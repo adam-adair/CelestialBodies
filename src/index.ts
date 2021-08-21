@@ -1,9 +1,10 @@
 import { perspective, orthogonal } from "./camera";
-import { Red } from "./colors";
-import { Cube } from "./cube";
+import { Color, Red, Green, Blue } from "./colors";
+import { Barycenter, Body } from "./bodies";
 import { constants } from "./constants";
-import { Mesh } from "./mesh";
+import { Mesh, Vertex } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
+
 const {
   clearColor,
   zoom,
@@ -37,7 +38,7 @@ const fs_source = require("./glsl/fshader.glsl") as string;
 
 let gl: WebGLRenderingContext;
 let program: WebGLProgram;
-let enemies: Mesh[] = [];
+let movables: Body[] = [];
 let player: Mesh;
 
 const init = async () => {
@@ -66,7 +67,7 @@ const init = async () => {
   //set light, camera uniforms
   const camera = gl.getUniformLocation(program, "camera");
   const cameraMatrix = perspective(zoom, canvas.width / canvas.height, 1, 100);
-  cameraMatrix.translateSelf(0, 0, -zoom * 2);
+  cameraMatrix.translateSelf(0, 0, -zoom * 5);
 
   // for ortho view:
   // const cameraMatrix = orthogonal(zoom * ratio, zoom, 100);
@@ -98,36 +99,80 @@ const init = async () => {
   gl.uniform2fv(u_FogDist, a_fogDist);
 
   // set up some objects
-  player = await Mesh.fromObjMtl(
-    "./obj/weirddonut.obj",
-    "./obj/weirddonut.mtl",
-    1
-  );
-  enemies.push(new Cube(0.2, Red));
+  // player = await Mesh.fromObjMtl(
+  //   "./obj/weirddonut.obj",
+  //   "./obj/weirddonut.mtl",
+  //   1
+  // );
+  // movables.push(new Body(0.2, Red));
 
-  player.translate(0, -2, 0);
-  player.rotate(0, 180, 0);
+  // player.translate(0, -2, 0);
+  // player.rotate(0, 180, 0);
+
+//randomly generate solar system
+  for(let x = 0 ; x<5; x++){
+    // const size = Math.random();
+    const mass = Math.random()*(1/1047);
+    const size = mass *1047
+    const color = new Color(Math.random(), Math.random(), Math.random());
+    // const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
+    const velocity = new Vertex(0,0,0);
+
+    const body = new Body(size, mass, color, velocity);
+    body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);
+    movables.push(body);
+  }
+
+  // 1 sun,  1 plane
+    const sun = new Body(1, 1, Red, new Vertex(0,0,0));
+    // sun.translate(5,5,0);
+    const planet = new Body(.3, (1/1500), Green, new Vertex(0,0,0))
+    planet.translate(-5,-5,0);
+    movables.push(sun);
+    movables.push(planet);
 
   requestAnimationFrame(loop);
 };
 
+let then = 0;
+
 //game loop
-const loop = () => {
+const loop = (now: number) => {
+  // calculate frames per second
+    now *= 0.001;                          // convert to seconds
+    const deltaTime = now - then;          // compute time since last frame
+    then = now;                            // remember time for next frame
+    const fps = 1 / deltaTime;             // compute frames per second
+    console.log("FPS", fps)
+
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //box movement
-  movePlayer(player, playerInput, movement);
+  // movePlayer(player, playerInput, movement);
 
-  // draw enemies
-  for (let i = 0; i < enemies.length; i++) {
-    const enemy = enemies[i];
-    //make enemy spin
-    enemy.rotate(0.5, 0.5, 0.5);
-    enemy.draw(gl, program);
+  // calculateNewVelocities(movables[0], movables[1]);
+
+  for(let j = 0; j < movables.length; j++) {
+    for(let i = 0; i <movables.length; i++){
+      if(i !== j) {
+        const force = movables[j].calculateAttraction(movables[i], fps)
+        movables[j].applyForce(force);
+      }
+    }
+  }
+
+  // draw movables
+  for (let i = 0; i < movables.length; i++) {
+    const body = movables[i];
+    //make object spin
+    body.rotate(0.5, 0.5, 0.5);
+    // body.translate(body.velocity.x, body.velocity.y, body.velocity.z )
+    body.update();
+    body.draw(gl, program);
   }
 
   //draw player
-  player.draw(gl, program);
+  // player.draw(gl, program);
 
   requestAnimationFrame(loop);
 };

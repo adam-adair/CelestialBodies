@@ -4,5 +4,6 @@ export const constants = {
   lightDirection: { x: 0, y: 4, z: 10 },
   ambientLightAmount: 0.1,
   movement: 0.1,
-  fogDistance: [45, 60],
-};
+  fogDistance: [99999999, 99999999],
+  simluationSpeed: 23, // days simulated per real second
+}
