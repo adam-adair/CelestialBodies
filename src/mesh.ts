@@ -103,7 +103,15 @@ export class Mesh {
   sMatrix: Matrix;
   buffer: WebGLBuffer;
   vbo: Float32Array;
-  constructor(vertices: Vertex[], faces: Face[], normals?: Vertex[]) {
+  textureURL: string;
+  textureCoords: number[];
+  constructor(
+    vertices: Vertex[],
+    faces: Face[],
+    normals?: Vertex[],
+    textureURL?: string,
+    textureCoords?: number[]
+  ) {
     this.vertices = vertices;
     this.faces = faces;
     if (normals) this.normals = normals;
@@ -112,6 +120,8 @@ export class Mesh {
     this.sMatrix = new Matrix();
     this.position = new Vertex(0, 0, 0);
     this.rotation = new Vertex(0, 0, 0);
+    this.textureURL = textureURL;
+    this.textureCoords = textureCoords;
   }
 
   static async fromSerialized(url: string): Promise<Mesh> {
@@ -183,22 +193,62 @@ export class Mesh {
         const vA = this.vertices[vAi];
         const vB = this.vertices[vBi];
         const vC = this.vertices[vCi];
-        let normalA, normalB, normalC;
+        let normalA, normalB, normalC, tN, tA, tB, tC;
         if (this.normals) {
           normalA = this.normals[vAi];
           normalB = this.normals[vBi];
           normalC = this.normals[vCi];
         } else
           normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
+        //texture coords
+        if (this.textureURL) {
+          tN = 1.0;
+          tA = { x: this.textureCoords[i], y: this.textureCoords[i + 1] };
+          tB = { x: this.textureCoords[i + 2], y: this.textureCoords[i + 3] };
+          tC = { x: this.textureCoords[i + 4], y: this.textureCoords[i + 5] };
+        } else {
+          tN = 0.0;
+          tA = { x: 0.0, y: 0.0 };
+          tB = { x: 0.0, y: 0.0 };
+          tC = { x: 0.0, y: 0.0 };
+        }
         // prettier-ignore
         arr.push(
-          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,
-          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,
-          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z
+          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z, tN, tA.x, tA.y,
+          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z, tN, tB.x, tB.y,
+          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z, tN, tC.x, tC.y
           )
       }
       this.vbo = new Float32Array(arr);
       this.buffer = gl.createBuffer();
+      if (this.textureURL) {
+        const texture = gl.createTexture();
+        const sampler = gl.getUniformLocation(program, "sampler");
+        const image = new Image();
+        image.src = this.textureURL;
+        image.onload = () => {
+          // Flip the image's y axis
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+
+          // Enable texture 0
+          gl.activeTexture(gl.TEXTURE0);
+
+          // Set the texture's target (2D or cubemap)
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+
+          // Stretch/wrap options
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+          // Bind image to texture
+          // prettier-ignore
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+          // Pass texture 0 to the sampler
+          gl.uniform1i(sampler, 0);
+
+          // gl.bindTexture(gl.TEXTURE_2D, null);
+        };
+      }
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -206,16 +256,24 @@ export class Mesh {
     const FSIZE = this.vbo.BYTES_PER_ELEMENT;
 
     const position = gl.getAttribLocation(program, "position");
-    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 9, 0);
+    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 12, 0);
     gl.enableVertexAttribArray(position);
 
     const color = gl.getAttribLocation(program, "color");
-    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 9, FSIZE * 3);
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
     gl.enableVertexAttribArray(color);
 
     const normal = gl.getAttribLocation(program, "normal");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 9, FSIZE * 6);
+    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
     gl.enableVertexAttribArray(normal);
+
+    const useTex = gl.getAttribLocation(program, "useTexture");
+    gl.vertexAttribPointer(useTex, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
+    gl.enableVertexAttribArray(useTex);
+
+    const texCoord = gl.getAttribLocation(program, "texCoord");
+    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
+    gl.enableVertexAttribArray(texCoord);
 
     // Set the model matrix
     const model = gl.getUniformLocation(program, "model");

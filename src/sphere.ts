@@ -4,9 +4,15 @@ import { Face, Mesh, Vertex } from "./mesh";
 export class Sphere extends Mesh {
   size: number;
   precision: number;
-  constructor(size: number, color?: Color, precision = 12) {
+  constructor(
+    size: number,
+    precision: number,
+    textureUrl: string,
+    color?: Color
+  ) {
     const vertices: Vertex[] = [];
     const faces: Face[] = [];
+    const textureCoords = [];
     for (let j = 0; j <= precision; j++) {
       const aj = (j * Math.PI) / precision;
       const sj = Math.sin(aj);
@@ -16,6 +22,8 @@ export class Sphere extends Mesh {
         const si = Math.sin(ai);
         const ci = Math.cos(ai);
         vertices.push(new Vertex(si * sj, cj, ci * sj));
+        textureCoords.push(i / precision);
+        textureCoords.push(j / precision);
       }
     }
     for (let j = 0; j < precision; j++) {
@@ -27,7 +35,7 @@ export class Sphere extends Mesh {
       }
     }
     //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
-    super(vertices, faces, vertices);
+    super(vertices, faces, vertices, textureUrl, textureCoords);
     //in case we need size or precision later
     this.size = size;
     this.precision = precision;

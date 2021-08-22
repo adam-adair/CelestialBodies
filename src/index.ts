@@ -58,6 +58,9 @@ const init = async () => {
   gl.attachShader(program, fragShader);
   gl.linkProgram(program);
   gl.useProgram(program);
+  console.log("vertex shader:", gl.getShaderInfoLog(vertexShader) || "OK");
+  console.log("fragment shader:", gl.getShaderInfoLog(fragShader) || "OK");
+  console.log("program:", gl.getProgramInfoLog(program) || "OK");
 
   //set background color, enable depth
   gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -105,8 +108,8 @@ const init = async () => {
     1
   );
   // enemies.push(new Cube(0.2, Red));
-  enemies.push(new Sphere(0.5, Blue, 8));
-  enemies.push(new Sphere(1, Red));
+  enemies.push(new Sphere(0.5, 8, null, Blue));
+  enemies.push(new Sphere(1, 12, "./test.png"));
   enemies[1].translate(-1, -1, -1);
 
   player.translate(0, -2, 0);
@@ -126,7 +129,7 @@ const loop = () => {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
     //make enemy spin
-    enemy.rotate(0.5, 0.5, 0.5);
+    // enemy.rotate(0.5, 0.5, 0.5);
     enemy.draw(gl, program);
   }
 
