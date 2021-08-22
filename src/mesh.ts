@@ -58,8 +58,12 @@ export class Vertex {
       this.z + otherVertex.z
     );
   }
-  public scale(factor: number): Vertex {
-    return new Vertex(this.x * factor, this.y * factor, this.z * factor);
+  public scale(otherVertex: Vertex): Vertex {
+    return new Vertex(
+      this.x * otherVertex.x,
+      this.y * otherVertex.y,
+      this.z * otherVertex.z
+    );
   }
   public cross(otherVertex: Vertex): Vertex {
     return new Vertex(
@@ -90,18 +94,22 @@ export class Face {
 
 export class Mesh {
   vertices: Vertex[];
+  normals: Vertex[];
   position: Vertex;
   rotation: Vertex;
   faces: Face[];
   pMatrix: Matrix;
   rMatrix: Matrix;
+  sMatrix: Matrix;
   buffer: WebGLBuffer;
   vbo: Float32Array;
-  constructor(vertices: Vertex[], faces: Face[]) {
+  constructor(vertices: Vertex[], faces: Face[], normals?: Vertex[]) {
     this.vertices = vertices;
     this.faces = faces;
+    if (normals) this.normals = normals;
     this.pMatrix = new Matrix();
     this.rMatrix = new Matrix();
+    this.sMatrix = new Matrix();
     this.position = new Vertex(0, 0, 0);
     this.rotation = new Vertex(0, 0, 0);
   }
@@ -176,7 +184,12 @@ export class Mesh {
         const vB = this.vertices[vBi];
         const vC = this.vertices[vCi];
         let normalA, normalB, normalC;
-        normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
+        if (this.normals) {
+          normalA = this.normals[vAi];
+          normalB = this.normals[vBi];
+          normalC = this.normals[vCi];
+        } else
+          normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
         // prettier-ignore
         arr.push(
           vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,
@@ -208,7 +221,9 @@ export class Mesh {
     const model = gl.getUniformLocation(program, "model");
     const nMatrix = gl.getUniformLocation(program, "nMatrix");
 
-    const modelMatrix = this.pMatrix.multiply(this.rMatrix);
+    const modelMatrix = this.sMatrix.multiply(
+      this.pMatrix.multiply(this.rMatrix)
+    );
     const normalMatrix = new Matrix(modelMatrix.toString());
     normalMatrix.invertSelf();
     normalMatrix.transposeSelf();
@@ -227,6 +242,11 @@ export class Mesh {
   translate(x: number, y: number, z: number): void {
     this.position = this.position.subtract(new Vertex(-x, -y, -z));
     this.pMatrix.translateSelf(x, y, z);
+  }
+
+  scale(x: number, y: number, z: number): void {
+    this.position = this.position.scale(new Vertex(-x, -y, -z));
+    this.sMatrix.scaleSelf(x, y, z);
   }
 
   serialize(precision: number): string {

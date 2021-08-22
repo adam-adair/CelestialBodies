@@ -1,9 +1,10 @@
 import { perspective, orthogonal } from "./camera";
-import { Red } from "./colors";
+import { Blue, Red } from "./colors";
 import { Cube } from "./cube";
 import { constants } from "./constants";
 import { Mesh } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
+import { Sphere } from "./sphere";
 const {
   clearColor,
   zoom,
@@ -103,7 +104,10 @@ const init = async () => {
     "./obj/weirddonut.mtl",
     1
   );
-  enemies.push(new Cube(0.2, Red));
+  // enemies.push(new Cube(0.2, Red));
+  enemies.push(new Sphere(0.5, Blue, 8));
+  enemies.push(new Sphere(1, Red));
+  enemies[1].translate(-1, -1, -1);
 
   player.translate(0, -2, 0);
   player.rotate(0, 180, 0);
