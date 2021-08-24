@@ -1,5 +1,5 @@
 import { Color } from "./colors";
-import { Face, Mesh, Vertex } from "./mesh";
+import { Face, Mesh, textureCoord, Vertex } from "./mesh";
 
 export class Sphere extends Mesh {
   size: number;
@@ -12,7 +12,7 @@ export class Sphere extends Mesh {
   ) {
     const vertices: Vertex[] = [];
     const faces: Face[] = [];
-    const textureCoords = [];
+    const textureCoords: textureCoord[] = [];
     for (let j = 0; j <= precision; j++) {
       const aj = (j * Math.PI) / precision;
       const sj = Math.sin(aj);
@@ -22,8 +22,7 @@ export class Sphere extends Mesh {
         const si = Math.sin(ai);
         const ci = Math.cos(ai);
         vertices.push(new Vertex(si * sj, cj, ci * sj));
-        textureCoords.push(i / precision);
-        textureCoords.push(j / precision);
+        textureCoords.push({ u: i / precision, v: j / precision });
       }
     }
     for (let j = 0; j < precision; j++) {

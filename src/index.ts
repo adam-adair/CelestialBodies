@@ -109,6 +109,7 @@ const init = async () => {
   );
   // enemies.push(new Cube(0.2, Red));
   enemies.push(new Sphere(0.5, 8, null, Blue));
+  // enemies.push(new Sphere(1, 12, "./test2.jpg"));
   enemies.push(new Sphere(1, 12, "./test.png"));
   enemies[1].translate(-1, -1, -1);
 
@@ -129,7 +130,7 @@ const loop = () => {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
     //make enemy spin
-    // enemy.rotate(0.5, 0.5, 0.5);
+    enemy.rotate(0.5, 0.5, 0.5);
     enemy.draw(gl, program);
   }
 

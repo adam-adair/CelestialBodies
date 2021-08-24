@@ -91,7 +91,7 @@ export class Face {
     this.color = color;
   }
 }
-
+export type textureCoord = { u: number; v: number };
 export class Mesh {
   vertices: Vertex[];
   normals: Vertex[];
@@ -104,13 +104,13 @@ export class Mesh {
   buffer: WebGLBuffer;
   vbo: Float32Array;
   textureURL: string;
-  textureCoords: number[];
+  textureCoords: textureCoord[];
   constructor(
     vertices: Vertex[],
     faces: Face[],
     normals?: Vertex[],
     textureURL?: string,
-    textureCoords?: number[]
+    textureCoords?: textureCoord[]
   ) {
     this.vertices = vertices;
     this.faces = faces;
@@ -201,22 +201,22 @@ export class Mesh {
         } else
           normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
         //texture coords
-        if (this.textureURL) {
+        if (!!this.textureURL) {
           tN = 1.0;
-          tA = { x: this.textureCoords[i], y: this.textureCoords[i + 1] };
-          tB = { x: this.textureCoords[i + 2], y: this.textureCoords[i + 3] };
-          tC = { x: this.textureCoords[i + 4], y: this.textureCoords[i + 5] };
+          tA = this.textureCoords[vAi];
+          tB = this.textureCoords[vBi];
+          tC = this.textureCoords[vCi];
         } else {
           tN = 0.0;
-          tA = { x: 0.0, y: 0.0 };
-          tB = { x: 0.0, y: 0.0 };
-          tC = { x: 0.0, y: 0.0 };
+          tA = { u: 0.0, v: 0.0 };
+          tB = { u: 0.0, v: 0.0 };
+          tC = { u: 0.0, v: 0.0 };
         }
         // prettier-ignore
         arr.push(
-          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z, tN, tA.x, tA.y,
-          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z, tN, tB.x, tB.y,
-          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z, tN, tC.x, tC.y
+          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z, tN, tA.u, tA.v,
+          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z, tN, tB.u, tB.v,
+          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z, tN, tC.u, tC.v
           )
       }
       this.vbo = new Float32Array(arr);
@@ -268,11 +268,18 @@ export class Mesh {
     gl.enableVertexAttribArray(normal);
 
     const useTex = gl.getAttribLocation(program, "useTexture");
-    gl.vertexAttribPointer(useTex, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
+    gl.vertexAttribPointer(useTex, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 9);
     gl.enableVertexAttribArray(useTex);
 
     const texCoord = gl.getAttribLocation(program, "texCoord");
-    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
+    gl.vertexAttribPointer(
+      texCoord,
+      2,
+      gl.FLOAT,
+      false,
+      FSIZE * 12,
+      FSIZE * 10
+    );
     gl.enableVertexAttribArray(texCoord);
 
     // Set the model matrix
