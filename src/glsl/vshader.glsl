@@ -13,7 +13,6 @@ uniform vec3 ambientLight;
 varying vec4 v_color;
 varying float v_dist;
 varying vec2 v_texCoord;
-varying float v_textureNum;
 
 void main() {
   gl_Position = camera * model * position;
@@ -25,5 +24,4 @@ void main() {
   v_color = vec4(diffuse + ambient, 1.0);
   v_dist = gl_Position.w;
   v_texCoord = texCoord;
-  v_textureNum = useTexture;
 }

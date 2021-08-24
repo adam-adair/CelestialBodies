@@ -5,9 +5,11 @@ export class Sphere extends Mesh {
   size: number;
   precision: number;
   constructor(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
     size: number,
     precision: number,
-    textureUrl: string,
+    texture?: HTMLImageElement,
     color?: Color
   ) {
     const vertices: Vertex[] = [];
@@ -34,7 +36,7 @@ export class Sphere extends Mesh {
       }
     }
     //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
-    super(vertices, faces, vertices, textureUrl, textureCoords);
+    super(gl, program, vertices, faces, vertices, textureCoords, texture);
     //in case we need size or precision later
     this.size = size;
     this.precision = precision;

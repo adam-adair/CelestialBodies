@@ -93,6 +93,8 @@ export class Face {
 }
 export type textureCoord = { u: number; v: number };
 export class Mesh {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
   vertices: Vertex[];
   normals: Vertex[];
   position: Vertex;
@@ -103,15 +105,20 @@ export class Mesh {
   sMatrix: Matrix;
   buffer: WebGLBuffer;
   vbo: Float32Array;
-  textureURL: string;
   textureCoords: textureCoord[];
+  gl_texture: WebGLTexture;
+  texture: HTMLImageElement;
   constructor(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
     vertices: Vertex[],
     faces: Face[],
     normals?: Vertex[],
-    textureURL?: string,
-    textureCoords?: textureCoord[]
+    textureCoords?: textureCoord[],
+    texture?: HTMLImageElement
   ) {
+    this.gl = gl;
+    this.program = program;
     this.vertices = vertices;
     this.faces = faces;
     if (normals) this.normals = normals;
@@ -120,11 +127,15 @@ export class Mesh {
     this.sMatrix = new Matrix();
     this.position = new Vertex(0, 0, 0);
     this.rotation = new Vertex(0, 0, 0);
-    this.textureURL = textureURL;
     this.textureCoords = textureCoords;
+    this.initialize(texture);
   }
 
-  static async fromSerialized(url: string): Promise<Mesh> {
+  static async fromSerialized(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
+    url: string
+  ): Promise<Mesh> {
     const res = await fetch(url);
     const obj = await res.json();
     const vertices: Vertex[] = [];
@@ -141,10 +152,12 @@ export class Mesh {
     for (let i = 0; i < f.length; i += 4) {
       faces.push(new Face(f[i], f[i + 1], f[i + 2], colors[f[i + 3]]));
     }
-    return new Mesh(vertices, faces);
+    return new Mesh(gl, program, vertices, faces);
   }
 
   static async fromObjMtl(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
     url: string,
     mtlUrl: string,
     scale: number
@@ -181,74 +194,26 @@ export class Mesh {
         faces.push(new Face(A, B, C, Colors[currentCol]));
       }
     }
-    return new Mesh(vertices, faces);
+    return new Mesh(gl, program, vertices, faces);
   }
 
-  draw = (gl: WebGLRenderingContext, program: WebGLProgram): void => {
-    //if vbo doesn't exist, create it and fill with polygon info
-    if (!this.vbo) {
-      const arr = [];
-      for (let i = 0; i < this.faces.length; i++) {
-        const { vAi, vBi, vCi, color } = this.faces[i];
-        const vA = this.vertices[vAi];
-        const vB = this.vertices[vBi];
-        const vC = this.vertices[vCi];
-        let normalA, normalB, normalC, tN, tA, tB, tC;
-        if (this.normals) {
-          normalA = this.normals[vAi];
-          normalB = this.normals[vBi];
-          normalC = this.normals[vCi];
-        } else
-          normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
-        //texture coords
-        if (!!this.textureURL) {
-          tN = 1.0;
-          tA = this.textureCoords[vAi];
-          tB = this.textureCoords[vBi];
-          tC = this.textureCoords[vCi];
-        } else {
-          tN = 0.0;
-          tA = { u: 0.0, v: 0.0 };
-          tB = { u: 0.0, v: 0.0 };
-          tC = { u: 0.0, v: 0.0 };
-        }
-        // prettier-ignore
-        arr.push(
-          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z, tN, tA.u, tA.v,
-          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z, tN, tB.u, tB.v,
-          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z, tN, tC.u, tC.v
-          )
-      }
-      this.vbo = new Float32Array(arr);
-      this.buffer = gl.createBuffer();
-      if (this.textureURL) {
-        const texture = gl.createTexture();
-        const sampler = gl.getUniformLocation(program, "sampler");
-        const image = new Image();
-        image.src = this.textureURL;
-        image.onload = () => {
-          // Flip the image's y axis
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-
-          // Enable texture 0
-          gl.activeTexture(gl.TEXTURE0);
-
-          // Set the texture's target (2D or cubemap)
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-
-          // Stretch/wrap options
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-          // Bind image to texture
-          // prettier-ignore
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-
-          // Pass texture 0 to the sampler
-          gl.uniform1i(sampler, 0);
-
-          // gl.bindTexture(gl.TEXTURE_2D, null);
-        };
-      }
+  draw = (): void => {
+    const { gl, program } = this;
+    if (this.texture) {
+      console.log(this.texture);
+      const sampler = gl.getUniformLocation(program, "sampler");
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.gl_texture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGB,
+        gl.RGB,
+        gl.UNSIGNED_BYTE,
+        this.texture
+      );
+      gl.uniform1i(sampler, 0);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -256,30 +221,19 @@ export class Mesh {
     const FSIZE = this.vbo.BYTES_PER_ELEMENT;
 
     const position = gl.getAttribLocation(program, "position");
-    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 12, 0);
+    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 11, 0);
     gl.enableVertexAttribArray(position);
 
     const color = gl.getAttribLocation(program, "color");
-    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 3);
     gl.enableVertexAttribArray(color);
 
     const normal = gl.getAttribLocation(program, "normal");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
+    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 6);
     gl.enableVertexAttribArray(normal);
 
-    const useTex = gl.getAttribLocation(program, "useTexture");
-    gl.vertexAttribPointer(useTex, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 9);
-    gl.enableVertexAttribArray(useTex);
-
     const texCoord = gl.getAttribLocation(program, "texCoord");
-    gl.vertexAttribPointer(
-      texCoord,
-      2,
-      gl.FLOAT,
-      false,
-      FSIZE * 12,
-      FSIZE * 10
-    );
+    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 11, FSIZE * 9);
     gl.enableVertexAttribArray(texCoord);
 
     // Set the model matrix
@@ -339,5 +293,42 @@ export class Mesh {
       f.push(face.vAi, face.vBi, face.vCi, colorIndex);
     }
     return JSON.stringify({ v, f, c });
+  }
+
+  initialize(texture: HTMLImageElement) {
+    const arr = [];
+    for (let i = 0; i < this.faces.length; i++) {
+      const { vAi, vBi, vCi, color } = this.faces[i];
+      const vA = this.vertices[vAi];
+      const vB = this.vertices[vBi];
+      const vC = this.vertices[vCi];
+      let normalA, normalB, normalC, tA, tB, tC;
+      if (this.normals) {
+        normalA = this.normals[vAi];
+        normalB = this.normals[vBi];
+        normalC = this.normals[vCi];
+      } else
+        normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
+      //texture coords
+      if (texture) {
+        this.gl_texture = this.gl.createTexture();
+        this.texture = texture;
+        tA = this.textureCoords[vAi];
+        tB = this.textureCoords[vBi];
+        tC = this.textureCoords[vCi];
+      } else {
+        tA = { u: 0.0, v: 0.0 };
+        tB = { u: 0.0, v: 0.0 };
+        tC = { u: 0.0, v: 0.0 };
+      }
+      // prettier-ignore
+      arr.push(
+        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v,
+        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v,
+        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v
+        )
+    }
+    this.vbo = new Float32Array(arr);
+    this.buffer = this.gl.createBuffer();
   }
 }
