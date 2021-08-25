@@ -1,5 +1,11 @@
 import { Color } from "./colors";
-import { Face, Mesh, textureCoord, Vertex } from "./mesh";
+import {
+  Face,
+  Mesh,
+  ProceduralTextureData,
+  textureCoord,
+  Vertex,
+} from "./mesh";
 
 export class Sphere extends Mesh {
   size: number;
@@ -9,7 +15,7 @@ export class Sphere extends Mesh {
     program: WebGLProgram,
     size: number,
     precision: number,
-    texture?: HTMLImageElement,
+    texture?: HTMLImageElement | ProceduralTextureData,
     color?: Color
   ) {
     const vertices: Vertex[] = [];
