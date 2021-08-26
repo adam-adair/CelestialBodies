@@ -41,6 +41,6 @@ export class Sphere extends Mesh {
     this.size = size;
     this.precision = precision;
     //make sphere unit sphere and scale it to size
-    this.scale(size, size, size);
+    this.scale(size);
   }
 }
