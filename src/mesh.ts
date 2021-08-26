@@ -58,12 +58,8 @@ export class Vertex {
       this.z + otherVertex.z
     );
   }
-  public scale(otherVertex: Vertex): Vertex {
-    return new Vertex(
-      this.x * otherVertex.x,
-      this.y * otherVertex.y,
-      this.z * otherVertex.z
-    );
+  public scale(factor: number): Vertex {
+    return new Vertex(this.x * factor, this.y * factor, this.z * factor);
   }
   public cross(otherVertex: Vertex): Vertex {
     return new Vertex(
@@ -102,8 +98,9 @@ export class Mesh {
   program: WebGLProgram;
   vertices: Vertex[];
   normals: Vertex[];
-  position: Vertex;
-  rotation: Vertex;
+  _position: Vertex;
+  _rotation: Vertex;
+  _scale: Vertex;
   faces: Face[];
   pMatrix: Matrix;
   rMatrix: Matrix;
@@ -130,8 +127,9 @@ export class Mesh {
     this.pMatrix = new Matrix();
     this.rMatrix = new Matrix();
     this.sMatrix = new Matrix();
-    this.position = new Vertex(0, 0, 0);
-    this.rotation = new Vertex(0, 0, 0);
+    this._position = new Vertex(0, 0, 0);
+    this._rotation = new Vertex(0, 0, 0);
+    this._scale = new Vertex(1, 1, 1);
     this.textureCoords = textureCoords;
     this.initialize(texture);
   }
@@ -278,18 +276,18 @@ export class Mesh {
   };
 
   rotate(x: number, y: number, z: number): void {
-    this.rotation = this.rotation.subtract(new Vertex(-x, -y, -z));
+    this._rotation = this._rotation.subtract(new Vertex(-x, -y, -z));
     this.rMatrix.rotateSelf(x, y, z);
   }
 
   translate(x: number, y: number, z: number): void {
-    this.position = this.position.subtract(new Vertex(-x, -y, -z));
+    this._position = this._position.subtract(new Vertex(-x, -y, -z));
     this.pMatrix.translateSelf(x, y, z);
   }
 
-  scale(x: number, y: number, z: number): void {
-    this.position = this.position.scale(new Vertex(-x, -y, -z));
-    this.sMatrix.scaleSelf(x, y, z);
+  scale(x: number): void {
+    this._scale = this._scale.scale(x);
+    this.sMatrix.scaleSelf(x, x, x);
   }
 
   serialize(precision: number): string {
