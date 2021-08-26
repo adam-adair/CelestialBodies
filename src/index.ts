@@ -1,3 +1,5 @@
+import { CPlayer } from "./music/player-small";
+import spaceJam from "./music/spaceJam";
 import { perspective, orthogonal } from "./camera";
 import { Blue, Green, Red } from "./colors";
 import { Cube } from "./cube";
@@ -6,6 +8,53 @@ import { Mesh, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
 import { Sphere } from "./sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
+
+//could use this func to load diff songs for diff levels or scenes
+const loadMusic = (song: any) => {
+  const cPlayer = new CPlayer();
+  cPlayer.init(song);
+  cPlayer.generate();
+  let done = false;
+  const musicStatus = document.getElementById("musicStatus");
+  setInterval(function () {
+    if (done) {
+      return;
+    }
+    const pctLoaded = cPlayer.generate();
+    musicStatus.innerHTML = `Music Loading: ${(100 * pctLoaded).toFixed(0)}%`;
+    done = pctLoaded >= 1;
+    if (done) {
+      // Put the generated song in an Audio element.
+      const wave = cPlayer.createWave();
+      const audio = document.createElement("audio");
+      audio.src = URL.createObjectURL(new Blob([wave], { type: "audio/wav" }));
+      audio.loop = true;
+      musicStatus.remove();
+
+      // doing this for now so we can test audio
+      // chrome requires user interact with DOM before audio plays
+      // think this won't be an issue once actually playing game
+      // but during development, if you live reload, you haven't
+      // interacted with DOM so it won't autoplay music.
+      // Plus hearing the same loop forever is annoying.
+      let playing = false;
+      const playButton = document.createElement("button");
+      playButton.innerHTML = "Play Song";
+      document.body.appendChild(playButton);
+      playButton.onclick = () => {
+        if (!playing) {
+          playButton.innerHTML = "Pause Song";
+          audio.play();
+          playing = true;
+        } else {
+          playButton.innerHTML = "Play Song";
+          audio.pause();
+          playing = false;
+        }
+      };
+    }
+  }, 0);
+};
 
 const sandTexture: ProceduralTextureData = {
   width: 128,
@@ -197,5 +246,6 @@ const loop = () => {
 window.onload = () => {
   canvas.width = 640; //document.body.clientWidth;
   canvas.height = 480; //document.body.clientHeight;
+  loadMusic(spaceJam);
   init();
 };
