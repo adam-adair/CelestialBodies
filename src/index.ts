@@ -2,20 +2,33 @@ import { perspective, orthogonal } from "./camera";
 import { Color, Red, Green, Blue } from "./colors";
 import { Barycenter, Body } from "./bodies";
 import { constants } from "./constants";
-import { Mesh, Vertex } from "./mesh";
+import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
 import { kilogramsToMass, metersToAU} from "./utils";
+import { Sphere } from "./sphere";
+import { generateTexture, sand, grass, clouds } from "./texture";
+import  initialize from './initialize';
 
-const {
-  clearColor,
-  zoom,
-  lightDirection,
-  ambientLightAmount,
-  movement,
-  fogDistance,
-} = constants;
+const { gl,program, canvas, camera } = initialize;
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+const sandTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, sand)),
+};
+
+const grassTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, grass)),
+};
+
+const cloudTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, clouds)),
+};
+
 const playerInput: PlayerMovement = {
   spinL: false,
   spinR: false,
@@ -33,82 +46,29 @@ const playerInput: PlayerMovement = {
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-//shader source
-const vs_source = require("./glsl/vshader.glsl") as string;
-const fs_source = require("./glsl/fshader.glsl") as string;
 
-let gl: WebGLRenderingContext;
-let program: WebGLProgram;
+
+
 let movables: Body[] = [];
 let player: Mesh;
+let textures: (HTMLImageElement | ProceduralTextureData)[];
+
+const loadImage = (url: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = url;
+  });
+};
+
+const loadImages = (urlArr: string[]) => {
+  return Promise.all(urlArr.map((url) => loadImage(url)));
+};
 
 const init = async () => {
-  //initialize webgl
-  gl = canvas.getContext("webgl");
+textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
+textures.push(sandTexture, grassTexture, cloudTexture);
 
-  program = gl.createProgram();
-
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vs_source);
-  gl.compileShader(vertexShader);
-  const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragShader, fs_source);
-  gl.compileShader(fragShader);
-
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragShader);
-  gl.linkProgram(program);
-  gl.useProgram(program);
-
-  //set background color, enable depth
-  gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.DEPTH_TEST);
-
-  //set light, camera uniforms
-  const camera = gl.getUniformLocation(program, "camera");
-  const cameraMatrix = perspective(zoom, canvas.width / canvas.height, 1, 100);
-  cameraMatrix.translateSelf(0, 0, -zoom * 5);
-
-  // for ortho view:
-  // const cameraMatrix = orthogonal(zoom * ratio, zoom, 100);
-  // cameraMatrix.translateSelf((zoom * ratio) / 2, -zoom / 2, -zoom);
-
-  gl.uniformMatrix4fv(camera, false, cameraMatrix.toFloat32Array());
-
-  // light
-  const light = gl.getUniformLocation(program, "light");
-  gl.uniform3f(light, lightDirection.x, lightDirection.y, lightDirection.z);
-  const ambientLight = gl.getUniformLocation(program, "ambientLight");
-  gl.uniform3f(
-    ambientLight,
-    ambientLightAmount,
-    ambientLightAmount,
-    ambientLightAmount
-  );
-
-  //fog
-  const a_fogColor = new Float32Array([
-    clearColor.r,
-    clearColor.g,
-    clearColor.b,
-  ]);
-  const a_fogDist = new Float32Array(fogDistance);
-  const u_FogColor = gl.getUniformLocation(program, "u_FogColor");
-  const u_FogDist = gl.getUniformLocation(program, "u_FogDist");
-  gl.uniform3fv(u_FogColor, a_fogColor);
-  gl.uniform2fv(u_FogDist, a_fogDist);
-
-  // set up some objects
-  // player = await Mesh.fromObjMtl(
-  //   "./obj/weirddonut.obj",
-  //   "./obj/weirddonut.mtl",
-  //   1
-  // );
-  // movables.push(new Body(0.2, Red));
-
-  // player.translate(0, -2, 0);
-  // player.rotate(0, 180, 0);
 
 //randomly generate solar system
   for(let x = 0 ; x<40; x++){
@@ -116,12 +76,42 @@ const init = async () => {
     const size = mass*2000
     const color = new Color(Math.random(), Math.random(), Math.random());
     const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
-    // const velocity = new Vertex(0,0,0);
+    const acceleration = new Vertex(0,0,0);
+    const texture = textures[Math.floor(Math.random()*textures.length)];
+    const precision = Math.random()*12
 
-    const body = new Body(`Planet ${x}`,size, mass, color, velocity);
+    const body = new Sphere(`Planet ${x}`,size, precision, mass, velocity, acceleration, texture, color);
     body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);
     movables.push(body);
   }
+
+  // player = await Mesh.fromObjMtl(
+  //   gl,
+  //   program,
+  //   "./obj/weirddonut.obj",
+  //   "./obj/weirddonut.mtl",
+  //   1
+  // );
+
+  // movables.push(new Sphere( 0.8, 12, textures[0]));
+  // movables.[0].translate(-1, -1, -1);
+  // movables.push(new Sphere( 1, 16, textures[1]));
+  // movables[1].translate(2, 1, 0);
+  // movables.push(new Sphere( 0.5, 5, null, Green));
+  // movables[3].translate(-2, 1, -5);
+  // movables[3].rotate(-2, 1, -5);
+
+  // //sand textured sphere
+  // movables.push(new Sphere(gl, program, 0.7, 16, textures[2]));
+  // movables[4].translate(-2, 3.5, 0);
+
+  // //grass textured sphere
+  // movables.push(new Sphere(gl, program, 0.7, 16, textures[3]));
+  // movables[5].translate(2, -3.5, 0);
+
+  // //clouds textured sphere
+  // movables.push(new Sphere(gl, program, 0.7, 16, textures[4]));
+  // movables[6].translate(-3, -3.5, 0);
 
   // 1 sun,  1 planet to test a stable orbit, which is not working yet.
     // const sun = new Body("sun", .25, kilogramsToMass(1.989e30), Red, new Vertex(0,0,0)); // metersToAU(1.3927e9) to get the real diameter of the sun
@@ -168,7 +158,7 @@ const loop = (now: number) => {
     body.rotate(0.5, 0.5, 0.5);
     // body.translate(body.velocity.x, body.velocity.y, body.velocity.z )
     body.update();
-    body.draw(gl, program);
+    body.draw();
   }
 
   //draw player

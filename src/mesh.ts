@@ -5,6 +5,8 @@ and from Maxime Euzière's equally excellent guide to WebGL:
 https://xem.github.io/articles/webgl-guide.html
 */
 import { Color, White } from "./colors";
+import initialize from "./initialize";
+const { gl, program } = initialize;
 
 export class Matrix extends DOMMatrix {
   transposeSelf() {
@@ -99,26 +101,56 @@ export class Face {
     this.color = color;
   }
 }
-
+export type textureCoord = { u: number; v: number };
+export interface ProceduralTextureData {
+  width: number;
+  height: number;
+  data: Uint8Array;
+}
 export class Mesh {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
   vertices: Vertex[];
+  normals: Vertex[];
   position: Vertex;
   rotation: Vertex;
+  scale: Vertex;
   faces: Face[];
   pMatrix: Matrix;
   rMatrix: Matrix;
+  sMatrix: Matrix;
   buffer: WebGLBuffer;
   vbo: Float32Array;
-  constructor(vertices: Vertex[], faces: Face[]) {
+  textureCoords: textureCoord[];
+  gl_texture: WebGLTexture;
+  texture: HTMLImageElement | ProceduralTextureData;
+  constructor(
+    vertices: Vertex[],
+    faces: Face[],
+    normals?: Vertex[],
+    textureCoords?: textureCoord[],
+    texture?: HTMLImageElement | ProceduralTextureData
+  ) {
+    this.gl = gl;
+    this.program = program;
     this.vertices = vertices;
     this.faces = faces;
+    if (normals) this.normals = normals;
     this.pMatrix = new Matrix();
     this.rMatrix = new Matrix();
+    this.sMatrix = new Matrix();
     this.position = new Vertex(0, 0, 0);
     this.rotation = new Vertex(0, 0, 0);
+    this.scale = new Vertex(1, 1, 1);
+    this.textureCoords = textureCoords;
+    this.initialize(texture);
   }
 
-  static async fromSerialized(url: string): Promise<Mesh> {
+  static async fromSerialized(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
+    url: string
+  ): Promise<Mesh> {
     const res = await fetch(url);
     const obj = await res.json();
     const vertices: Vertex[] = [];
@@ -139,6 +171,8 @@ export class Mesh {
   }
 
   static async fromObjMtl(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
     url: string,
     mtlUrl: string,
     scale: number
@@ -178,26 +212,42 @@ export class Mesh {
     return new Mesh(vertices, faces);
   }
 
-  draw = (gl: WebGLRenderingContext, program: WebGLProgram): void => {
-    //if vbo doesn't exist, create it and fill with polygon info
-    if (!this.vbo) {
-      const arr = [];
-      for (let i = 0; i < this.faces.length; i++) {
-        const { vAi, vBi, vCi, color } = this.faces[i];
-        const vA = this.vertices[vAi];
-        const vB = this.vertices[vBi];
-        const vC = this.vertices[vCi];
-        let normalA, normalB, normalC;
-        normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
-        // prettier-ignore
-        arr.push(
-          vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,
-          vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,
-          vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z
-          )
+  draw = (): void => {
+    const { gl, program } = this;
+    if (this.texture) {
+      const sampler = gl.getUniformLocation(program, "sampler");
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.gl_texture);
+
+      if ("data" in this.texture) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          this.texture.width,
+          this.texture.height,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          this.texture.data
+        );
+      } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGB,
+          gl.RGB,
+          gl.UNSIGNED_BYTE,
+          this.texture
+        );
       }
-      this.vbo = new Float32Array(arr);
-      this.buffer = gl.createBuffer();
+      gl.uniform1i(sampler, 0);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -205,22 +255,28 @@ export class Mesh {
     const FSIZE = this.vbo.BYTES_PER_ELEMENT;
 
     const position = gl.getAttribLocation(program, "position");
-    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 9, 0);
+    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 11, 0);
     gl.enableVertexAttribArray(position);
 
     const color = gl.getAttribLocation(program, "color");
-    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 9, FSIZE * 3);
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 3);
     gl.enableVertexAttribArray(color);
 
     const normal = gl.getAttribLocation(program, "normal");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 9, FSIZE * 6);
+    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 6);
     gl.enableVertexAttribArray(normal);
+
+    const texCoord = gl.getAttribLocation(program, "texCoord");
+    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 11, FSIZE * 9);
+    gl.enableVertexAttribArray(texCoord);
 
     // Set the model matrix
     const model = gl.getUniformLocation(program, "model");
     const nMatrix = gl.getUniformLocation(program, "nMatrix");
 
-    const modelMatrix = this.pMatrix.multiply(this.rMatrix);
+    const modelMatrix = this.sMatrix.multiply(
+      this.pMatrix.multiply(this.rMatrix)
+    );
     const normalMatrix = new Matrix(modelMatrix.toString());
     normalMatrix.invertSelf();
     normalMatrix.transposeSelf();
@@ -239,6 +295,11 @@ export class Mesh {
   translate(x: number, y: number, z: number): void {
     this.position = this.position.subtract(new Vertex(-x, -y, -z));
     this.pMatrix.translateSelf(x, y, z);
+  }
+
+  rescale(x: number): void {
+    this.scale = this.scale.scale(x);
+    this.sMatrix.scaleSelf(x, x, x);
   }
 
   serialize(precision: number): string {
@@ -266,5 +327,42 @@ export class Mesh {
       f.push(face.vAi, face.vBi, face.vCi, colorIndex);
     }
     return JSON.stringify({ v, f, c });
+  }
+
+  initialize(texture: HTMLImageElement | ProceduralTextureData) {
+    const arr = [];
+    for (let i = 0; i < this.faces.length; i++) {
+      const { vAi, vBi, vCi, color } = this.faces[i];
+      const vA = this.vertices[vAi];
+      const vB = this.vertices[vBi];
+      const vC = this.vertices[vCi];
+      let normalA, normalB, normalC, tA, tB, tC;
+      if (this.normals) {
+        normalA = this.normals[vAi];
+        normalB = this.normals[vBi];
+        normalC = this.normals[vCi];
+      } else
+        normalA = normalB = normalC = vA.subtract(vB).cross(vA.subtract(vC));
+      //texture coords
+      if (texture) {
+        this.gl_texture = this.gl.createTexture();
+        this.texture = texture;
+        tA = this.textureCoords[vAi];
+        tB = this.textureCoords[vBi];
+        tC = this.textureCoords[vCi];
+      } else {
+        tA = { u: 0.0, v: 0.0 };
+        tB = { u: 0.0, v: 0.0 };
+        tC = { u: 0.0, v: 0.0 };
+      }
+      // prettier-ignore
+      arr.push(
+        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v,
+        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v,
+        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v
+        )
+    }
+    this.vbo = new Float32Array(arr);
+    this.buffer = this.gl.createBuffer();
   }
 }
