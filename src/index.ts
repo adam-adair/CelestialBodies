@@ -46,10 +46,7 @@ const playerInput: PlayerMovement = {
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-
-
-
-let movables: Body[] = [];
+let movables: Sphere[] = [];
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 
@@ -77,8 +74,9 @@ textures.push(sandTexture, grassTexture, cloudTexture);
     const color = new Color(Math.random(), Math.random(), Math.random());
     const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
     const acceleration = new Vertex(0,0,0);
-    const texture = textures[Math.floor(Math.random()*textures.length)];
-    const precision = Math.random()*12
+    // const texture = textures[Math.floor(Math.random()*textures.length)];
+    const texture = textures[0]
+    const precision = Math.random()*12;
 
     const body = new Sphere(`Planet ${x}`,size, precision, mass, velocity, acceleration, texture, color);
     body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);

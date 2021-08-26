@@ -74,7 +74,6 @@ const u_FogDist = gl.getUniformLocation(program, "u_FogDist");
 gl.uniform3fv(u_FogColor, a_fogColor);
 gl.uniform2fv(u_FogDist, a_fogDist);
 
-
 export default {
   gl,
   program,
