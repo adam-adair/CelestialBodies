@@ -1,14 +1,15 @@
 import { Color } from "./colors";
 import { constants } from "./constants";
 import { Mesh, Vertex, Face } from "./mesh";
-import {getDirectionalVector, getGravitationalForce} from "./physics";
+import {getDirectionalVector, getGravitationalForce, equalCentripGravity} from "./physics";
 
 export class Body extends Mesh {
+  name: string;
   size: number;
   mass: number; // kg
   velocity: Vertex; // changes in location (in AUs) in that direction in a frame. due to gravitational constant, 1 frame is 1 day.
   acceleration: Vertex; // change in AU to velocity in a frame, again 1 frame is 1 day.
-  constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ) {
+  constructor(name: string, d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ) {
     const Vertices = [];
     Vertices[0] = new Vertex(-d, -d, -d);
     Vertices[1] = new Vertex(-d, -d, d);
@@ -35,13 +36,15 @@ export class Body extends Mesh {
     super(Vertices, Faces);
 
     this.size = d;
-    this.mass = mass ? mass : 0;
+    this.mass = mass ? mass : 1;
     this.velocity = velocity ? velocity : new Vertex(0,0,0);
     this.acceleration = acceleration ? acceleration : new Vertex(0,0,0);
+    this.name = name;
   }
 
   update(){
-    this.velocity = this.velocity.add(this.acceleration);
+    this.velocity = this.velocity.subtract(this.acceleration);
+
     this.translate(this.velocity.x, this.velocity.y, this.velocity.z);
     this.acceleration = this.acceleration.scale(0);
   }
@@ -54,18 +57,25 @@ export class Body extends Mesh {
     let direction = getDirectionalVector(this,objectTwo);
     const distance = direction.magnitude(); // astronomical units AU
     direction.normalize();
-    let gravitationalForce = getGravitationalForce(this, objectTwo, distance); // AUs cubed per kilogram per day per day
-    gravitationalForce = gravitationalForce / (constants.simluationSpeed/fps)/100000 //convert gravitational force to frames, where ~60 frames = 23 days. I have to divide by 100000 to slow things down and I don't know why. Maybe the units are off?
+    let gravitationalForce = getGravitationalForce(this, objectTwo, distance); // cubic meters per kilogram per second per second
+    gravitationalForce = gravitationalForce / (constants.simluationSpeed/fps)
+    // convert gravitational force to frames, where ~60 frames = 23 days.
 
     direction = direction.scale(gravitationalForce);
-
     return direction;
+  }
+
+  setStableOrbit(sun: Body) {
+    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's quite right yet.
+    const force = equalCentripGravity(this, sun);
+    this.velocity = new Vertex(0,force,0);
+    this.acceleration = this.acceleration.scale(0);
   }
 }
 
 export class Barycenter extends Body {
   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
-    super(d,mass, color, velocity, acceleration);
+    super("barycenter",d,mass, color, velocity, acceleration);
   }
   place(movables:Body[]): void {
     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);

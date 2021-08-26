@@ -4,6 +4,7 @@ import { Barycenter, Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
+import { kilogramsToMass, metersToAU} from "./utils";
 
 const {
   clearColor,
@@ -110,26 +111,25 @@ const init = async () => {
   // player.rotate(0, 180, 0);
 
 //randomly generate solar system
-  for(let x = 0 ; x<5; x++){
-    // const size = Math.random();
-    const mass = Math.random()*(1/1047);
-    const size = mass *1047
+  for(let x = 0 ; x<40; x++){
+    const mass = kilogramsToMass(Math.random()*1.989e30);
+    const size = mass*2000
     const color = new Color(Math.random(), Math.random(), Math.random());
-    // const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
-    const velocity = new Vertex(0,0,0);
+    const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
+    // const velocity = new Vertex(0,0,0);
 
-    const body = new Body(size, mass, color, velocity);
+    const body = new Body(`Planet ${x}`,size, mass, color, velocity);
     body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);
     movables.push(body);
   }
 
-  // 1 sun,  1 plane
-    const sun = new Body(1, 1, Red, new Vertex(0,0,0));
-    // sun.translate(5,5,0);
-    const planet = new Body(.3, (1/1500), Green, new Vertex(0,0,0))
-    planet.translate(-5,-5,0);
-    movables.push(sun);
-    movables.push(planet);
+  // 1 sun,  1 planet to test a stable orbit, which is not working yet.
+    // const sun = new Body("sun", .25, kilogramsToMass(1.989e30), Red, new Vertex(0,0,0)); // metersToAU(1.3927e9) to get the real diameter of the sun
+    // const planet = new Body("earth", .1, kilogramsToMass(5.972e24), Green, new Vertex(0,0,0)) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
+    // planet.translate(-3,0,0);
+    // planet.setStableOrbit(sun);
+    // movables.push(sun);
+    // movables.push(planet);
 
   requestAnimationFrame(loop);
 };
@@ -143,7 +143,7 @@ const loop = (now: number) => {
     const deltaTime = now - then;          // compute time since last frame
     then = now;                            // remember time for next frame
     const fps = 1 / deltaTime;             // compute frames per second
-    console.log("FPS", fps)
+
 
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
