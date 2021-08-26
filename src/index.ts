@@ -2,9 +2,29 @@ import { perspective, orthogonal } from "./camera";
 import { Blue, Green, Red } from "./colors";
 import { Cube } from "./cube";
 import { constants } from "./constants";
-import { Mesh } from "./mesh";
+import { Mesh, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
 import { Sphere } from "./sphere";
+import { generateTexture, sand, grass, clouds } from "./texture";
+
+const sandTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, sand)),
+};
+
+const grassTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, grass)),
+};
+
+const cloudTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, clouds)),
+};
+
 const {
   clearColor,
   zoom,
@@ -40,7 +60,7 @@ let gl: WebGLRenderingContext;
 let program: WebGLProgram;
 let enemies: Mesh[] = [];
 let player: Mesh;
-let textures: HTMLImageElement[];
+let textures: (HTMLImageElement | ProceduralTextureData)[];
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -56,6 +76,7 @@ const loadImages = (urlArr: string[]) => {
 
 const init = async () => {
   textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
+  textures.push(sandTexture, grassTexture, cloudTexture);
   //initialize webgl
   gl = canvas.getContext("webgl");
 
@@ -132,6 +153,18 @@ const init = async () => {
   enemies.push(new Cube(gl, program, 0.7, Red));
   enemies[3].translate(-2, 1, -5);
   enemies[3].rotate(-2, 1, -5);
+
+  //sand textured sphere
+  enemies.push(new Sphere(gl, program, 0.7, 16, textures[2]));
+  enemies[4].translate(-2, 3.5, 0);
+
+  //grass textured sphere
+  enemies.push(new Sphere(gl, program, 0.7, 16, textures[3]));
+  enemies[5].translate(2, -3.5, 0);
+
+  //clouds textured sphere
+  enemies.push(new Sphere(gl, program, 0.7, 16, textures[4]));
+  enemies[6].translate(-3, -3.5, 0);
 
   player.translate(0, -2, 0);
   player.rotate(0, 180, 0);

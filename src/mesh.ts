@@ -88,6 +88,11 @@ export class Face {
   }
 }
 export type textureCoord = { u: number; v: number };
+export interface ProceduralTextureData {
+  width: number;
+  height: number;
+  data: Uint8Array;
+}
 export class Mesh {
   gl: WebGLRenderingContext;
   program: WebGLProgram;
@@ -104,7 +109,7 @@ export class Mesh {
   vbo: Float32Array;
   textureCoords: textureCoord[];
   gl_texture: WebGLTexture;
-  texture: HTMLImageElement;
+  texture: HTMLImageElement | ProceduralTextureData;
   constructor(
     gl: WebGLRenderingContext,
     program: WebGLProgram,
@@ -112,7 +117,7 @@ export class Mesh {
     faces: Face[],
     normals?: Vertex[],
     textureCoords?: textureCoord[],
-    texture?: HTMLImageElement
+    texture?: HTMLImageElement | ProceduralTextureData
   ) {
     this.gl = gl;
     this.program = program;
@@ -198,19 +203,38 @@ export class Mesh {
   draw = (): void => {
     const { gl, program } = this;
     if (this.texture) {
-      console.log(this.texture);
       const sampler = gl.getUniformLocation(program, "sampler");
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.gl_texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGB,
-        gl.RGB,
-        gl.UNSIGNED_BYTE,
-        this.texture
-      );
+
+      if ("data" in this.texture) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          this.texture.width,
+          this.texture.height,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          this.texture.data
+        );
+      } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGB,
+          gl.RGB,
+          gl.UNSIGNED_BYTE,
+          this.texture
+        );
+      }
       gl.uniform1i(sampler, 0);
     }
 
@@ -293,7 +317,7 @@ export class Mesh {
     return JSON.stringify({ v, f, c });
   }
 
-  initialize(texture: HTMLImageElement) {
+  initialize(texture: HTMLImageElement | ProceduralTextureData) {
     const arr = [];
     for (let i = 0; i < this.faces.length; i++) {
       const { vAi, vBi, vCi, color } = this.faces[i];
