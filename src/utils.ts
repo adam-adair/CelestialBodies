@@ -8,4 +8,4 @@ export const metersToAU = (meters: number): number => meters / 149597870700; //c
 
 export const auToMeters = (au: number): number => au*149597870700; // reverse au back to meters, might be useful for display purposes
 
-export default { kilogramsToMass, massToKilograms, metersToAU,auToMeters};
+export default { kilogramsToMass, massToKilograms, metersToAU, auToMeters};

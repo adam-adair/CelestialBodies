@@ -7,7 +7,7 @@ import {
   textureCoord,
   Vertex,
 } from "./mesh";
-import {getDirectionalVector, getGravitationalForce, equalCentripGravity} from "./physics";
+import { getDirectionalVector, getGravitationalForce, equalCentripGravity } from "./physics";
 
 export class Body extends Mesh {
   name: string;
@@ -95,16 +95,16 @@ export class Body extends Mesh {
   }
 }
 
-export class Barycenter extends Body {
-  constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
-    super("barycenter",d,mass, color, velocity, acceleration);
-  }
-  place(movables:Body[]): void {
-    const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
-    let centerOfMass = new Vertex(0,0,0);
-    for(let x = 0; x< movables.length; x++){
-      centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
-    }
-    this.position = centerOfMass;
-  }
-}
+// export class Barycenter extends Body {
+//   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
+//     super("barycenter",d,mass, color, velocity, acceleration);
+//   }
+//   place(movables:Body[]): void {
+//     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
+//     let centerOfMass = new Vertex(0,0,0);
+//     for(let x = 0; x< movables.length; x++){
+//       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
+//     }
+//     this.position = centerOfMass;
+//   }
+// }

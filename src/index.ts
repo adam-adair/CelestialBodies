@@ -1,6 +1,6 @@
 import { perspective, orthogonal } from "./camera";
 import { Color, Red, Green, Blue } from "./colors";
-import { Barycenter, Body } from "./bodies";
+import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
@@ -68,15 +68,15 @@ textures.push(sandTexture, grassTexture, cloudTexture);
 
 
 //randomly generate solar system
-  for(let x = 0 ; x<40; x++){
+  for(let x = 0 ; x<10; x++){
     const mass = kilogramsToMass(Math.random()*1.989e30);
-    const size = mass*2000
+    const size = mass*3000+.25
+    console.log(size)
     const color = new Color(Math.random(), Math.random(), Math.random());
     const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
     const acceleration = new Vertex(0,0,0);
-    // const texture = textures[Math.floor(Math.random()*textures.length)];
-    const texture = textures[0]
-    const precision = Math.random()*12;
+    const texture = textures[Math.floor(Math.random()*textures.length)];
+    const precision = Math.floor(Math.random()*8)+8;
 
     const body = new Sphere(`Planet ${x}`,size, precision, mass, velocity, acceleration, texture, color);
     body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);
@@ -112,9 +112,9 @@ textures.push(sandTexture, grassTexture, cloudTexture);
   // movables[6].translate(-3, -3.5, 0);
 
   // 1 sun,  1 planet to test a stable orbit, which is not working yet.
-    // const sun = new Body("sun", .25, kilogramsToMass(1.989e30), Red, new Vertex(0,0,0)); // metersToAU(1.3927e9) to get the real diameter of the sun
-    // const planet = new Body("earth", .1, kilogramsToMass(5.972e24), Green, new Vertex(0,0,0)) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
-    // planet.translate(-3,0,0);
+    // const sun = new Sphere("sun", 1, 16, kilogramsToMass(1.989e30), null,null, textures[2], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
+    // const planet = new Sphere("earth", .5, 16, kilogramsToMass(5.972e24),null, null, textures[3], Green) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
+    // planet.translate(-5,0,0);
     // planet.setStableOrbit(sun);
     // movables.push(sun);
     // movables.push(planet);
@@ -132,6 +132,7 @@ const loop = (now: number) => {
     then = now;                            // remember time for next frame
     const fps = 1 / deltaTime;             // compute frames per second
 
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

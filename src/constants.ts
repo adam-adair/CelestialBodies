@@ -2,7 +2,7 @@ const gravitationalFactor = 1; // we would only change this if we wanted to resc
 
 export const constants = {
   clearColor: { r: 0, g: 0.2, b: 0.2, a: 1 },
-  zoom: 10,
+  zoom: 8,
   lightDirection: { x: 0, y: 4, z: 10 },
   ambientLightAmount: 0.1,
   movement: 0.1,
