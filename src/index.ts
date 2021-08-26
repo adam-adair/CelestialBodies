@@ -1,9 +1,10 @@
 import { perspective, orthogonal } from "./camera";
-import { Red } from "./colors";
+import { Blue, Green, Red } from "./colors";
 import { Cube } from "./cube";
 import { constants } from "./constants";
 import { Mesh } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement } from "./input";
+import { Sphere } from "./sphere";
 const {
   clearColor,
   zoom,
@@ -39,8 +40,22 @@ let gl: WebGLRenderingContext;
 let program: WebGLProgram;
 let enemies: Mesh[] = [];
 let player: Mesh;
+let textures: HTMLImageElement[];
+
+const loadImage = (url: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = url;
+  });
+};
+
+const loadImages = (urlArr: string[]) => {
+  return Promise.all(urlArr.map((url) => loadImage(url)));
+};
 
 const init = async () => {
+  textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
   //initialize webgl
   gl = canvas.getContext("webgl");
 
@@ -57,6 +72,9 @@ const init = async () => {
   gl.attachShader(program, fragShader);
   gl.linkProgram(program);
   gl.useProgram(program);
+  console.log("vertex shader:", gl.getShaderInfoLog(vertexShader) || "OK");
+  console.log("fragment shader:", gl.getShaderInfoLog(fragShader) || "OK");
+  console.log("program:", gl.getProgramInfoLog(program) || "OK");
 
   //set background color, enable depth
   gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -99,11 +117,21 @@ const init = async () => {
 
   // set up some objects
   player = await Mesh.fromObjMtl(
+    gl,
+    program,
     "./obj/weirddonut.obj",
     "./obj/weirddonut.mtl",
     1
   );
-  enemies.push(new Cube(0.2, Red));
+
+  enemies.push(new Sphere(gl, program, 0.8, 12, textures[0]));
+  enemies[0].translate(-1, -1, -1);
+  enemies.push(new Sphere(gl, program, 1, 16, textures[1]));
+  enemies[1].translate(2, 1, 0);
+  enemies.push(new Sphere(gl, program, 0.5, 5, null, Green));
+  enemies.push(new Cube(gl, program, 0.7, Red));
+  enemies[3].translate(-2, 1, -5);
+  enemies[3].rotate(-2, 1, -5);
 
   player.translate(0, -2, 0);
   player.rotate(0, 180, 0);
@@ -122,12 +150,12 @@ const loop = () => {
   for (let i = 0; i < enemies.length; i++) {
     const enemy = enemies[i];
     //make enemy spin
-    enemy.rotate(0.5, 0.5, 0.5);
-    enemy.draw(gl, program);
+    enemy.rotate(0.0, 0.5, 0.0);
+    enemy.draw();
   }
 
   //draw player
-  player.draw(gl, program);
+  player.draw();
 
   requestAnimationFrame(loop);
 };
