@@ -119,11 +119,11 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  // populate.randomSystem(movables, 25, textures);       // after 25 objects the simulation gets real slow
-  // populate.repeatableSystem(movables, textures);       // two objects with equal mass and no starting velocity
+  populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
+  // populate.repeatableSystem(movables, textures); // two objects with equal mass and no starting velocity
   // populate.stableOrbit(movables, 1, textures);         // doesn't quite work yet.
   //  populate.binaryStars(movables,textures);            // to objects with equal mass and opposite motion perpindular to axis
-  populate.binaryStarsPlanet(movables, textures); //binary stars plus an orbiting planet
+  // populate.binaryStarsPlanet(movables, textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, stationary, player, textures);
 
   requestAnimationFrame(loop);
@@ -163,6 +163,25 @@ const loop = (now: number) => {
       // body.translate(body.velocity.x, body.velocity.y, body.velocity.z )
       body.update();
       body.draw();
+
+      // check this object against all other objects for collision
+      // maybe there's a better way to do this
+      for (let j = 0; j < movables.length - 1; j++) {
+        //dont check against self
+        if (i === j) j++;
+        else {
+          const otherBody = movables[j];
+          //if the bodies intersect
+          if (body.intersect(otherBody)) {
+            //do something
+            console.log("collide");
+            //todo - some real physics about ricocheting or exploding or combining
+            // for now, reverse their velocities
+            otherBody.velocity = otherBody.velocity.scale(-1);
+            body.velocity = body.velocity.scale(-1);
+          }
+        }
+      }
     }
   }
 
