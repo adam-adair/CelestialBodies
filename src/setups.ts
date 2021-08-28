@@ -76,8 +76,8 @@ export const texturesDisplay = async (gl: WebGLRenderingContext, program: WebGLP
 
   // 1 sun,  x planets to test a stable orbit, which is not working yet.
   export const stableOrbit = (objects: Sphere[], numPlanets:number, textures: (HTMLImageElement | ProceduralTextureData)[]): void => {
-    const sun = new Sphere("sun", 1, 16, kilogramsToMass(1.989e30), null,null, textures[2], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
-    const planet = new Sphere("earth", .5, 16, kilogramsToMass(5.972e24),null, null, textures[3], Green) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
+    const sun = new Sphere("sun", 1, 16, .01, null,null, textures[2], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
+    const planet = new Sphere("earth", .5, 16, sun.mass/1047,null, null, textures[3], Green) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
     planet.translate(-5,0,0);
     planet.setStableOrbit(sun);
     objects.push(sun);
@@ -86,23 +86,25 @@ export const texturesDisplay = async (gl: WebGLRenderingContext, program: WebGLP
 
   //two stars orbiting each other
   export const binaryStars = (objects: Sphere[], textures: (HTMLImageElement | ProceduralTextureData)[]): void => {
-    const startSpeed = .01
-    const sun1 = new Sphere("sun", 1, 16, kilogramsToMass(1.989e30), new Vertex(0,startSpeed,0), null, textures[0], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
-    const sun2 = new Sphere("sun", 1, 16, kilogramsToMass(1.989e30), new Vertex( 0,-startSpeed,0), null, textures[0], Red);
+    const startSpeed = .05;
+    const mass = .01;
+    const sun1 = new Sphere("sun1", 1, 16, mass, new Vertex(0,startSpeed,0), null, textures[2], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
+    const sun2 = new Sphere("sun2", 1, 16, mass, new Vertex( 0,-startSpeed,0), null, textures[2], Red);
 
-    sun1.translate(3,0,0);
-    sun2.translate(-3,0,0);
+    sun1.translate(5,0,0);
+    sun2.translate(-5,0,0);
     objects.push(sun1);
     objects.push(sun2);
   }
 
-  //1 planet orbiting the binary star
+  //1 planet orbiting the binary star, hardcoded
   export const binaryStarsPlanet = (objects: Sphere[], textures: (HTMLImageElement | ProceduralTextureData)[]): void => {
 
     binaryStars(objects,textures);
-    const startSpeed = .02
-    const planet = new Sphere("planet", .5, 16, kilogramsToMass(1.989e15), new Vertex(0,startSpeed,0), null, textures[0], Red);
-    planet.translate(-15,0,0);
+    const startSpeed = objects[0].velocity.y*3;
+
+    const planet = new Sphere("planet", .5, 16, objects[0].mass/1047, new Vertex(0,startSpeed,0), null, textures[0], Red);
+    planet.translate(objects[1].position.x*3,0,0);
     objects.push(planet);
   }
 

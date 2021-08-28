@@ -22,7 +22,7 @@ export const getDirectionalVector = (objectOne: Mesh, objectTwo:Mesh): Vertex =>
 export const getGravitationalForce = (objectOne: Body, objectTwo:Body, distance: number): number => (g * objectOne.mass * objectTwo.mass) / (distance * distance);
 
 export const equalCentripGravity = (planet: Body, sun: Body): number => {
-  let direction = getDirectionalVector(planet,sun);
-   const distance = direction.magnitude(); // AU
+  let direction = getDirectionalVector(sun,planet);
+   const distance = direction.magnitude();
    return Math.sqrt((g * sun.mass) / distance);
 }

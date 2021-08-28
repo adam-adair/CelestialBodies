@@ -72,11 +72,11 @@ textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
 textures.push(sandTexture, grassTexture, cloudTexture);
 
 // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  populate.randomSystem(movables, 25, textures);
-  // populate.repeatableSystem(movables, textures);
-  // populate.stableOrbit(movables, 1, textures);
-    //  populate.binaryStars(movables,textures);
-    //  populate.binaryStarsPlanet(movables,textures);
+  // populate.randomSystem(movables, 25, textures);       // after 25 objects the simulation gets real slow
+  // populate.repeatableSystem(movables, textures);       // two objects with equal mass and no starting velocity
+  // populate.stableOrbit(movables, 1, textures);         // doesn't quite work yet.
+  //  populate.binaryStars(movables,textures);            // to objects with equal mass and opposite motion perpindular to axis
+   populate.binaryStarsPlanet(movables,textures);      //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, stationary, player, textures);
 
   requestAnimationFrame(loop);
