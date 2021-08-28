@@ -12,6 +12,8 @@ const {
 } = constants;
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+canvas.width = 640; //document.body.clientWidth;
+canvas.height = 480; //document.body.clientHeight;
 //initialize webgl
 const gl = canvas.getContext("webgl");
 const program = gl.createProgram();

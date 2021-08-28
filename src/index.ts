@@ -8,8 +8,12 @@ import { kilogramsToMass, metersToAU} from "./utils";
 import { Sphere } from "./sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import  initialize from './initialize';
+import populate from "./setups";
 
 const { gl,program, canvas, camera } = initialize;
+const {
+  movement,
+} = constants;
 
 const sandTexture: ProceduralTextureData = {
   width: 128,
@@ -47,6 +51,7 @@ document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
 let movables: Sphere[] = [];
+let stationary: Sphere[] =[];
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 
@@ -66,58 +71,13 @@ const init = async () => {
 textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
 textures.push(sandTexture, grassTexture, cloudTexture);
 
-
-//randomly generate solar system
-  for(let x = 0 ; x<10; x++){
-    const mass = kilogramsToMass(Math.random()*1.989e30);
-    const size = mass*3000+.25
-    console.log(size)
-    const color = new Color(Math.random(), Math.random(), Math.random());
-    const velocity = new Vertex(Math.random()/100, Math.random()/100, Math.random()/100);
-    const acceleration = new Vertex(0,0,0);
-    const texture = textures[Math.floor(Math.random()*textures.length)];
-    const precision = Math.floor(Math.random()*8)+8;
-
-    const body = new Sphere(`Planet ${x}`,size, precision, mass, velocity, acceleration, texture, color);
-    body.translate(Math.random()*16-8, Math.random()*16-8, Math.random()*16-8);
-    movables.push(body);
-  }
-
-  // player = await Mesh.fromObjMtl(
-  //   gl,
-  //   program,
-  //   "./obj/weirddonut.obj",
-  //   "./obj/weirddonut.mtl",
-  //   1
-  // );
-
-  // movables.push(new Sphere( 0.8, 12, textures[0]));
-  // movables.[0].translate(-1, -1, -1);
-  // movables.push(new Sphere( 1, 16, textures[1]));
-  // movables[1].translate(2, 1, 0);
-  // movables.push(new Sphere( 0.5, 5, null, Green));
-  // movables[3].translate(-2, 1, -5);
-  // movables[3].rotate(-2, 1, -5);
-
-  // //sand textured sphere
-  // movables.push(new Sphere(gl, program, 0.7, 16, textures[2]));
-  // movables[4].translate(-2, 3.5, 0);
-
-  // //grass textured sphere
-  // movables.push(new Sphere(gl, program, 0.7, 16, textures[3]));
-  // movables[5].translate(2, -3.5, 0);
-
-  // //clouds textured sphere
-  // movables.push(new Sphere(gl, program, 0.7, 16, textures[4]));
-  // movables[6].translate(-3, -3.5, 0);
-
-  // 1 sun,  1 planet to test a stable orbit, which is not working yet.
-    // const sun = new Sphere("sun", 1, 16, kilogramsToMass(1.989e30), null,null, textures[2], Red); // metersToAU(1.3927e9) to get the real diameter of the sun
-    // const planet = new Sphere("earth", .5, 16, kilogramsToMass(5.972e24),null, null, textures[3], Green) //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
-    // planet.translate(-5,0,0);
-    // planet.setStableOrbit(sun);
-    // movables.push(sun);
-    // movables.push(planet);
+// moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
+  populate.randomSystem(movables, 25, textures);
+  // populate.repeatableSystem(movables, textures);
+  // populate.stableOrbit(movables, 1, textures);
+    //  populate.binaryStars(movables,textures);
+    //  populate.binaryStarsPlanet(movables,textures);
+  // player = await populate.texturesDisplay(gl, program, stationary, player, textures);
 
   requestAnimationFrame(loop);
 };
@@ -128,7 +88,7 @@ let then = 0;
 const loop = (now: number) => {
   // calculate frames per second
     now *= 0.001;                          // convert to seconds
-    const deltaTime = now - then;          // compute time since last frame
+    const deltaTime = now - then;         // compute time since last frame
     then = now;                            // remember time for next frame
     const fps = 1 / deltaTime;             // compute frames per second
 
@@ -137,14 +97,13 @@ const loop = (now: number) => {
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //box movement
-  // movePlayer(player, playerInput, movement);
 
-  // calculateNewVelocities(movables[0], movables[1]);
 
+  if(movables.length > 0 ) {
   for(let j = 0; j < movables.length; j++) {
     for(let i = 0; i <movables.length; i++){
       if(i !== j) {
-        const force = movables[j].calculateAttraction(movables[i], fps)
+        const force = movables[j].calculateAttraction(movables[i]);
         movables[j].applyForce(force);
       }
     }
@@ -159,16 +118,29 @@ const loop = (now: number) => {
     body.update();
     body.draw();
   }
+}
 
-  //draw player
-  // player.draw(gl, program);
+  // right now this is only useful for the "texture display" setup
+  if(stationary.length>0){
+    for (let i = 0; i < stationary.length; i++) {
+      const body = stationary[i];
+
+      //make object spin
+      body.rotate(0.5, 0.5, 0.5);
+      body.update();
+      body.draw();
+    }
+
+      //draw player
+      movePlayer(player, playerInput, movement);
+  player.draw();
+
+  }
 
   requestAnimationFrame(loop);
 };
 
 // start program
 window.onload = () => {
-  canvas.width = 640; //document.body.clientWidth;
-  canvas.height = 480; //document.body.clientHeight;
   init();
 };

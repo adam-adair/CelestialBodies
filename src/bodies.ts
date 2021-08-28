@@ -66,7 +66,6 @@ export class Body extends Mesh {
 
   update(){
     this.velocity = this.velocity.subtract(this.acceleration);
-
     this.translate(this.velocity.x, this.velocity.y, this.velocity.z);
     this.acceleration = this.acceleration.scale(0);
   }
@@ -75,14 +74,12 @@ export class Body extends Mesh {
     this.acceleration= this.acceleration.add(force.scale(1/this.mass));
   }
 
-  calculateAttraction(objectTwo:Body, fps: number): Vertex {
+  calculateAttraction(objectTwo:Body): Vertex {
     let direction = getDirectionalVector(this,objectTwo);
-    const distance = direction.magnitude(); // astronomical units AU
+    let distance = direction.magnitude()
+    distance = Math.max(distance, .01);; // astronomical units AU
     direction.normalize();
     let gravitationalForce = getGravitationalForce(this, objectTwo, distance); // cubic meters per kilogram per second per second
-    gravitationalForce = gravitationalForce / (constants.simluationSpeed/fps)
-    // convert gravitational force to frames, where ~60 frames = 23 days.
-
     direction = direction.scale(gravitationalForce);
     return direction;
   }

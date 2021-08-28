@@ -2,12 +2,12 @@ const gravitationalFactor = 1; // we would only change this if we wanted to resc
 
 export const constants = {
   clearColor: { r: 0, g: 0.2, b: 0.2, a: 1 },
-  zoom: 8,
+  zoom: 10,
   lightDirection: { x: 0, y: 4, z: 10 },
   ambientLightAmount: 0.1,
   movement: 0.1,
   fogDistance: [99999999, 99999999],
-  simluationSpeed: 23, // days simulated per real second
+  simulationSpeed: 23, // days simulated per real second, doesn't work yet.
   // massScale: 14982844642.9, //1 mass = this many kilograms
   massScale: 6.7213335e33/gravitationalFactor, //1 mass = this many kilograms,
   gravitationalConstant: gravitationalFactor, //cubic AUs per massScale number of kg per day squared (aka per ~60 frames per ~60 frames )
