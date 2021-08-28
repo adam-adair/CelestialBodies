@@ -5,6 +5,8 @@ and from Maxime Euzière's equally excellent guide to WebGL:
 https://xem.github.io/articles/webgl-guide.html
 */
 import { Color, White } from "./colors";
+import initialize from "./initialize";
+const { gl, program } = initialize;
 
 export class Matrix extends DOMMatrix {
   transposeSelf() {
@@ -73,6 +75,18 @@ export class Vertex {
       this.x * otherVertex.x + this.y * otherVertex.y + this.z * otherVertex.z
     );
   }
+  public magnitude(): number {
+    //the length of the vector
+    return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+  }
+  public normalize(){
+    // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
+    const m = this.magnitude();
+    if (m > 0) {
+    this.scale(1/m);
+  }
+  }
+
 }
 
 export class Face {
@@ -98,9 +112,9 @@ export class Mesh {
   program: WebGLProgram;
   vertices: Vertex[];
   normals: Vertex[];
-  _position: Vertex;
-  _rotation: Vertex;
-  _scale: Vertex;
+  position: Vertex;
+  rotation: Vertex;
+  scale: Vertex;
   faces: Face[];
   pMatrix: Matrix;
   rMatrix: Matrix;
@@ -111,8 +125,6 @@ export class Mesh {
   gl_texture: WebGLTexture;
   texture: HTMLImageElement | ProceduralTextureData;
   constructor(
-    gl: WebGLRenderingContext,
-    program: WebGLProgram,
     vertices: Vertex[],
     faces: Face[],
     normals?: Vertex[],
@@ -127,9 +139,9 @@ export class Mesh {
     this.pMatrix = new Matrix();
     this.rMatrix = new Matrix();
     this.sMatrix = new Matrix();
-    this._position = new Vertex(0, 0, 0);
-    this._rotation = new Vertex(0, 0, 0);
-    this._scale = new Vertex(1, 1, 1);
+    this.position = new Vertex(0, 0, 0);
+    this.rotation = new Vertex(0, 0, 0);
+    this.scale = new Vertex(1, 1, 1);
     this.textureCoords = textureCoords;
     this.initialize(texture);
   }
@@ -155,7 +167,7 @@ export class Mesh {
     for (let i = 0; i < f.length; i += 4) {
       faces.push(new Face(f[i], f[i + 1], f[i + 2], colors[f[i + 3]]));
     }
-    return new Mesh(gl, program, vertices, faces);
+    return new Mesh(vertices, faces);
   }
 
   static async fromObjMtl(
@@ -197,7 +209,7 @@ export class Mesh {
         faces.push(new Face(A, B, C, Colors[currentCol]));
       }
     }
-    return new Mesh(gl, program, vertices, faces);
+    return new Mesh(vertices, faces);
   }
 
   draw = (): void => {
@@ -276,17 +288,17 @@ export class Mesh {
   };
 
   rotate(x: number, y: number, z: number): void {
-    this._rotation = this._rotation.subtract(new Vertex(-x, -y, -z));
+    this.rotation = this.rotation.subtract(new Vertex(-x, -y, -z));
     this.rMatrix.rotateSelf(x, y, z);
   }
 
   translate(x: number, y: number, z: number): void {
-    this._position = this._position.subtract(new Vertex(-x, -y, -z));
+    this.position = this.position.subtract(new Vertex(-x, -y, -z));
     this.pMatrix.translateSelf(x, y, z);
   }
 
-  scale(x: number): void {
-    this._scale = this._scale.scale(x);
+  rescale(x: number): void {
+    this.scale = this.scale.scale(x);
     this.sMatrix.scaleSelf(x, x, x);
   }
 
