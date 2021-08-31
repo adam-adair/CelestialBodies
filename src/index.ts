@@ -11,8 +11,9 @@ import { Sphere } from "./sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
+import { Grid } from "./grid";
 
-const { gl, program, canvas, camera } = initialize;
+const { gl, program, canvas, camera, cameraMatrix } = initialize;
 const { movement } = constants;
 
 //could use this func to load diff songs for diff levels or scenes
@@ -101,6 +102,7 @@ let movables: Sphere[] = [];
 let stationary: Sphere[] = [];
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
+let grid: Grid;
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -119,12 +121,19 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
+  // populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(movables, textures); // two objects with equal mass and no starting velocity
   // populate.stableOrbit(movables, 1, textures);         // doesn't quite work yet.
   //  populate.binaryStars(movables,textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(movables, textures); //binary stars plus an orbiting planet
-  // player = await populate.texturesDisplay(gl, program, stationary, player, textures);
+  player = await populate.texturesDisplay(
+    gl,
+    program,
+    stationary,
+    player,
+    textures
+  );
+  grid = new Grid(10, 2, true);
 
   requestAnimationFrame(loop);
 };
@@ -200,7 +209,8 @@ const loop = (now: number) => {
     movePlayer(player, playerInput, movement);
     player.draw();
   }
-
+  grid.draw();
+  gl.uniformMatrix4fv(camera, false, cameraMatrix.toFloat32Array());
   requestAnimationFrame(loop);
 };
 
@@ -208,6 +218,31 @@ const loop = (now: number) => {
 window.onload = () => {
   canvas.width = 640; //document.body.clientWidth;
   canvas.height = 480; //document.body.clientHeight;
-  loadMusic(spaceJam);
+  // loadMusic(spaceJam); //disabled for now for speed
   init();
+};
+
+let dragging = false;
+let lastX = -1;
+let lastY = 0;
+canvas.onmousedown = (e) => {
+  lastX = e.clientX;
+  lastY = e.clientY;
+  dragging = true;
+};
+
+canvas.onmouseup = (e) => {
+  dragging = false;
+};
+
+canvas.onmousemove = (e) => {
+  let x = e.clientX;
+  let y = e.clientY;
+  if (dragging) {
+    let dx = ((y - lastY) * 200) / canvas.height;
+    let dy = ((x - lastX) * 200) / canvas.width;
+    cameraMatrix.rotateSelf(dx, dy);
+    lastX = x;
+    lastY = y;
+  }
 };

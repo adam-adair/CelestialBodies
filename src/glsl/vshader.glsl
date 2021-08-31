@@ -24,4 +24,5 @@ void main() {
   v_color = vec4(diffuse + ambient, 1.0);
   v_dist = gl_Position.w;
   v_texCoord = texCoord;
+  gl_PointSize = 3.0;
 }
