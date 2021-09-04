@@ -15,14 +15,3 @@ const g = constants.gravitationalConstant //cubic AUs per 6.7213335e+33 kg per d
 // distance = AU. ie difference between (0,0,0) and (1,0,0) locations is 1 AU
 // 1 AU is the distance between earth and sun, 149597870700 m
 
-
-
-export const getDirectionalVector = (objectOne: Mesh, objectTwo:Mesh): Vertex => objectOne.position.subtract(objectTwo.position);
-
-export const getGravitationalForce = (objectOne: Body, objectTwo:Body, distance: number): number => (g * objectOne.mass * objectTwo.mass) / (distance * distance);
-
-export const equalCentripGravity = (planet: Body, sun: Body): number => {
-  let direction = getDirectionalVector(sun,planet);
-   const distance = direction.magnitude();
-   return Math.sqrt((g * sun.mass) / distance);
-}
