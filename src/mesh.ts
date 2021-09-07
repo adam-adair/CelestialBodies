@@ -84,7 +84,7 @@ export class Vertex {
     // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
     const m = this.magnitude();
     if (m > 0) {
-      this.scale(1 / m);
+      return this.scale(1 / m);
     }
   }
 }

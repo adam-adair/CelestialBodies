@@ -7,6 +7,8 @@ export class Color {
     this.g = g;
     this.b = b;
   }
+
+
 }
 
 export const Red = new Color(1, 0, 0);
@@ -17,6 +19,7 @@ export const Yellow = new Color(1, 1, 0);
 export const Orange = new Color(1, .5, 0);
 export const ClassA = new Color(.68, .93, 2);
 export const ClassB = new Color(.34,.45,2);
+export const randomColor = () => new Color(Math.random(), Math.random(), Math.random());
 
 export default {
   Red,
@@ -26,5 +29,6 @@ export default {
   Yellow,
   Orange,
   ClassA,
-  ClassB
+  ClassB,
+  randomColor
 }

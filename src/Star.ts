@@ -53,8 +53,7 @@ export class Star extends Sphere {
     this.luminosity = luminosity; // 4*Math.PI*((size/2)**2)*(temperature**4 )  // divided by some
   }
   handleCollision(gameObjects: GameObjects, otherObject: Body) {
-    //if two stars collide then, just add the mass and size to one of them and destroy the other
-    //if something else collides then add the mass only?
+    // stars will absorb the other object, no matter what it is. If we make black holes in the future then we may have to change that.
     this.absorb(gameObjects, otherObject);
     otherObject.destroy(gameObjects);
   }
@@ -67,11 +66,12 @@ export class Star extends Sphere {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
+    // Stars have a different absorb function than other types, which is defined in the Body class. Just add to the star's mass, resize and recolor the star based on the new mass.
     // this.velocity = this.velocity.add(otherObject.velocity.scale(this.mass/otherObject.mass));
     this.mass += otherObject.mass;
     const newSize = starMasstoRadius(this.mass);
-    this.rescale(newSize/this.size);
-    this.size=newSize;
+    this.rescale(newSize / this.size);
+    this.size = newSize;
     this.temperature = calculateTemperature(this.mass, this.size);
     this.reColor();
   }

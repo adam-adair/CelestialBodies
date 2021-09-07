@@ -45,7 +45,7 @@ export class Asteroid extends Sphere {
     //if the other object is a star then that handling takes precedence
       if (otherObject instanceof Asteroid) {
        // if two asteroids collide, just split again?
-       this.split();
+      //  this.split(gameObjects,otherObject);
     } else otherObject.handleCollision(gameObjects,this);
   }
 

@@ -1,4 +1,4 @@
-import { Color } from "./colors";
+import { Color, randomColor } from "./colors";
 import { constants } from "./constants";
 import {
   Face,
@@ -17,8 +17,8 @@ export class Body extends Mesh {
   name: string;
   size: number;
   mass: number; // kg
-  velocity: Vertex; // changes in location (in AUs) in that direction in a frame. due to gravitational constant, 1 frame is 1 day.
-  acceleration: Vertex; // change in AU to velocity in a frame, again 1 frame is 1 day.
+  velocity: Vertex; // changes in location (in AUs) in that direction in a frame.
+  acceleration: Vertex; // change in AU to velocity in a frame
   constructor(
     name: string,
     d: number,
@@ -90,13 +90,13 @@ export class Body extends Mesh {
   calculateAttraction(objectTwo: Body): Vertex {
     let direction = this.directionalVector(objectTwo);
     const distance = Math.max(direction.magnitude(), 0.01); // astronomical units AU
-    direction.normalize();
+    direction = direction.normalize();
     let gravitationalForce = this.gravitationalForce(objectTwo, distance); // cubic meters per kilogram per second per second
     direction = direction.scale(gravitationalForce);
     return direction;
   }
 
-  findForceofSun(otherObject: Body): number {
+  forceOfCenterMass(otherObject: Body): number {
     return Math.sqrt(
       (gravitationalConstant * Math.max(this.mass, otherObject.mass)) /
         this.distance(otherObject)
@@ -104,9 +104,9 @@ export class Body extends Mesh {
   }
 
   setStableOrbit(otherObject: Body) {
-    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's quite right yet.
+    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's not quite right yet.
     if (this.mass < otherObject.mass) {
-      const force = this.findForceofSun(otherObject);
+      const force = this.forceOfCenterMass(otherObject);
       this.velocity = new Vertex(0, force, 0);
       this.acceleration = this.acceleration.scale(0);
     }
@@ -130,25 +130,35 @@ export class Body extends Mesh {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
+    const newSize = this.size + otherObject.size;
+    this.rescale(newSize / this.size);
+    this.size = newSize;
     this.alterTrajectory(otherObject);
     this.mass += otherObject.mass;
-    const newSize =  this.size+ otherObject.size;
-    this.rescale(newSize/this.size);
-    this.size =newSize;
+    this.moveToMidPoint(otherObject);
     otherObject.destroy(gameObjects);
   }
 
-  split(){
-    // break into pieces
+  moveToMidPoint(otherObject: Body) {
+    const halfwayPoint = this.position.add(otherObject.position).scale(1 / 2);
+    const { x, y, z } = this.position.subtract(halfwayPoint);
+    this.translate(x, y, z);
   }
 
-  alterTrajectory(otherObject: Body) {
+  alterTrajectory(otherObject: Body): Vertex {
     const combinedMass = this.mass + otherObject.mass;
-    const obj1ScaledVelocity = this.velocity.scale(this.mass);
-    const obj2ScaledVelocity = otherObject.velocity.scale(otherObject.mass);
-    const combinedVelocity = obj1ScaledVelocity.add(obj2ScaledVelocity);
-    this.acceleration = combinedVelocity.scale(1/combinedMass);
+    const obj1ScaledVelocity = this.velocity.scale(this.mass / combinedMass);
+    const obj2ScaledVelocity = otherObject.velocity.scale(
+      otherObject.mass / combinedMass
+    );
+    const newVelocity = obj1ScaledVelocity.add(obj2ScaledVelocity);
+    this.velocity = newVelocity;
+    return newVelocity;
   }
+
+
+calculateNewTrajectory(otherObject:Body): Vertex {
+  return new Vertex (0,0,0)
 }
 
 // export class Barycenter extends Body {
@@ -164,3 +174,4 @@ export class Body extends Mesh {
 //     this.position = centerOfMass;
 //   }
 // }
+}

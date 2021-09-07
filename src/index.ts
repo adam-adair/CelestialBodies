@@ -124,14 +124,17 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
+  // populate.randomSystem(25, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(1, textures);         // doesn't quite work yet.
+  populate.stableOrbit(10, textures);         // doesn't quite work yet.
   //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
-  populate.starColor(textures); // just a display of star colors. they don't move.
+      // populate.starColor(textures); // just a display of star colors. they don't move.
   // populate.twoPlanets(textures);
+  // populate.testCollisionAddMomentum(textures);
+  // populate.testCollisionLoseMomentum(textures);
+  // populate.randomPlanetSystem(5, textures);
 
   requestAnimationFrame(loop);
 };
@@ -152,12 +155,14 @@ const loop = (now: number) => {
 
   // check this object against all other objects for collision
   // maybe there's a better way to do this
+
   for (let i in movers) {
     const body = movers[i] as Planet | Star | Asteroid;
 
     for (let j in objects) {
       //dont check against self
-      if (i !== j) {
+
+      if (movers[i] !== objects[j]) {
         const otherBody = objects[j] as Planet | Star | Asteroid;
         body.checkCollision(gameObjects, otherBody);
       }
