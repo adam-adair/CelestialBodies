@@ -120,7 +120,9 @@ export const movePlayer = (
   if (inp.spinD) player.rotate(0, movement * -10, 0);
   if (inp.spinI) player.rotate(0, 0, movement * 10);
   if (inp.spinO) player.rotate(0, 0, movement * -10);
+};
 
+export const moveCamera = (inp: PlayerMovement) => {
   if (inp.camL) cam.move(-0.1, 0, 0);
   if (inp.camR) cam.move(0.1, 0, 0);
   if (inp.camU) cam.move(0, 0.1, 0);

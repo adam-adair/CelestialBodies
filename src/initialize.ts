@@ -81,5 +81,4 @@ export default {
   gl,
   program,
   canvas,
-  // cam,
 };
