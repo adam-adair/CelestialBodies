@@ -1,4 +1,4 @@
-import { cam } from ".";
+import { cam, togglePause } from ".";
 import { Mesh } from "./mesh";
 
 export interface PlayerMovement {
@@ -100,6 +100,8 @@ export const handleInput = (
       inp.camO = pressed;
       ev.preventDefault();
       break;
+    case " ":
+      if (!pressed) togglePause();
   }
 };
 

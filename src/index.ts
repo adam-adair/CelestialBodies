@@ -17,11 +17,14 @@ import { Planet } from "./Planet";
 import { Asteroid } from "./Asteroid";
 
 import gameObjects from "./GameObjects";
+import { addBody } from "./addBody";
 
 const { gl, program, canvas } = initialize;
 const { movement } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
+const planetButton = document.getElementById("addPlanet") as HTMLButtonElement;
+const starButton = document.getElementById("addStar") as HTMLButtonElement;
 
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -111,10 +114,11 @@ const playerInput: PlayerMovement = {
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-let player: Mesh;
+let player: Mesh | Body;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
+let paused = false;
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -131,22 +135,24 @@ const loadImages = (urlArr: string[]) => {
 const init = async () => {
   textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
+  starButton.onclick = () => addBody("star", textures);
+  planetButton.onclick = () => addBody("planet", textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(25, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  populate.stableOrbit(10, textures); // doesn't quite work yet.
+  // populate.stableOrbit(10, textures); // doesn't quite work yet.
   //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
-  // populate.twoPlanets(textures);
+  populate.twoPlanets(textures);
   // populate.testCollisionAddMomentum(textures);
   // populate.testCollisionLoseMomentum(textures);
   // populate.randomPlanetSystem(5, textures);
   // populate.testTranslation(textures);
   grid = new Grid(10, 2, true);
-  cam = new Camera(new DOMPoint(0, 0, 10), new DOMPoint(0, 0, 0));
+  cam = new Camera(new DOMPoint(0, 40, 40), new DOMPoint(0, 0, 0));
   cam.view();
   requestAnimationFrame(loop);
 };
@@ -170,25 +176,27 @@ const loop = (now: number) => {
   // check this object against all other objects for collision
   // maybe there's a better way to do this
 
-  for (let i in movers) {
-    const body = movers[i] as Planet | Star | Asteroid;
+  if (!paused) {
+    for (let i in movers) {
+      const body = movers[i] as Planet | Star | Asteroid;
 
-    for (let j in objects) {
-      //dont check against self
+      for (let j in objects) {
+        //dont check against self
 
-      if (movers[i] !== objects[j]) {
-        const otherBody = objects[j] as Planet | Star | Asteroid;
-        body.checkCollision(gameObjects, otherBody);
+        if (movers[i] !== objects[j]) {
+          const otherBody = objects[j] as Planet | Star | Asteroid;
+          body.checkCollision(gameObjects, otherBody);
+        }
       }
     }
-  }
 
-  // calculate effect of attractors on movers
-  for (let j in movers) {
-    for (let i in attractors) {
-      if (i !== j) {
-        const force = movers[j].calculateAttraction(attractors[i]);
-        movers[j].applyForce(force);
+    // calculate effect of attractors on movers
+    for (let j in movers) {
+      for (let i in attractors) {
+        if (i !== j) {
+          const force = movers[j].calculateAttraction(attractors[i]);
+          movers[j].applyForce(force);
+        }
       }
     }
   }
@@ -197,8 +205,8 @@ const loop = (now: number) => {
   for (let i in objects) {
     const body = objects[i];
     //make object spin
-    body.rotate(0.5, 0.5, 0.5);
-    body.update();
+    // body.rotate(0.5, 0.5, 0.5);
+    if (!paused) body.update();
     body.draw();
   }
 
@@ -247,4 +255,15 @@ canvas.onmousemove = (e) => {
     lastX = x;
     lastY = y;
   }
+};
+
+export const togglePause = () => {
+  paused = !paused;
+  starButton.disabled = !paused;
+  planetButton.disabled = !paused;
+  if (!paused) setPlayer(null);
+};
+
+export const setPlayer = (body: Body) => {
+  player = body;
 };
