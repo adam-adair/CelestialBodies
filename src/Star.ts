@@ -45,7 +45,8 @@ export class Star extends Sphere {
       velocity,
       acceleration,
       texture,
-      color
+      color,
+      true
     );
 
     //in case we want to have lighting come from stars and dynamically adjust color and brightness

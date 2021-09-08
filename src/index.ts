@@ -1,23 +1,24 @@
 import { CPlayer } from "./music/player-small";
 import spaceJam from "./music/spaceJam";
-import { perspective, orthogonal } from "./camera";
 import { Color, Red, Green, Blue } from "./colors";
 import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
-import { movePlayer, handleInput, PlayerMovement } from "./input";
+import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
 import { kilogramsToMass, metersToAU } from "./utils";
 import { Sphere } from "./Sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
+import { Grid } from "./grid";
+import { Camera } from "./camera";
 import { Star } from "./Star";
 import { Planet } from "./Planet";
 import { Asteroid } from "./Asteroid";
 
 import gameObjects from "./GameObjects";
 
-const { gl, program, canvas, camera } = initialize;
+const { gl, program, canvas } = initialize;
 const { movement } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
@@ -100,12 +101,20 @@ const playerInput: PlayerMovement = {
   spinO: false,
   spinU: false,
   spinD: false,
+  camR: false,
+  camL: false,
+  camU: false,
+  camD: false,
+  camI: false,
+  camO: false,
 };
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
+let grid: Grid;
+export let cam: Camera;
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -126,7 +135,7 @@ const init = async () => {
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(25, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(10, textures); // doesn't quite work yet.
+  populate.stableOrbit(10, textures); // doesn't quite work yet.
   //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
@@ -135,13 +144,17 @@ const init = async () => {
   // populate.testCollisionAddMomentum(textures);
   // populate.testCollisionLoseMomentum(textures);
   // populate.randomPlanetSystem(5, textures);
-  populate.testTranslation(textures);
-
+  // populate.testTranslation(textures);
+  grid = new Grid(10, 2, true);
+  cam = new Camera(new DOMPoint(0, 0, 10), new DOMPoint(0, 0, 0));
+  cam.view();
   requestAnimationFrame(loop);
 };
 
 //game loop
 const loop = (now: number) => {
+  cam.view();
+  // cam.rotateAroundEye();
   // calculate frames per second
   now *= 0.001; // convert to seconds
   const deltaTime = now - then; // compute time since last frame
@@ -189,11 +202,13 @@ const loop = (now: number) => {
     body.draw();
   }
 
+  moveCamera(playerInput);
   //draw player
   if (player) {
     movePlayer(player, playerInput, movement);
     player.draw();
   }
+  grid.draw();
   requestAnimationFrame(loop);
 };
 
@@ -205,4 +220,31 @@ window.onload = () => {
   // disabling for testing so I don't have to wait
   // loadMusic(spaceJam);
   init();
+};
+
+let dragging = false;
+let lastX = -1;
+let lastY = 0;
+canvas.onmousedown = (e) => {
+  lastX = e.clientX;
+  lastY = e.clientY;
+  dragging = true;
+};
+
+canvas.onmouseup = (e) => {
+  dragging = false;
+};
+
+canvas.onmousemove = (e) => {
+  let x = e.clientX;
+  let y = e.clientY;
+  if (dragging) {
+    let dy = (y - lastY) / canvas.height;
+    let dx = (x - lastX) / canvas.width;
+    cam.rotateAroundEye(dx, dy);
+    // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
+    //(dx, dy);
+    lastX = x;
+    lastY = y;
+  }
 };

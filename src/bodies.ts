@@ -30,7 +30,8 @@ export class Body extends Mesh {
     faces?: Face[],
     normals?: Vertex[],
     textureCoords?: textureCoord[],
-    texture?: HTMLImageElement | ProceduralTextureData
+    texture?: HTMLImageElement | ProceduralTextureData,
+    isStar = false
   ) {
     if (!vertices) {
       vertices = [];
@@ -59,7 +60,7 @@ export class Body extends Mesh {
       faces[10] = new Face(5, 4, 2, color);
       faces[11] = new Face(0, 2, 4, color);
     }
-    super(vertices, faces, normals, textureCoords, texture);
+    super(vertices, faces, normals, textureCoords, texture, isStar);
     this.id = nextID;
     nextID++;
     this.size = d;

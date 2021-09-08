@@ -129,7 +129,8 @@ export class Mesh {
     faces: Face[],
     normals?: Vertex[],
     textureCoords?: textureCoord[],
-    texture?: HTMLImageElement | ProceduralTextureData
+    texture?: HTMLImageElement | ProceduralTextureData,
+    isStar = false
   ) {
     this.gl = gl;
     this.program = program;
@@ -144,7 +145,7 @@ export class Mesh {
     this.scale = new Vertex(1, 1, 1);
     this.texture = texture;
     this.textureCoords = textureCoords;
-    this.initialize(texture);
+    this.initialize(texture, isStar);
     this.buffer = this.gl.createBuffer();
   }
 
@@ -257,20 +258,24 @@ export class Mesh {
     const FSIZE = this.vbo.BYTES_PER_ELEMENT;
 
     const position = gl.getAttribLocation(program, "position");
-    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 11, 0);
+    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 12, 0);
     gl.enableVertexAttribArray(position);
 
     const color = gl.getAttribLocation(program, "color");
-    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 3);
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
     gl.enableVertexAttribArray(color);
 
     const normal = gl.getAttribLocation(program, "normal");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 6);
+    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
     gl.enableVertexAttribArray(normal);
 
     const texCoord = gl.getAttribLocation(program, "texCoord");
-    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 11, FSIZE * 9);
+    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 12, FSIZE * 9);
     gl.enableVertexAttribArray(texCoord);
+
+    const sunFlag = gl.getAttribLocation(program, "sunFlag");
+    gl.vertexAttribPointer(sunFlag, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 11);
+    gl.enableVertexAttribArray(sunFlag);
 
     // Set the model matrix
     const model = gl.getUniformLocation(program, "model");
@@ -339,8 +344,12 @@ export class Mesh {
     return JSON.stringify({ v, f, c });
   }
 
-  initialize(texture: HTMLImageElement | ProceduralTextureData) {
+  initialize(
+    texture: HTMLImageElement | ProceduralTextureData,
+    isStar = false
+  ) {
     const arr = [];
+    const sunData = isStar ? 1.0 : 0.0;
     for (let i = 0; i < this.faces.length; i++) {
       const { vAi, vBi, vCi, color } = this.faces[i];
       const vA = this.vertices[vAi];
@@ -367,9 +376,9 @@ export class Mesh {
       }
       // prettier-ignore
       arr.push(
-        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v,
-        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v,
-        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v
+        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v, sunData,
+        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v, sunData,
+        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v, sunData
         )
     }
     this.vbo = new Float32Array(arr);

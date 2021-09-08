@@ -19,7 +19,8 @@ export class Sphere extends Body {
     velocity?: Vertex,
     acceleration?: Vertex,
     texture?: HTMLImageElement | ProceduralTextureData,
-    color?: Color
+    color?: Color,
+    isStar = false
   ) {
     const vertices: Vertex[] = [];
     const faces: Face[] = [];
@@ -56,7 +57,8 @@ export class Sphere extends Body {
       faces,
       vertices,
       textureCoords,
-      texture
+      texture,
+      isStar
     );
     //in case we need size or precision later
     this.precision = precision;
