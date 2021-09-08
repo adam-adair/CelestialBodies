@@ -65,11 +65,7 @@ gl.uniform3f(
 );
 
 //fog
-const a_fogColor = new Float32Array([
-  clearColor.r,
-  clearColor.g,
-  clearColor.b,
-]);
+const a_fogColor = new Float32Array([clearColor.r, clearColor.g, clearColor.b]);
 const a_fogDist = new Float32Array(fogDistance);
 const u_FogColor = gl.getUniformLocation(program, "u_FogColor");
 const u_FogDist = gl.getUniformLocation(program, "u_FogDist");
@@ -80,5 +76,5 @@ export default {
   gl,
   program,
   canvas,
-  camera
-}
+  camera,
+};
