@@ -1,6 +1,5 @@
 import { CPlayer } from "./music/player-small";
 import spaceJam from "./music/spaceJam";
-import { perspective, orthogonal } from "./camera";
 import { Color, Red, Green, Blue } from "./colors";
 import { Body } from "./bodies";
 import { constants } from "./constants";
@@ -12,8 +11,9 @@ import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
 import { Grid } from "./grid";
+import { Camera } from "./camera";
 
-const { gl, program, canvas, camera, cameraMatrix } = initialize;
+const { gl, program, canvas } = initialize;
 const { movement } = constants;
 
 //could use this func to load diff songs for diff levels or scenes
@@ -94,6 +94,12 @@ const playerInput: PlayerMovement = {
   spinO: false,
   spinU: false,
   spinD: false,
+  camR: false,
+  camL: false,
+  camU: false,
+  camD: false,
+  camI: false,
+  camO: false,
 };
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
@@ -103,6 +109,7 @@ let stationary: Sphere[] = [];
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
+export let cam: Camera;
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -134,7 +141,8 @@ const init = async () => {
     textures
   );
   grid = new Grid(10, 2, true);
-
+  cam = new Camera(new DOMPoint(0, 0, 10), new DOMPoint(0, 0, 0));
+  cam.view();
   requestAnimationFrame(loop);
 };
 
@@ -142,6 +150,8 @@ let then = 0;
 
 //game loop
 const loop = (now: number) => {
+  cam.view();
+  // cam.rotateAroundEye();
   // calculate frames per second
   now *= 0.001; // convert to seconds
   const deltaTime = now - then; // compute time since last frame
@@ -210,7 +220,6 @@ const loop = (now: number) => {
     player.draw();
   }
   grid.draw();
-  gl.uniformMatrix4fv(camera, false, cameraMatrix.toFloat32Array());
   requestAnimationFrame(loop);
 };
 
@@ -239,9 +248,11 @@ canvas.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {
-    let dx = ((y - lastY) * 200) / canvas.height;
-    let dy = ((x - lastX) * 200) / canvas.width;
-    cameraMatrix.rotateSelf(dx, dy);
+    let dy = (y - lastY) / canvas.height;
+    let dx = (x - lastX) / canvas.width;
+    cam.rotateAroundEye(dx, dy);
+    // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
+    //(dx, dy);
     lastX = x;
     lastY = y;
   }

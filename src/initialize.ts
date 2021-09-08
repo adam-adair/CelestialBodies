@@ -1,6 +1,7 @@
 import { container } from "webpack";
 import { constants } from "./constants";
-import { perspective, orthogonal } from "./camera";
+import { Camera } from "./camera";
+import { Vertex } from "./mesh";
 
 const {
   clearColor,
@@ -43,15 +44,19 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 gl.enable(gl.DEPTH_TEST);
 
 //set light, camera uniforms
-const camera = gl.getUniformLocation(program, "camera");
-const cameraMatrix = perspective(zoom, canvas.width / canvas.height, 1, 100);
-cameraMatrix.translateSelf(0, 0, -zoom * 5);
+// const cam = new Camera(new Vertex(0, 2, 50), new Vertex(0, 0, 0));
+// const camera = gl.getUniformLocation(program, "camera");
+// const projMatrix = perspective(zoom, canvas.width / canvas.height, 1, 100);
+// const viewMatrix = lookAt(0, 2, 50, 0, 0, 10);
+// // const cameraMatrix = projMatrix.multiplySelf(viewMatrix);
+// const cameraMatrix = perspective(zoom, canvas.width / canvas.height, 1, 100);
+// cameraMatrix.translateSelf(0, 0, -zoom * 5);
 
 // for ortho view:
 // const cameraMatrix = orthogonal(zoom * ratio, zoom, 100);
 // cameraMatrix.translateSelf((zoom * ratio) / 2, -zoom / 2, -zoom);
 
-gl.uniformMatrix4fv(camera, false, cameraMatrix.toFloat32Array());
+// cam.view();
 
 // light
 const light = gl.getUniformLocation(program, "light");
@@ -76,6 +81,5 @@ export default {
   gl,
   program,
   canvas,
-  camera,
-  cameraMatrix,
+  // cam,
 };

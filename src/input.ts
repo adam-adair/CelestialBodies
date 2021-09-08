@@ -1,3 +1,4 @@
+import { cam } from ".";
 import { Mesh } from "./mesh";
 
 export interface PlayerMovement {
@@ -13,6 +14,12 @@ export interface PlayerMovement {
   spinD: boolean;
   spinI: boolean;
   spinO: boolean;
+  camR: boolean;
+  camL: boolean;
+  camU: boolean;
+  camD: boolean;
+  camI: boolean;
+  camO: boolean;
 }
 
 export const handleInput = (
@@ -69,6 +76,30 @@ export const handleInput = (
       inp.spinO = pressed;
       ev.preventDefault();
       break;
+    case "l":
+      inp.camR = pressed;
+      ev.preventDefault();
+      break;
+    case "j":
+      inp.camL = pressed;
+      ev.preventDefault();
+      break;
+    case "i":
+      inp.camU = pressed;
+      ev.preventDefault();
+      break;
+    case "k":
+      inp.camD = pressed;
+      ev.preventDefault();
+      break;
+    case "o":
+      inp.camI = pressed;
+      ev.preventDefault();
+      break;
+    case "u":
+      inp.camO = pressed;
+      ev.preventDefault();
+      break;
   }
 };
 
@@ -89,4 +120,11 @@ export const movePlayer = (
   if (inp.spinD) player.rotate(0, movement * -10, 0);
   if (inp.spinI) player.rotate(0, 0, movement * 10);
   if (inp.spinO) player.rotate(0, 0, movement * -10);
+
+  if (inp.camL) cam.move(-0.1, 0, 0);
+  if (inp.camR) cam.move(0.1, 0, 0);
+  if (inp.camU) cam.move(0, 0.1, 0);
+  if (inp.camD) cam.move(0, -0.1, 0);
+  if (inp.camI) cam.move(0, 0, -0.1);
+  if (inp.camO) cam.move(0, 0, 0.1);
 };
