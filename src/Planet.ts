@@ -39,8 +39,8 @@ export class Planet extends Sphere {
       const smaller = this.mass < otherObject.size ? this : otherObject;
       const newVelocity = bigger.alterTrajectory(smaller);
       const diff = newVelocity.add(bigger.velocity).magnitude();
-      console.log("Diff", diff)
-      if(diff<impactThreshold){
+      console.log("Diff", diff);
+      if (diff < impactThreshold) {
         bigger.absorb(gameObjects, smaller);
       } else bigger.split(gameObjects, smaller);
     }
@@ -55,9 +55,7 @@ export class Planet extends Sphere {
     const initialSize = this.size + otherObject.size;
     const initialVelocity = this.alterTrajectory(otherObject); //find the trajectory of the planets before they split up, this is important to find the calculate the momentum of the new objects and to keep them from going in crazy directions
     const unitVelocity = initialVelocity.normalize(); // normalize the velocity to 0-1 scale to make it easier to offset
-    const startPosition = this.position
-        .add(otherObject.position)
-        .scale(1 / 2);
+    const startPosition = this.position.add(otherObject.position).scale(1 / 2);
     const randomOffset = () => Math.random() * 2 - 1;
     let remainingMass = initialMass;
     while (remainingMass >= minMass) {
@@ -69,7 +67,7 @@ export class Planet extends Sphere {
         unitVelocity.y - randomOffset(),
         unitVelocity.z - randomOffset()
       ); // right now the direction of each object is randomly offset. In the future I'd like to prevent the pieces from going in strange directions but that math is beyond me
-      const newVelocity = randomDirection.normalize() //.scale(newSpeed);
+      const newVelocity = randomDirection.normalize(); //.scale(newSpeed);
       new Planet(
         "Debris",
         newSize,

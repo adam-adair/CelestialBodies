@@ -156,22 +156,21 @@ export class Body extends Mesh {
     return newVelocity;
   }
 
+  calculateNewTrajectory(otherObject: Body): Vertex {
+    return new Vertex(0, 0, 0);
+  }
 
-calculateNewTrajectory(otherObject:Body): Vertex {
-  return new Vertex (0,0,0)
-}
-
-// export class Barycenter extends Body {
-//   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
-//     super("barycenter",d,mass, color, velocity, acceleration);
-//   }
-//   place(movables:Body[]): void {
-//     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
-//     let centerOfMass = new Vertex(0,0,0);
-//     for(let x = 0; x< movables.length; x++){
-//       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
-//     }
-//     this.position = centerOfMass;
-//   }
-// }
+  // export class Barycenter extends Body {
+  //   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
+  //     super("barycenter",d,mass, color, velocity, acceleration);
+  //   }
+  //   place(movables:Body[]): void {
+  //     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
+  //     let centerOfMass = new Vertex(0,0,0);
+  //     for(let x = 0; x< movables.length; x++){
+  //       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
+  //     }
+  //     this.position = centerOfMass;
+  //   }
+  // }
 }

@@ -276,8 +276,8 @@ export class Mesh {
     const model = gl.getUniformLocation(program, "model");
     const nMatrix = gl.getUniformLocation(program, "nMatrix");
 
-    const modelMatrix = this.sMatrix.multiply(
-      this.pMatrix.multiply(this.rMatrix)
+    const modelMatrix = this.pMatrix.multiply(
+      this.rMatrix.multiply(this.sMatrix)
     );
     const normalMatrix = new Matrix(modelMatrix.toString());
     normalMatrix.invertSelf();

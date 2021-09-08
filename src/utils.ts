@@ -17,7 +17,7 @@ export const starMasstoRadius = (mass: number): number => {
 };
 
 export const calculateTemperature = (mass: number, radius: number) =>
-  Math.pow(mass ** 3.5 / (4 * Math.PI *  (radius ** 2)), 1 / 4);
+  Math.pow(mass ** 3.5 / (4 * Math.PI * radius ** 2), 1 / 4);
 
 export default {
   kilogramsToMass,

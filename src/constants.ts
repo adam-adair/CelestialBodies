@@ -12,5 +12,5 @@ export const constants = {
   massScale: 6.7213335e33 / gravitationalFactor, //1 mass = this many kilograms,
   gravitationalConstant: gravitationalFactor, //cubic AUs per massScale number of kg per day squared (aka per ~60 frames per ~60 frames )
   minMass: 0.5, //smallest mass any object can be
-  impactThreshold: .05,
+  impactThreshold: 0.05,
 };
