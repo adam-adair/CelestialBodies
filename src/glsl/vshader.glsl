@@ -3,6 +3,7 @@ attribute vec4 color;
 attribute vec4 normal;
 attribute vec2 texCoord;
 attribute float useTexture;
+attribute float sunFlag;
 
 uniform mat4 camera;
 uniform mat4 model;
@@ -21,7 +22,11 @@ void main() {
   float nDotL = dot(wNormal, lightDirection);
   vec3 ambient = ambientLight * color.rgb;
   vec3 diffuse = color.rgb * nDotL;
-  v_color = vec4(diffuse + ambient, 1.0);
+  if (sunFlag == 1.0) {
+    v_color = color;
+  } else {
+    v_color = vec4(diffuse + ambient, 1.0);
+  }
   v_dist = gl_Position.w;
   v_texCoord = texCoord;
 }

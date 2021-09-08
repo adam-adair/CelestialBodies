@@ -77,16 +77,15 @@ export class Vertex {
   }
   public magnitude(): number {
     //the length of the vector
-    return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
-  public normalize(){
+  public normalize() {
     // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
     const m = this.magnitude();
     if (m > 0) {
-    this.scale(1/m);
+      this.scale(1 / m);
+    }
   }
-  }
-
 }
 
 export class Face {
@@ -129,7 +128,8 @@ export class Mesh {
     faces: Face[],
     normals?: Vertex[],
     textureCoords?: textureCoord[],
-    texture?: HTMLImageElement | ProceduralTextureData
+    texture?: HTMLImageElement | ProceduralTextureData,
+    isSun = false
   ) {
     this.gl = gl;
     this.program = program;
@@ -143,7 +143,7 @@ export class Mesh {
     this.rotation = new Vertex(0, 0, 0);
     this.scale = new Vertex(1, 1, 1);
     this.textureCoords = textureCoords;
-    this.initialize(texture);
+    this.initialize(texture, isSun);
   }
 
   static async fromSerialized(
@@ -255,20 +255,24 @@ export class Mesh {
     const FSIZE = this.vbo.BYTES_PER_ELEMENT;
 
     const position = gl.getAttribLocation(program, "position");
-    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 11, 0);
+    gl.vertexAttribPointer(position, 3, gl.FLOAT, false, FSIZE * 12, 0);
     gl.enableVertexAttribArray(position);
 
     const color = gl.getAttribLocation(program, "color");
-    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 3);
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 3);
     gl.enableVertexAttribArray(color);
 
     const normal = gl.getAttribLocation(program, "normal");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 11, FSIZE * 6);
+    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, FSIZE * 12, FSIZE * 6);
     gl.enableVertexAttribArray(normal);
 
     const texCoord = gl.getAttribLocation(program, "texCoord");
-    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 11, FSIZE * 9);
+    gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 12, FSIZE * 9);
     gl.enableVertexAttribArray(texCoord);
+
+    const sunFlag = gl.getAttribLocation(program, "sunFlag");
+    gl.vertexAttribPointer(sunFlag, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 11);
+    gl.enableVertexAttribArray(sunFlag);
 
     // Set the model matrix
     const model = gl.getUniformLocation(program, "model");
@@ -329,7 +333,7 @@ export class Mesh {
     return JSON.stringify({ v, f, c });
   }
 
-  initialize(texture: HTMLImageElement | ProceduralTextureData) {
+  initialize(texture: HTMLImageElement | ProceduralTextureData, isSun = false) {
     const arr = [];
     for (let i = 0; i < this.faces.length; i++) {
       const { vAi, vBi, vCi, color } = this.faces[i];
@@ -355,11 +359,12 @@ export class Mesh {
         tB = { u: 0.0, v: 0.0 };
         tC = { u: 0.0, v: 0.0 };
       }
+      const sunData = isSun ? 1.0 : 0.0;
       // prettier-ignore
       arr.push(
-        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v,
-        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v,
-        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v
+        vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v, sunData,
+        vB.x, vB.y, vB.z, color.r, color.g, color.b, normalB.x, normalB.y, normalB.z,  tB.u, tB.v, sunData,
+        vC.x, vC.y, vC.z, color.r, color.g, color.b, normalC.x, normalC.y, normalC.z,  tC.u, tC.v, sunData
         )
     }
     this.vbo = new Float32Array(arr);

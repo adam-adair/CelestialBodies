@@ -119,12 +119,18 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
+  // populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(movables, textures); // two objects with equal mass and no starting velocity
   // populate.stableOrbit(movables, 1, textures);         // doesn't quite work yet.
   //  populate.binaryStars(movables,textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(movables, textures); //binary stars plus an orbiting planet
-  // player = await populate.texturesDisplay(gl, program, stationary, player, textures);
+  player = await populate.texturesDisplay(
+    gl,
+    program,
+    stationary,
+    player,
+    textures
+  );
 
   requestAnimationFrame(loop);
 };
