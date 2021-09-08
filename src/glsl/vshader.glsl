@@ -29,4 +29,5 @@ void main() {
   }
   v_dist = gl_Position.w;
   v_texCoord = texCoord;
+  gl_PointSize = 3.0;
 }

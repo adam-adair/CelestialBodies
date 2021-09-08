@@ -6,6 +6,7 @@ https://xem.github.io/articles/webgl-guide.html
 */
 import { Color, White } from "./colors";
 import initialize from "./initialize";
+
 const { gl, program } = initialize;
 
 export class Matrix extends DOMMatrix {
@@ -83,7 +84,7 @@ export class Vertex {
     // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
     const m = this.magnitude();
     if (m > 0) {
-      this.scale(1 / m);
+      return this.scale(1 / m);
     }
   }
 }
@@ -129,7 +130,7 @@ export class Mesh {
     normals?: Vertex[],
     textureCoords?: textureCoord[],
     texture?: HTMLImageElement | ProceduralTextureData,
-    isSun = false
+    isStar = false
   ) {
     this.gl = gl;
     this.program = program;
@@ -142,8 +143,10 @@ export class Mesh {
     this.position = new Vertex(0, 0, 0);
     this.rotation = new Vertex(0, 0, 0);
     this.scale = new Vertex(1, 1, 1);
+    this.texture = texture;
     this.textureCoords = textureCoords;
-    this.initialize(texture, isSun);
+    this.initialize(texture, isStar);
+    this.buffer = this.gl.createBuffer();
   }
 
   static async fromSerialized(
@@ -278,8 +281,8 @@ export class Mesh {
     const model = gl.getUniformLocation(program, "model");
     const nMatrix = gl.getUniformLocation(program, "nMatrix");
 
-    const modelMatrix = this.sMatrix.multiply(
-      this.pMatrix.multiply(this.rMatrix)
+    const modelMatrix = this.pMatrix.multiply(
+      this.rMatrix.multiply(this.sMatrix)
     );
     const normalMatrix = new Matrix(modelMatrix.toString());
     normalMatrix.invertSelf();
@@ -290,6 +293,14 @@ export class Mesh {
 
     gl.drawArrays(gl.TRIANGLES, 0, this.faces.length * 3);
   };
+
+  distance(otherObject: Mesh) {
+    return this.directionalVector(otherObject).magnitude();
+  }
+
+  directionalVector(otherObject: Mesh): Vertex {
+    return this.position.subtract(otherObject.position);
+  }
 
   rotate(x: number, y: number, z: number): void {
     this.rotation = this.rotation.subtract(new Vertex(-x, -y, -z));
@@ -333,8 +344,12 @@ export class Mesh {
     return JSON.stringify({ v, f, c });
   }
 
-  initialize(texture: HTMLImageElement | ProceduralTextureData, isSun = false) {
+  initialize(
+    texture: HTMLImageElement | ProceduralTextureData,
+    isStar = false
+  ) {
     const arr = [];
+    const sunData = isStar ? 1.0 : 0.0;
     for (let i = 0; i < this.faces.length; i++) {
       const { vAi, vBi, vCi, color } = this.faces[i];
       const vA = this.vertices[vAi];
@@ -359,7 +374,6 @@ export class Mesh {
         tB = { u: 0.0, v: 0.0 };
         tC = { u: 0.0, v: 0.0 };
       }
-      const sunData = isSun ? 1.0 : 0.0;
       // prettier-ignore
       arr.push(
         vA.x, vA.y, vA.z, color.r, color.g, color.b, normalA.x, normalA.y, normalA.z,  tA.u, tA.v, sunData,
@@ -368,6 +382,5 @@ export class Mesh {
         )
     }
     this.vbo = new Float32Array(arr);
-    this.buffer = this.gl.createBuffer();
   }
 }

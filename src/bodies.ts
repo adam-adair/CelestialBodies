@@ -1,4 +1,4 @@
-import { Color } from "./colors";
+import { Color, randomColor } from "./colors";
 import { constants } from "./constants";
 import {
   Face,
@@ -7,18 +7,18 @@ import {
   textureCoord,
   Vertex,
 } from "./mesh";
-import {
-  getDirectionalVector,
-  getGravitationalForce,
-  equalCentripGravity,
-} from "./physics";
+import gameObjects, { GameObjects } from "./GameObjects";
+
+const { gravitationalConstant } = constants;
+let nextID = 1;
 
 export class Body extends Mesh {
+  id: number;
   name: string;
   size: number;
   mass: number; // kg
-  velocity: Vertex; // changes in location (in AUs) in that direction in a frame. due to gravitational constant, 1 frame is 1 day.
-  acceleration: Vertex; // change in AU to velocity in a frame, again 1 frame is 1 day.
+  velocity: Vertex; // changes in location (in AUs) in that direction in a frame.
+  acceleration: Vertex; // change in AU to velocity in a frame
   constructor(
     name: string,
     d: number,
@@ -30,7 +30,8 @@ export class Body extends Mesh {
     faces?: Face[],
     normals?: Vertex[],
     textureCoords?: textureCoord[],
-    texture?: HTMLImageElement | ProceduralTextureData
+    texture?: HTMLImageElement | ProceduralTextureData,
+    isStar = false
   ) {
     if (!vertices) {
       vertices = [];
@@ -59,14 +60,15 @@ export class Body extends Mesh {
       faces[10] = new Face(5, 4, 2, color);
       faces[11] = new Face(0, 2, 4, color);
     }
-    //for now, hardcoded to be "Sand"-named planet. Once Solar PR is up, will change this.
-    super(vertices, faces, normals, textureCoords, texture, name === "Sand");
-
+    super(vertices, faces, normals, textureCoords, texture, isStar);
+    this.id = nextID;
+    nextID++;
     this.size = d;
     this.mass = mass ? mass : 1;
     this.velocity = velocity ? velocity : new Vertex(0, 0, 0);
     this.acceleration = acceleration ? acceleration : new Vertex(0, 0, 0);
     this.name = name;
+    gameObjects.objects[this.id] = this;
   }
 
   update() {
@@ -79,34 +81,97 @@ export class Body extends Mesh {
     this.acceleration = this.acceleration.add(force.scale(1 / this.mass));
   }
 
+  gravitationalForce(otherObject: Body, distance: number): number {
+    return (
+      (gravitationalConstant * this.mass * otherObject.mass) /
+      (distance * distance)
+    );
+  }
+
   calculateAttraction(objectTwo: Body): Vertex {
-    let direction = getDirectionalVector(this, objectTwo);
-    let distance = direction.magnitude();
-    distance = Math.max(distance, 0.01); // astronomical units AU
-    direction.normalize();
-    let gravitationalForce = getGravitationalForce(this, objectTwo, distance); // cubic meters per kilogram per second per second
+    let direction = this.directionalVector(objectTwo);
+    const distance = Math.max(direction.magnitude(), 0.01); // astronomical units AU
+    direction = direction.normalize();
+    let gravitationalForce = this.gravitationalForce(objectTwo, distance); // cubic meters per kilogram per second per second
     direction = direction.scale(gravitationalForce);
     return direction;
   }
 
-  setStableOrbit(sun: Body) {
-    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's quite right yet.
-    const force = equalCentripGravity(this, sun);
-    this.velocity = new Vertex(0, force, 0);
-    this.acceleration = this.acceleration.scale(0);
+  forceOfCenterMass(otherObject: Body): number {
+    return Math.sqrt(
+      (gravitationalConstant * Math.max(this.mass, otherObject.mass)) /
+        this.distance(otherObject)
+    );
   }
-}
 
-// export class Barycenter extends Body {
-//   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
-//     super("barycenter",d,mass, color, velocity, acceleration);
-//   }
-//   place(movables:Body[]): void {
-//     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
-//     let centerOfMass = new Vertex(0,0,0);
-//     for(let x = 0; x< movables.length; x++){
-//       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
-//     }
-//     this.position = centerOfMass;
-//   }
-// }
+  setStableOrbit(otherObject: Body) {
+    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's not quite right yet.
+    if (this.mass < otherObject.mass) {
+      const force = this.forceOfCenterMass(otherObject);
+      this.velocity = new Vertex(0, force, 0);
+      this.acceleration = this.acceleration.scale(0);
+    }
+  }
+
+  destroy(gameObjects: GameObjects) {
+    // remove all references to the object
+    delete gameObjects.objects[this.id];
+    delete gameObjects.movers[this.id];
+    delete gameObjects.attractors[this.id];
+  }
+
+  addToMovers() {
+    gameObjects.movers[this.id] = this;
+    return this;
+  }
+
+  addToAttractors() {
+    gameObjects.attractors[this.id] = this;
+    return this;
+  }
+
+  absorb(gameObjects: GameObjects, otherObject: Body) {
+    const newSize = this.size + otherObject.size;
+    this.rescale(newSize / this.size);
+    this.size = newSize;
+    this.alterTrajectory(otherObject);
+    this.mass += otherObject.mass;
+    this.moveToMidPoint(otherObject);
+    otherObject.destroy(gameObjects);
+  }
+
+  moveToMidPoint(otherObject: Body) {
+    const halfwayPoint = this.position.add(otherObject.position).scale(1 / 2);
+    const { x, y, z } = this.position.subtract(halfwayPoint);
+    this.translate(x, y, z);
+  }
+
+  alterTrajectory(otherObject: Body): Vertex {
+    const combinedMass = this.mass + otherObject.mass;
+    const obj1ScaledVelocity = this.velocity.scale(this.mass / combinedMass);
+    const obj2ScaledVelocity = otherObject.velocity.scale(
+      otherObject.mass / combinedMass
+    );
+    const newVelocity = obj1ScaledVelocity.add(obj2ScaledVelocity);
+    this.velocity = newVelocity;
+    return newVelocity;
+  }
+
+  calculateNewTrajectory(otherObject: Body): Vertex {
+    return new Vertex(0, 0, 0);
+  }
+
+  // export class Barycenter extends Body {
+  //   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
+  //     super("barycenter",d,mass, color, velocity, acceleration);
+  //   }
+  //   place(movables:Body[]): void {
+  //     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
+  //     let centerOfMass = new Vertex(0,0,0);
+  //     for(let x = 0; x< movables.length; x++){
+  //       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
+  //     }
+  //     this.position = centerOfMass;
+  //   }
+  // }
+}

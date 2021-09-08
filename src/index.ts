@@ -1,19 +1,27 @@
 import { CPlayer } from "./music/player-small";
 import spaceJam from "./music/spaceJam";
-import { perspective, orthogonal } from "./camera";
 import { Color, Red, Green, Blue } from "./colors";
 import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
-import { movePlayer, handleInput, PlayerMovement } from "./input";
+import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
 import { kilogramsToMass, metersToAU } from "./utils";
-import { Sphere } from "./sphere";
+import { Sphere } from "./Sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
+import { Grid } from "./grid";
+import { Camera } from "./camera";
+import { Star } from "./Star";
+import { Planet } from "./Planet";
+import { Asteroid } from "./Asteroid";
 
-const { gl, program, canvas, camera } = initialize;
+import gameObjects from "./GameObjects";
+
+const { gl, program, canvas } = initialize;
 const { movement } = constants;
+const { movers, attractors, objects } = gameObjects;
+let then = 0;
 
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -93,14 +101,20 @@ const playerInput: PlayerMovement = {
   spinO: false,
   spinU: false,
   spinD: false,
+  camR: false,
+  camL: false,
+  camU: false,
+  camD: false,
+  camI: false,
+  camO: false,
 };
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-let movables: Sphere[] = [];
-let stationary: Sphere[] = [];
 let player: Mesh;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
+let grid: Grid;
+export let cam: Camera;
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -119,26 +133,28 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  // populate.randomSystem(movables, 3, textures); // after 25 objects the simulation gets real slow
-  // populate.repeatableSystem(movables, textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(movables, 1, textures);         // doesn't quite work yet.
-  //  populate.binaryStars(movables,textures);            // to objects with equal mass and opposite motion perpindular to axis
-  // populate.binaryStarsPlanet(movables, textures); //binary stars plus an orbiting planet
-  player = await populate.texturesDisplay(
-    gl,
-    program,
-    stationary,
-    player,
-    textures
-  );
-
+  // populate.randomSystem(25, textures); // after 25 objects the simulation gets real slow
+  // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
+  populate.stableOrbit(10, textures); // doesn't quite work yet.
+  //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
+  // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
+  // player = await populate.texturesDisplay(gl, program, player, textures);
+  // populate.starColor(textures); // just a display of star colors. they don't move.
+  // populate.twoPlanets(textures);
+  // populate.testCollisionAddMomentum(textures);
+  // populate.testCollisionLoseMomentum(textures);
+  // populate.randomPlanetSystem(5, textures);
+  // populate.testTranslation(textures);
+  grid = new Grid(10, 2, true);
+  cam = new Camera(new DOMPoint(0, 0, 10), new DOMPoint(0, 0, 0));
+  cam.view();
   requestAnimationFrame(loop);
 };
 
-let then = 0;
-
 //game loop
 const loop = (now: number) => {
+  cam.view();
+  // cam.rotateAroundEye();
   // calculate frames per second
   now *= 0.001; // convert to seconds
   const deltaTime = now - then; // compute time since last frame
@@ -151,62 +167,48 @@ const loop = (now: number) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //box movement
 
-  if (movables.length > 0) {
-    for (let j = 0; j < movables.length; j++) {
-      for (let i = 0; i < movables.length; i++) {
-        if (i !== j) {
-          const force = movables[j].calculateAttraction(movables[i]);
-          movables[j].applyForce(force);
-        }
-      }
-    }
+  // check this object against all other objects for collision
+  // maybe there's a better way to do this
 
-    // draw movables
-    for (let i = 0; i < movables.length; i++) {
-      const body = movables[i];
-      //make object spin
-      body.rotate(0.5, 0.5, 0.5);
-      // body.translate(body.velocity.x, body.velocity.y, body.velocity.z )
-      body.update();
-      body.draw();
+  for (let i in movers) {
+    const body = movers[i] as Planet | Star | Asteroid;
 
-      // check this object against all other objects for collision
-      // maybe there's a better way to do this
-      for (let j = 0; j < movables.length - 1; j++) {
-        //dont check against self
-        if (i === j) j++;
-        else {
-          const otherBody = movables[j];
-          //if the bodies intersect
-          if (body.intersect(otherBody)) {
-            //do something
-            console.log("collide");
-            //todo - some real physics about ricocheting or exploding or combining
-            // for now, reverse their velocities
-            otherBody.velocity = otherBody.velocity.scale(-1);
-            body.velocity = body.velocity.scale(-1);
-          }
-        }
+    for (let j in objects) {
+      //dont check against self
+
+      if (movers[i] !== objects[j]) {
+        const otherBody = objects[j] as Planet | Star | Asteroid;
+        body.checkCollision(gameObjects, otherBody);
       }
     }
   }
 
-  // right now this is only useful for the "texture display" setup
-  if (stationary.length > 0) {
-    for (let i = 0; i < stationary.length; i++) {
-      const body = stationary[i];
-
-      //make object spin
-      body.rotate(0.5, 0.5, 0.5);
-      body.update();
-      body.draw();
+  // calculate effect of attractors on movers
+  for (let j in movers) {
+    for (let i in attractors) {
+      if (i !== j) {
+        const force = movers[j].calculateAttraction(attractors[i]);
+        movers[j].applyForce(force);
+      }
     }
+  }
 
-    //draw player
+  // draw all objects
+  for (let i in objects) {
+    const body = objects[i];
+    //make object spin
+    body.rotate(0.5, 0.5, 0.5);
+    body.update();
+    body.draw();
+  }
+
+  moveCamera(playerInput);
+  //draw player
+  if (player) {
     movePlayer(player, playerInput, movement);
     player.draw();
   }
-
+  grid.draw();
   requestAnimationFrame(loop);
 };
 
@@ -214,6 +216,35 @@ const loop = (now: number) => {
 window.onload = () => {
   canvas.width = 640; //document.body.clientWidth;
   canvas.height = 480; //document.body.clientHeight;
-  loadMusic(spaceJam);
+
+  // disabling for testing so I don't have to wait
+  // loadMusic(spaceJam);
   init();
+};
+
+let dragging = false;
+let lastX = -1;
+let lastY = 0;
+canvas.onmousedown = (e) => {
+  lastX = e.clientX;
+  lastY = e.clientY;
+  dragging = true;
+};
+
+canvas.onmouseup = (e) => {
+  dragging = false;
+};
+
+canvas.onmousemove = (e) => {
+  let x = e.clientX;
+  let y = e.clientY;
+  if (dragging) {
+    let dy = (y - lastY) / canvas.height;
+    let dx = (x - lastX) / canvas.width;
+    cam.rotateAroundEye(dx, dy);
+    // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
+    //(dx, dy);
+    lastX = x;
+    lastY = y;
+  }
 };

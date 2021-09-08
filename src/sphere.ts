@@ -19,7 +19,8 @@ export class Sphere extends Body {
     velocity?: Vertex,
     acceleration?: Vertex,
     texture?: HTMLImageElement | ProceduralTextureData,
-    color?: Color
+    color?: Color,
+    isStar = false
   ) {
     const vertices: Vertex[] = [];
     const faces: Face[] = [];
@@ -56,20 +57,15 @@ export class Sphere extends Body {
       faces,
       vertices,
       textureCoords,
-      texture
+      texture,
+      isStar
     );
     //in case we need size or precision later
     this.precision = precision;
     //make sphere unit sphere and scale it to size
     this.rescale(size);
   }
-  intersect(otherSphere: Sphere) {
+  intersect(otherSphere: Body) {
     return this.distance(otherSphere) <= this.size + otherSphere.size;
-  }
-  distance(otherSphere: Sphere) {
-    const x = otherSphere.position.x - this.position.x;
-    const y = otherSphere.position.y - this.position.y;
-    const z = otherSphere.position.z - this.position.z;
-    return Math.sqrt(x * x + y * y + z * z);
   }
 }
