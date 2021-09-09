@@ -6,7 +6,6 @@ export const constants = {
   lightDirection: { x: 0, y: 4, z: 10 },
   ambientLightAmount: 0.1,
   movement: 0.1,
-  fogDistance: [99999999, 99999999],
   simulationSpeed: 23, // days simulated per real second, doesn't work yet.
   // massScale: 14982844642.9, //1 mass = this many kilograms
   massScale: 6.7213335e33 / gravitationalFactor, //1 mass = this many kilograms,

@@ -3,14 +3,7 @@ import { constants } from "./constants";
 import { Camera } from "./camera";
 import { Vertex } from "./mesh";
 
-const {
-  clearColor,
-  zoom,
-  lightDirection,
-  ambientLightAmount,
-  movement,
-  fogDistance,
-} = constants;
+const { clearColor, zoom, lightDirection, ambientLightAmount } = constants;
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 canvas.width = 640; //document.body.clientWidth;
@@ -68,14 +61,6 @@ gl.uniform3f(
   ambientLightAmount,
   ambientLightAmount
 );
-
-//fog
-const a_fogColor = new Float32Array([clearColor.r, clearColor.g, clearColor.b]);
-const a_fogDist = new Float32Array(fogDistance);
-const u_FogColor = gl.getUniformLocation(program, "u_FogColor");
-const u_FogDist = gl.getUniformLocation(program, "u_FogDist");
-gl.uniform3fv(u_FogColor, a_fogColor);
-gl.uniform2fv(u_FogDist, a_fogDist);
 
 export default {
   gl,

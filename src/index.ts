@@ -5,7 +5,7 @@ import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
-import { kilogramsToMass, metersToAU } from "./utils";
+import { get, kilogramsToMass, metersToAU } from "./utils";
 import { Sphere } from "./Sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
@@ -23,16 +23,15 @@ const { gl, program, canvas } = initialize;
 const { movement, zoom } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
-const planetButton = document.getElementById("addPlanet") as HTMLButtonElement;
-const starButton = document.getElementById("addStar") as HTMLButtonElement;
-
+const bodyButton = get("bodyButton") as HTMLButtonElement;
+const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
   const cPlayer = new CPlayer();
   cPlayer.init(song);
   cPlayer.generate();
   let done = false;
-  const musicStatus = document.getElementById("musicStatus");
+  const musicStatus = get("musicStatus");
   setInterval(function () {
     if (done) {
       return;
@@ -114,7 +113,7 @@ const playerInput: PlayerMovement = {
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-let player: Mesh | Body;
+let player: Body;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
@@ -133,26 +132,28 @@ const loadImages = (urlArr: string[]) => {
 };
 
 const init = async () => {
-  textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
+  textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
-  starButton.onclick = () => addBody("star", textures);
-  planetButton.onclick = () => addBody("planet", textures);
+  bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  populate.randomSystem(2, textures); // after 25 objects the simulation gets real slow
+  // populate.randomSystem(2, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
   // populate.stableOrbit(10, textures); // doesn't quite work yet.
   //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
-  populate.twoPlanets(textures);
+  // populate.twoPlanets(textures);
   // populate.testCollisionAddMomentum(textures);
   // populate.testCollisionLoseMomentum(textures);
-  populate.randomPlanetSystem(30, textures);
+  // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
   grid = new Grid(10, 2, true);
-  cam = new Camera(new DOMPoint(0, 0, zoom), new DOMPoint(0, 0, 0));
+  cam = new Camera(
+    new DOMPoint(0, zoom / 30, zoom / 20),
+    new DOMPoint(0, 0, 0)
+  );
   cam.view();
   requestAnimationFrame(loop);
 };
@@ -259,11 +260,22 @@ canvas.onmousemove = (e) => {
 
 export const togglePause = () => {
   paused = !paused;
-  starButton.disabled = !paused;
-  planetButton.disabled = !paused;
-  if (!paused) setPlayer(null);
+  if (paused) {
+    bodyButton.innerHTML = "Finalize Body";
+    bodyForm.style.visibility = "visible";
+    addBody(bodyForm, textures);
+  } else {
+    bodyButton.innerHTML = "Add Body";
+    bodyForm.style.visibility = "hidden";
+    setPlayer(null);
+    bodyForm.removeEventListener("change", null);
+  }
 };
 
 export const setPlayer = (body: Body) => {
   player = body;
+};
+
+export const getPlayer = () => {
+  return player;
 };
