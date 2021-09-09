@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Document</title>
+    <title>Celestial Bawdies</title>
     <style>
       html,
       body {
@@ -10,7 +10,8 @@
         overflow: hidden;
         height: 100%;
       }
-      #bodyForm > * {
+      #bodyForm > *,
+      #sizeDiv > * {
         display: block;
       }
     </style>
@@ -30,23 +31,27 @@
       </div>
       <label for="bodyName">Celestial Body Name:</label>
       <input type="text" id="bodyName" name="bodyName" />
-      <label for="bodySize" id="bodySizeLabel">Size:</label>
-      <input
-        type="number"
-        id="bodySize"
-        name="bodySize"
-        min="1"
-        max="50"
-        step=".01"
-      />
+      <div id="sizeDiv">
+        <label for="bodySize" id="bodySizeLabel">Size:</label>
+        <input
+          type="number"
+          id="bodySize"
+          name="bodySize"
+          min=".01"
+          max="50"
+          step=".01"
+          value="1"
+        />
+      </div>
       <label for="bodyMass">Mass:</label>
       <input
         type="number"
         id="bodyMass"
         name="bodyMass"
-        min="1"
-        max="5"
+        min=".01"
+        max="50"
         step=".01"
+        value="1"
       />
       <div>
         Initial Velocity:<br />
@@ -54,28 +59,31 @@
           type="number"
           id="velX"
           name="velX"
-          min="-5"
-          max="5"
+          min="-50"
+          max="50"
           step=".01"
+          value="0"
         />
         Y:<input
           type="number"
           id="velY"
           name="velY"
-          min="-5"
-          max="5"
+          min="-50"
+          max="50"
           step=".01"
+          value="0"
         />
         Z:<input
           type="number"
           id="velZ"
           name="velZ"
-          min="-5"
-          max="5"
+          min="-50"
+          max="50"
           step=".01"
+          value="0"
         />
       </div>
-      <div>
+      <div id="surfaceDiv">
         <span id="bodySurfaceLabel"> Surface:<br /> </span>
         <input type="radio" id="grass" name="bodySurface" value="grass" />
         <label for="grass">Grass</label>

@@ -260,14 +260,34 @@ canvas.onmousemove = (e) => {
 
 export const togglePause = () => {
   paused = !paused;
+  const nameField = <HTMLFormElement>get("bodyName");
   if (paused) {
     bodyButton.innerHTML = "Finalize Body";
     bodyForm.style.visibility = "visible";
+    get("sizeDiv").style.visibility = "visible";
+    get("surfaceDiv").style.visibility = "visible";
+    (<HTMLFormElement>get("bodyStar")).checked = false;
+    (<HTMLFormElement>get("bodyPlanet")).checked = false;
+    //stops game obj movement when typing name
+    nameField.onfocus = () => {
+      document.onkeydown = null;
+      document.onkeyup = null;
+    };
+    nameField.onblur = () => {
+      document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+      document.onkeyup = (ev) => handleInput(ev, false, playerInput);
+    };
     addBody(bodyForm, textures);
   } else {
     bodyButton.innerHTML = "Add Body";
     bodyForm.style.visibility = "hidden";
-    setPlayer(null);
+    get("sizeDiv").style.visibility = "hidden";
+    get("surfaceDiv").style.visibility = "hidden";
+    if (player) {
+      player.name = nameField.value;
+      player.addToAttractors().addToMovers();
+      setPlayer(null);
+    }
     bodyForm.removeEventListener("change", null);
   }
 };
