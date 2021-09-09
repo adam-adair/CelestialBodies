@@ -12,7 +12,6 @@ export const auToMeters = (au: number): number => au * 149597870700; // reverse 
 
 export const starMasstoRadius = (mass: number): number => {
   const radius = mass ** 0.8 / 2; //dividing by 2 just to scale
-  console.log("star radius", radius);
   return radius;
 };
 

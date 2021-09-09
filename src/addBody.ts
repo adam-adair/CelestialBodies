@@ -18,7 +18,7 @@ export const addBody = (
   }
   if (bodyType === "star") {
     console.log("here");
-    const star = new Star("test", 1, 16, 1, null, null, textures[2])
+    const star = new Star("test", 16, 1, null, null, textures[2])
       .addToAttractors()
       .addToMovers();
     setPlayer(star);
