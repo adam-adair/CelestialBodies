@@ -106,7 +106,7 @@ export class Body extends Mesh {
   }
 
   setStableOrbit(otherObjects: Body | Body[]) {
-    // still working on this. it is only designed for planets directly to the left or right of a central mass and it's not quite right yet.
+    // kind of cheating because this only works if the newly placed object is directly to the left or right of the center of gravity on the x axis. otherwise there's crazy geometry to figure out the perpindicular direction.
     const center =
       otherObjects instanceof Body
         ? otherObjects
@@ -137,7 +137,6 @@ export class Body extends Mesh {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
-    console.log("ABSORB");
     const newSize = this.size + otherObject.size;
     this.rescale(newSize / this.size);
     this.size = newSize;

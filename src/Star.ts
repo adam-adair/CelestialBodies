@@ -32,8 +32,6 @@ export class Star extends Sphere {
     const luminosity = mass ** 3.5;
     const radius = starMasstoRadius(mass); //**(v-1)/(v+3); // mass and radius are in solar units
     const temperature = calculateTemperature(mass, radius);
-
-    console.log(`Temperature of ${name}is`, temperature);
     const color = pickColor(temperature);
 
     super(
@@ -60,7 +58,6 @@ export class Star extends Sphere {
 
   checkCollision(gameObjects: GameObjects, otherObject: Body) {
     if (this.intersect(otherObject)) {
-      console.log("COLLISION");
       this.handleCollision(gameObjects, otherObject);
     }
   }
@@ -79,7 +76,6 @@ export class Star extends Sphere {
   reColor() {
     const newColor = pickColor(this.temperature);
     if (this.faces[0].color !== newColor) {
-      console.log("RECOLOR");
       this.faces.forEach((face) => {
         face.color = newColor;
       });

@@ -39,11 +39,9 @@ export class Planet extends Sphere {
       const smaller = this.mass < otherObject.size ? this : otherObject;
       const newVelocity = bigger.alterTrajectory(smaller);
       const diff = newVelocity.add(bigger.velocity).magnitude();
-      console.log("Diff", diff);
       if (diff < impactThreshold) {
         bigger.absorb(gameObjects, smaller);
       } else {
-        console.log("SPLIT");
         bigger.split(gameObjects, smaller);
       }
     }
