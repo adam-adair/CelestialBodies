@@ -8,6 +8,7 @@ import {
   Vertex,
 } from "./mesh";
 import gameObjects, { GameObjects } from "./GameObjects";
+import { Barycenter } from "./barycenter";
 
 const { gravitationalConstant } = constants;
 let nextID = 1;
@@ -97,17 +98,22 @@ export class Body extends Mesh {
     return direction;
   }
 
-  forceOfCenterMass(otherObject: Body): number {
+  forceOfCenterMass(otherObject: Body | Barycenter): number {
     return Math.sqrt(
       (gravitationalConstant * Math.max(this.mass, otherObject.mass)) /
         this.distance(otherObject)
     );
   }
 
-  setStableOrbit(otherObject: Body) {
+  setStableOrbit(otherObjects: Body | Body[]) {
     // still working on this. it is only designed for planets directly to the left or right of a central mass and it's not quite right yet.
-    if (this.mass < otherObject.mass) {
-      const force = this.forceOfCenterMass(otherObject);
+    const center =
+      otherObjects instanceof Body
+        ? otherObjects
+        : new Barycenter(otherObjects);
+
+    if (this.mass < center.mass) {
+      const force = this.forceOfCenterMass(center);
       this.velocity = new Vertex(0, force, 0);
       this.acceleration = this.acceleration.scale(0);
     }
@@ -131,12 +137,13 @@ export class Body extends Mesh {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
+    console.log("ABSORB");
     const newSize = this.size + otherObject.size;
     this.rescale(newSize / this.size);
     this.size = newSize;
     this.alterTrajectory(otherObject);
     this.mass += otherObject.mass;
-    this.moveToMidPoint(otherObject);
+    // this.moveToMidPoint(otherObject);
     otherObject.destroy(gameObjects);
   }
 
@@ -160,18 +167,4 @@ export class Body extends Mesh {
   calculateNewTrajectory(otherObject: Body): Vertex {
     return new Vertex(0, 0, 0);
   }
-
-  // export class Barycenter extends Body {
-  //   constructor(d: number, mass?: number, color?: Color, velocity?: Vertex, acceleration?: Vertex, ){
-  //     super("barycenter",d,mass, color, velocity, acceleration);
-  //   }
-  //   place(movables:Body[]): void {
-  //     const totalMass = movables.reduce((sum, movable) => sum+movable.mass, 0);
-  //     let centerOfMass = new Vertex(0,0,0);
-  //     for(let x = 0; x< movables.length; x++){
-  //       centerOfMass = centerOfMass.add(movables[x].position.scale(1/totalMass));
-  //     }
-  //     this.position = centerOfMass;
-  //   }
-  // }
 }

@@ -21,7 +21,6 @@ export class Star extends Sphere {
   temperature: number;
   constructor(
     name: string,
-    size: number,
     precision: number,
     mass?: number,
     velocity?: Vertex,
