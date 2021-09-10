@@ -1,6 +1,6 @@
 import { CPlayer } from "./music/player-small";
 import spaceJam from "./music/spaceJam";
-import { Color, Red, Green, Blue } from "./colors";
+import { Color, Red, Green, Blue, White } from "./colors";
 import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
@@ -17,7 +17,11 @@ import { Planet } from "./Planet";
 import { Asteroid } from "./Asteroid";
 
 import gameObjects from "./GameObjects";
+<<<<<<< HEAD
+import { StarField } from "./Starfield";
+=======
 import { addBody } from "./addBody";
+>>>>>>> master
 
 const { gl, program, canvas } = initialize;
 const { movement, zoom } = constants;
@@ -117,7 +121,11 @@ let player: Body;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
+<<<<<<< HEAD
+let starField: Sphere;
+=======
 let paused = false;
+>>>>>>> master
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -134,7 +142,12 @@ const loadImages = (urlArr: string[]) => {
 const init = async () => {
   textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
+<<<<<<< HEAD
+  //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
+  starField = new StarField(50, 512, 2000);
+=======
   bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
+>>>>>>> master
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(2, textures); // after 25 objects the simulation gets real slow
@@ -158,7 +171,7 @@ const init = async () => {
 //game loop
 const loop = (now: number) => {
   cam.view();
-  // cam.rotateAroundEye();
+  starField.draw();
   // calculate frames per second
   now *= 0.001; // convert to seconds
   const deltaTime = now - then; // compute time since last frame
@@ -204,7 +217,11 @@ const loop = (now: number) => {
     const body = objects[i];
     //make object spin
     // body.rotate(0.5, 0.5, 0.5);
+<<<<<<< HEAD
+    body.update();
+=======
     if (!paused) body.update();
+>>>>>>> master
     body.draw();
   }
 
@@ -245,8 +262,8 @@ canvas.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {
-    let dy = (y - lastY) / canvas.height;
-    let dx = (x - lastX) / canvas.width;
+    let dy = (4 * (y - lastY)) / canvas.height;
+    let dx = (4 * (x - lastX)) / canvas.width;
     cam.rotateAroundEye(dx, dy);
     // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
     //(dx, dy);
