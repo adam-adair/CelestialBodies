@@ -5,7 +5,7 @@ import { Body } from "./bodies";
 import { constants } from "./constants";
 import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
-import { kilogramsToMass, metersToAU } from "./utils";
+import { get, kilogramsToMass, metersToAU } from "./utils";
 import { Sphere } from "./Sphere";
 import { generateTexture, sand, grass, clouds } from "./texture";
 import initialize from "./initialize";
@@ -17,20 +17,25 @@ import { Planet } from "./Planet";
 import { Asteroid } from "./Asteroid";
 
 import gameObjects from "./GameObjects";
+<<<<<<< HEAD
 import { StarField } from "./Starfield";
+=======
+import { addBody } from "./addBody";
+>>>>>>> master
 
 const { gl, program, canvas } = initialize;
 const { movement, zoom } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
-
+const bodyButton = get("bodyButton") as HTMLButtonElement;
+const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
   const cPlayer = new CPlayer();
   cPlayer.init(song);
   cPlayer.generate();
   let done = false;
-  const musicStatus = document.getElementById("musicStatus");
+  const musicStatus = get("musicStatus");
   setInterval(function () {
     if (done) {
       return;
@@ -112,11 +117,15 @@ const playerInput: PlayerMovement = {
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
-let player: Mesh;
+let player: Body;
 let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
+<<<<<<< HEAD
 let starField: Sphere;
+=======
+let paused = false;
+>>>>>>> master
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -131,16 +140,20 @@ const loadImages = (urlArr: string[]) => {
 };
 
 const init = async () => {
-  textures = await loadImages(["./textures/test.png", "./textures/test2.jpg"]);
+  textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
+<<<<<<< HEAD
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(50, 512, 2000);
+=======
+  bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
+>>>>>>> master
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(2, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(10, textures); // doesn't quite work yet.
-  //  populate.binaryStars(textures);            // to objects with equal mass and opposite motion perpindular to axis
+  populate.stableOrbit(10, textures); // doesn't quite work yet.
+  // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
@@ -149,8 +162,8 @@ const init = async () => {
   // populate.testCollisionLoseMomentum(textures);
   // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
-  grid = new Grid(10, 2, true);
-  cam = new Camera(new DOMPoint(0, 0, zoom), new DOMPoint(0, 0, 0));
+  grid = new Grid(10, 10, true);
+  cam = new Camera(new DOMPoint(0, zoom / 2, zoom / 2), new DOMPoint(0, 0, 0));
   cam.view();
   requestAnimationFrame(loop);
 };
@@ -174,25 +187,27 @@ const loop = (now: number) => {
   // check this object against all other objects for collision
   // maybe there's a better way to do this
 
-  for (let i in movers) {
-    const body = movers[i] as Planet | Star | Asteroid;
+  if (!paused) {
+    for (let i in movers) {
+      const body = movers[i] as Planet | Star | Asteroid;
 
-    for (let j in objects) {
-      //dont check against self
+      for (let j in objects) {
+        //dont check against self
 
-      if (movers[i] !== objects[j]) {
-        const otherBody = objects[j] as Planet | Star | Asteroid;
-        body.checkCollision(gameObjects, otherBody);
+        if (movers[i] !== objects[j]) {
+          const otherBody = objects[j] as Planet | Star | Asteroid;
+          body.checkCollision(gameObjects, otherBody);
+        }
       }
     }
-  }
 
-  // calculate effect of attractors on movers
-  for (let j in movers) {
-    for (let i in attractors) {
-      if (i !== j) {
-        const force = movers[j].calculateAttraction(attractors[i]);
-        movers[j].applyForce(force);
+    // calculate effect of attractors on movers
+    for (let j in movers) {
+      for (let i in attractors) {
+        if (i !== j) {
+          const force = movers[j].calculateAttraction(attractors[i]);
+          movers[j].applyForce(force);
+        }
       }
     }
   }
@@ -202,7 +217,11 @@ const loop = (now: number) => {
     const body = objects[i];
     //make object spin
     // body.rotate(0.5, 0.5, 0.5);
+<<<<<<< HEAD
     body.update();
+=======
+    if (!paused) body.update();
+>>>>>>> master
     body.draw();
   }
 
@@ -251,4 +270,46 @@ canvas.onmousemove = (e) => {
     lastX = x;
     lastY = y;
   }
+};
+
+export const togglePause = () => {
+  paused = !paused;
+  const nameField = <HTMLFormElement>get("bodyName");
+  if (paused) {
+    bodyButton.innerHTML = "Finalize Body";
+    bodyForm.style.visibility = "visible";
+    get("sizeDiv").style.visibility = "visible";
+    get("surfaceDiv").style.visibility = "visible";
+    (<HTMLFormElement>get("bodyStar")).checked = false;
+    (<HTMLFormElement>get("bodyPlanet")).checked = false;
+    //stops game obj movement when typing name
+    nameField.onfocus = () => {
+      document.onkeydown = null;
+      document.onkeyup = null;
+    };
+    nameField.onblur = () => {
+      document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+      document.onkeyup = (ev) => handleInput(ev, false, playerInput);
+    };
+    addBody(bodyForm, textures);
+  } else {
+    bodyButton.innerHTML = "Add Body";
+    bodyForm.style.visibility = "hidden";
+    get("sizeDiv").style.visibility = "hidden";
+    get("surfaceDiv").style.visibility = "hidden";
+    if (player) {
+      player.name = nameField.value;
+      player.addToAttractors().addToMovers();
+      setPlayer(null);
+    }
+    bodyForm.removeEventListener("change", null);
+  }
+};
+
+export const setPlayer = (body: Body) => {
+  player = body;
+};
+
+export const getPlayer = () => {
+  return player;
 };

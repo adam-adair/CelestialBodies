@@ -1,4 +1,4 @@
-import { cam } from ".";
+import { cam, togglePause } from ".";
 import { Mesh } from "./mesh";
 
 export interface PlayerMovement {
@@ -30,75 +30,75 @@ export const handleInput = (
   switch (ev.key) {
     case "w":
       inp.up = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "a":
       inp.left = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "s":
       inp.down = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "d":
       inp.right = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "q":
       inp.in = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "e":
       inp.out = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "r":
       inp.spinR = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "f":
       inp.spinL = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "t":
       inp.spinU = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "g":
       inp.spinD = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "y":
       inp.spinI = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "h":
       inp.spinO = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "l":
       inp.camR = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "j":
       inp.camL = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "i":
       inp.camU = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "k":
       inp.camD = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "o":
       inp.camI = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
     case "u":
       inp.camO = pressed;
-      ev.preventDefault();
+      //ev.preventDefault();
       break;
   }
 };
