@@ -20,6 +20,17 @@
       #container > div {
         margin: 1rem;
       }
+      #panels{
+        display: flex;
+        flex-direction: column;
+      }
+      #bodyList{
+        height:50%;
+      }
+      .scrollable{
+        overflow-y: scroll;
+        height: 25%
+      }
     </style>
   </head>
   <body>
@@ -36,7 +47,8 @@
       l: strafe right<br>
       </p>
       </div>
-      <div>
+      <div id="panels">
+        <div id="addBody">
         <button id="bodyButton">Add Body</button>
     <form id="bodyForm" style="visibility: hidden">
       <p>Move new body: qewasd</p>
@@ -139,6 +151,13 @@
         <input type="color" id="colorRGB" name="bodyBase" value="#ffffff" />
       </div>
     </form>
+  </div>
+  <div id="bodyList">
+    <p>Stars</p>
+    <ul id="starList" class="scrollable"></ul>
+    <p>Planets</p>
+    <ul id="planetList" class="scrollable"></ul>
+  </div>
       </div>
     </div>
     <script src="./dist/bundle.js"></script>

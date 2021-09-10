@@ -35,9 +35,9 @@ export const randomSystem = (
       .addToAttractors()
       .addToMovers();
     body.translate(
-      Math.random() * numObjects - numObjects / 2,
-      Math.random() * numObjects - numObjects / 2,
-      (Math.random() * (numObjects - numObjects / 2)) / 3
+      Math.random() * 18 +18,
+      Math.random() * 18 +18,
+      Math.random() * 18 +18
     );
   }
 };
