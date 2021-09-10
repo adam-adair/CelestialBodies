@@ -30,12 +30,9 @@ const changeBody = (
     parseFloat((<HTMLFormElement>get("velY")).value) * speedAdjust || 0;
   const velZ =
     parseFloat((<HTMLFormElement>get("velZ")).value) * speedAdjust || 0;
-  const posX =
-    parseFloat((<HTMLFormElement>get("posX")).value) || 0;
-  const posY =
-    parseFloat((<HTMLFormElement>get("posY")).value) || 0;
-  const posZ =
-    parseFloat((<HTMLFormElement>get("posZ")).value) || 0;
+  const posX = parseFloat((<HTMLFormElement>get("posX")).value) || 0;
+  const posY = parseFloat((<HTMLFormElement>get("posY")).value) || 0;
+  const posZ = parseFloat((<HTMLFormElement>get("posZ")).value) || 0;
   let bodyType;
   if ((<HTMLFormElement>get("bodyStar")).checked) bodyType = "star";
   if ((<HTMLFormElement>get("bodyPlanet")).checked) bodyType = "planet";
@@ -80,7 +77,11 @@ const changeBody = (
       player.velocity = new Vertex(velX, velY, velZ);
     }
     if (["posX", "posY", "posZ"].includes(change)) {
-      player.translate(posX-player.position.x, posY-player.position.y, posZ-player.position.z);
+      player.translate(
+        posX - player.position.x,
+        posY - player.position.y,
+        posZ - player.position.z
+      );
     }
   }
 
@@ -97,7 +98,7 @@ const changeBody = (
       null,
       textures[texIx]
     );
-    // body.translate(scalePos[0], scalePos[1], scalePos[2]);
+    body.translate(scalePos[0], scalePos[1], scalePos[2]);
     if (texIx === 0) {
       for (let i = 0; i < body.faces.length; i++) {
         const f = body.faces[i];
@@ -118,7 +119,7 @@ const changeBody = (
       null,
       textures[2]
     );
-    // body.translate(scalePos[0], scalePos[1], scalePos[2]);
+    body.translate(scalePos[0], scalePos[1], scalePos[2]);
     setPlayer(body);
   }
 };

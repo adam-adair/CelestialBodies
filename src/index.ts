@@ -162,7 +162,6 @@ const init = async () => {
 //game loop
 const loop = (now: number) => {
   cam.view();
-  starField.draw();
   // calculate frames per second
   now *= 0.001; // convert to seconds
   const deltaTime = now - then; // compute time since last frame
@@ -174,6 +173,7 @@ const loop = (now: number) => {
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //box movement
+  starField.draw();
 
   // check this object against all other objects for collision
   // maybe there's a better way to do this
@@ -243,7 +243,7 @@ canvas.onmousedown = (e) => {
 
 document.onmouseup = (e) => {
   dragging = false;
-}
+};
 
 canvas.onmouseup = (e) => {
   dragging = false;
