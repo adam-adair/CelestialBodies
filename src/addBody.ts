@@ -30,6 +30,9 @@ const changeBody = (
     parseFloat((<HTMLFormElement>get("velY")).value) * speedAdjust || 0;
   const velZ =
     parseFloat((<HTMLFormElement>get("velZ")).value) * speedAdjust || 0;
+  const posX = parseFloat((<HTMLFormElement>get("posX")).value) || 0;
+  const posY = parseFloat((<HTMLFormElement>get("posY")).value) || 0;
+  const posZ = parseFloat((<HTMLFormElement>get("posZ")).value) || 0;
   let bodyType;
   if ((<HTMLFormElement>get("bodyStar")).checked) bodyType = "star";
   if ((<HTMLFormElement>get("bodyPlanet")).checked) bodyType = "planet";
@@ -72,6 +75,13 @@ const changeBody = (
     }
     if (["velX", "velY", "velZ"].includes(change)) {
       player.velocity = new Vertex(velX, velY, velZ);
+    }
+    if (["posX", "posY", "posZ"].includes(change)) {
+      player.translate(
+        posX - player.position.x,
+        posY - player.position.y,
+        posZ - player.position.z
+      );
     }
   }
 

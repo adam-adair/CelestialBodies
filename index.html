@@ -14,13 +14,30 @@
       #sizeDiv > * {
         display: block;
       }
+      #container {
+        display: flex;
+      }
+      #container > div {
+        margin: 1rem;
+      }
     </style>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <div id="container">
+      <div>
+        <canvas id="canvas"></canvas>
     <p id="musicStatus">Music Loading: 0%</p>
-    <p>Move camera: uiojkl</p>
-    <button id="bodyButton">Add Body</button>
+    <p>Move camera:<br>
+      u: backwards<br>
+      o: forward<br>
+      i: up<br>
+      k: down<br>
+      j: strafe left<br>
+      l: strafe right<br>
+      </p>
+      </div>
+      <div>
+        <button id="bodyButton">Add Body</button>
     <form id="bodyForm" style="visibility: hidden">
       <p>Move new body: qewasd</p>
       <div>
@@ -53,6 +70,30 @@
         step=".01"
         value="1"
       />
+      <div>
+        Position:<br />
+        X:<input
+          type="number"
+          id="posX"
+          name="posX"
+          step=".1"
+          value="0"
+        />
+        Y:<input
+          type="number"
+          id="posY"
+          name="posY"
+          step=".1"
+          value="0"
+        />
+        Z:<input
+          type="number"
+          id="posZ"
+          name="posZ"
+          step=".1"
+          value="0"
+        />
+      </div>
       <div>
         Initial Velocity:<br />
         X:<input
@@ -98,6 +139,8 @@
         <input type="color" id="colorRGB" name="bodyBase" value="#ffffff" />
       </div>
     </form>
+      </div>
+    </div>
     <script src="./dist/bundle.js"></script>
   </body>
 </html>

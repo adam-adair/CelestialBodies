@@ -1,5 +1,6 @@
 import { cam, togglePause } from ".";
 import { Mesh } from "./mesh";
+import { get } from "./utils";
 
 export interface PlayerMovement {
   up: boolean;
@@ -108,12 +109,35 @@ export const movePlayer = (
   inp: PlayerMovement,
   movement: number
 ) => {
-  if (inp.up) player.translate(0, movement, 0);
-  if (inp.down) player.translate(0, -movement, 0);
-  if (inp.left) player.translate(-movement, 0, 0);
-  if (inp.right) player.translate(movement, 0, 0);
-  if (inp.in) player.translate(0, 0, -movement);
-  if (inp.out) player.translate(0, 0, movement);
+
+  const posX = <HTMLFormElement>get("posX");
+  const posY = <HTMLFormElement>get("posY");
+  const posZ = <HTMLFormElement>get("posZ");
+
+  if (inp.up) {
+    player.translate(0, movement, 0);
+    posY.value = player.position.y;
+  }
+  if (inp.down) {
+    player.translate(0, -movement, 0);
+    posY.value = player.position.y;
+  }
+  if (inp.left) {
+    player.translate(-movement, 0, 0);
+    posX.value = player.position.x;
+  }
+  if (inp.right) {
+    player.translate(movement, 0, 0);
+    posX.value = player.position.x;
+  }
+  if (inp.in) {
+    player.translate(0, 0, -movement);
+    posZ.value = player.position.z;
+  }
+  if (inp.out) {
+    player.translate(0, 0, movement);
+    posZ.value = player.position.z;
+  }
   if (inp.spinL) player.rotate(movement * 10, 0, 0);
   if (inp.spinR) player.rotate(movement * -10, 0, 0);
   if (inp.spinU) player.rotate(0, movement * 10, 0);
