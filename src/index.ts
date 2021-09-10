@@ -237,6 +237,10 @@ canvas.onmousedown = (e) => {
   dragging = true;
 };
 
+document.onmouseup = (e) => {
+  dragging = false;
+}
+
 canvas.onmouseup = (e) => {
   dragging = false;
 };
