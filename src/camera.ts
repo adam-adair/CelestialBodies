@@ -18,6 +18,7 @@ export class Camera {
       1,
       100
     );
+
   }
   perspective = (fov: number, ratio: number, near: number, far: number) => {
     const tan = 1 / Math.tan((fov * Math.PI) / 180);

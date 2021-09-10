@@ -15,6 +15,7 @@ import { Camera } from "./camera";
 import { Star } from "./Star";
 import { Planet } from "./Planet";
 import { Asteroid } from "./Asteroid";
+import { Barycenter } from "./barycenter";
 
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
@@ -139,11 +140,11 @@ const init = async () => {
   textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
-  starField = new StarField(50, 512, 2000);
+  starField = new StarField(100, 512, 2000);
   bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  // populate.randomSystem(2, textures); // after 25 objects the simulation gets real slow
+  populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
   populate.stableOrbit(10, textures); // doesn't quite work yet.
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
@@ -156,6 +157,15 @@ const init = async () => {
   // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
   grid = new Grid(10, 10, true);
+
+  //dynamically point to the center of gravity of the starting objects, instead of 0 0 0
+  const startObjects = [];
+  for (let object in gameObjects.movers) {
+    startObjects.push(gameObjects.movers[object]);
+  }
+  const startPoint = new Barycenter(startObjects);
+
+  //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
   cam = new Camera();
   cam.view();
   requestAnimationFrame(loop);
@@ -226,8 +236,10 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
-  canvas.width = 640; //document.body.clientWidth;
-  canvas.height = 480; //document.body.clientHeight;
+  canvas.width = document.body.clientWidth / 2;
+  canvas.height =
+    document.body.clientHeight -
+    parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
 
   // disabling for testing so I don't have to wait
   // loadMusic(spaceJam);
@@ -247,11 +259,7 @@ document.onmouseup = (e) => {
   dragging = false;
 };
 
-canvas.onmouseup = (e) => {
-  dragging = false;
-};
-
-canvas.onmousemove = (e) => {
+document.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {

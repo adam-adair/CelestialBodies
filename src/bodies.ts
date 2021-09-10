@@ -76,6 +76,21 @@ export class Body extends Mesh {
     this.velocity = this.velocity.subtract(this.acceleration);
     this.translate(this.velocity.x, this.velocity.y, this.velocity.z);
     this.acceleration = this.acceleration.scale(0);
+    this.createOrUpdateListItem();
+  }
+
+
+  createOrUpdateListItem(): HTMLElement {
+    const element = document.getElementById(this.id.toString()) || document.createElement("li");
+    element.id = element.id ? element.id : this.id.toString();
+     element.innerHTML = `
+      Name: ${this.name}
+      Mass:
+      ${this.mass.toFixed(2)}
+      Size: ${this.size.toFixed(2)}
+      Position: [${this.position.x.toFixed(2)},${this.position.y.toFixed(2)},${this.position.z.toFixed(2)}]
+      Velocity: [${this.velocity.x.toFixed(2)},${this.velocity.y.toFixed(2)},${this.velocity.z.toFixed(2)}]`;
+    return element;
   }
 
   applyForce(force: Vertex) {
@@ -124,6 +139,8 @@ export class Body extends Mesh {
     delete gameObjects.objects[this.id];
     delete gameObjects.movers[this.id];
     delete gameObjects.attractors[this.id];
+    const element = document.getElementById(this.id.toString());
+    if (element) element.remove();
   }
 
   addToMovers() {

@@ -7,6 +7,8 @@ import { Sphere } from "./Sphere";
 import { Star } from "./Star";
 import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
+const planetList = document.getElementById("planetList");
+
 const { minMass, impactThreshold } = constants;
 
 export class Planet extends Sphere {
@@ -22,6 +24,7 @@ export class Planet extends Sphere {
   ) {
     //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
     super(name, size, precision, mass, velocity, acceleration, texture, color);
+    this.addToList();
   }
 
   checkCollision(gameObjects: GameObjects, otherObject: Body) {
@@ -100,4 +103,9 @@ export class Planet extends Sphere {
     this.destroy(gameObjects);
     otherObject.destroy(gameObjects);
   }
+
+  addToList(){
+    const item = this.createOrUpdateListItem();
+    planetList.appendChild(item);
+    }
 }

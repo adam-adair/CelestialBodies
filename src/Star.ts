@@ -6,6 +6,8 @@ import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
 import { starMasstoRadius, calculateTemperature } from "./utils";
 
+const starList = document.getElementById("starList");
+
 const pickColor = (temperature: number) => {
   if (temperature <= 3) return Colors.Red;
   else if (temperature <= 4) return Colors.Orange;
@@ -49,6 +51,7 @@ export class Star extends Sphere {
     //in case we want to have lighting come from stars and dynamically adjust color and brightness
     this.temperature = temperature; //in Kelvins (thousands)
     this.luminosity = luminosity; // 4*Math.PI*((size/2)**2)*(temperature**4 )  // divided by some
+    this.addToList();
   }
   handleCollision(gameObjects: GameObjects, otherObject: Body) {
     // stars will absorb the other object, no matter what it is. If we make black holes in the future then we may have to change that.
@@ -82,4 +85,9 @@ export class Star extends Sphere {
       this.initialize(this.texture);
     }
   }
+
+  addToList(){
+    const item = this.createOrUpdateListItem();
+    starList.appendChild(item);
+    }
 }

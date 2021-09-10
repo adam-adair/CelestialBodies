@@ -20,6 +20,17 @@
       #container > div {
         margin: 1rem;
       }
+      #panels {
+        display: flex;
+        flex-direction: column;
+      }
+      #bodyList {
+        height: 50%;
+      }
+      .scrollable {
+        overflow-y: scroll;
+        height: 25%;
+      }
     </style>
   </head>
   <body>
@@ -40,96 +51,127 @@
           . or 7: roll right<br />
         </p>
       </div>
-      <div>
-        <button id="bodyButton">Add Body</button>
-        <form id="bodyForm" style="visibility: hidden">
-          <p>Move new body: qewasd</p>
-          <div>
-            <input
-              type="radio"
-              id="bodyPlanet"
-              name="bodyType"
-              value="planet"
-            />
-            <label for="bodyPlanet">Planet</label>
-            <input type="radio" id="bodyStar" name="bodyType" value="star" />
-            <label for="bodyStar">Star</label>
-          </div>
-          <label for="bodyName">Celestial Body Name:</label>
-          <input type="text" id="bodyName" name="bodyName" />
-          <div id="sizeDiv">
-            <label for="bodySize" id="bodySizeLabel">Size:</label>
+      <div id="panels">
+        <div id="addBody">
+          <button id="bodyButton">Add Body</button>
+          <form id="bodyForm" style="visibility: hidden">
+            <p>Move new body: qewasd</p>
+            <div>
+              <input
+                type="radio"
+                id="bodyPlanet"
+                name="bodyType"
+                value="planet"
+              />
+              <label for="bodyPlanet">Planet</label>
+              <input type="radio" id="bodyStar" name="bodyType" value="star" />
+              <label for="bodyStar">Star</label>
+            </div>
+            <label for="bodyName">Celestial Body Name:</label>
+            <input type="text" id="bodyName" name="bodyName" />
+            <div id="sizeDiv">
+              <label for="bodySize" id="bodySizeLabel">Size:</label>
+              <input
+                type="number"
+                id="bodySize"
+                name="bodySize"
+                min=".01"
+                max="50"
+                step=".01"
+                value="1"
+              />
+            </div>
+            <label for="bodyMass">Mass:</label>
             <input
               type="number"
-              id="bodySize"
-              name="bodySize"
+              id="bodyMass"
+              name="bodyMass"
               min=".01"
               max="50"
               step=".01"
               value="1"
             />
-          </div>
-          <label for="bodyMass">Mass:</label>
-          <input
-            type="number"
-            id="bodyMass"
-            name="bodyMass"
-            min=".01"
-            max="50"
-            step=".01"
-            value="1"
-          />
-          <div>
-            Position:<br />
-            X:<input type="number" id="posX" name="posX" step=".1" value="0" />
-            Y:<input type="number" id="posY" name="posY" step=".1" value="0" />
-            Z:<input type="number" id="posZ" name="posZ" step=".1" value="0" />
-          </div>
-          <div>
-            Initial Velocity:<br />
-            X:<input
-              type="number"
-              id="velX"
-              name="velX"
-              min="-50"
-              max="50"
-              step=".01"
-              value="0"
-            />
-            Y:<input
-              type="number"
-              id="velY"
-              name="velY"
-              min="-50"
-              max="50"
-              step=".01"
-              value="0"
-            />
-            Z:<input
-              type="number"
-              id="velZ"
-              name="velZ"
-              min="-50"
-              max="50"
-              step=".01"
-              value="0"
-            />
-          </div>
-          <div id="surfaceDiv">
-            <span id="bodySurfaceLabel"> Surface:<br /> </span>
-            <input type="radio" id="grass" name="bodySurface" value="grass" />
-            <label for="grass">Grass</label>
-            <input type="radio" id="water" name="bodySurface" value="water" />
-            <label for="water">Water</label>
-            <input type="radio" id="sand" name="bodySurface" value="sand" />
-            <label for="sand">Sand</label>
-            <input type="radio" id="solid" name="bodySurface" value="color" />
-            <label for="solid">Solid Color</label>
-            <br />
-            <label for="color">Base Color</label>
-            <input type="color" id="colorRGB" name="bodyBase" value="#ffffff" />
-          </div>
-        </form>
+            <div>
+              Position:<br />
+              X:<input
+                type="number"
+                id="posX"
+                name="posX"
+                step=".1"
+                value="0"
+              />
+              Y:<input
+                type="number"
+                id="posY"
+                name="posY"
+                step=".1"
+                value="0"
+              />
+              Z:<input
+                type="number"
+                id="posZ"
+                name="posZ"
+                step=".1"
+                value="0"
+              />
+            </div>
+            <div>
+              Initial Velocity:<br />
+              X:<input
+                type="number"
+                id="velX"
+                name="velX"
+                min="-50"
+                max="50"
+                step=".01"
+                value="0"
+              />
+              Y:<input
+                type="number"
+                id="velY"
+                name="velY"
+                min="-50"
+                max="50"
+                step=".01"
+                value="0"
+              />
+              Z:<input
+                type="number"
+                id="velZ"
+                name="velZ"
+                min="-50"
+                max="50"
+                step=".01"
+                value="0"
+              />
+            </div>
+            <div id="surfaceDiv">
+              <span id="bodySurfaceLabel"> Surface:<br /> </span>
+              <input type="radio" id="grass" name="bodySurface" value="grass" />
+              <label for="grass">Grass</label>
+              <input type="radio" id="water" name="bodySurface" value="water" />
+              <label for="water">Water</label>
+              <input type="radio" id="sand" name="bodySurface" value="sand" />
+              <label for="sand">Sand</label>
+              <input type="radio" id="solid" name="bodySurface" value="color" />
+              <label for="solid">Solid Color</label>
+              <br />
+              <label for="color">Base Color</label>
+              <input
+                type="color"
+                id="colorRGB"
+                name="bodyBase"
+                value="#ffffff"
+              />
+            </div>
+          </form>
+        </div>
+        <div id="bodyList">
+          <p>Stars</p>
+          <ul id="starList" class="scrollable"></ul>
+          <p>Planets</p>
+          <ul id="planetList" class="scrollable"></ul>
+        </div>
       </div>
     </div>
     <script src="./dist/bundle.js"></script>
