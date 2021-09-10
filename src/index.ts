@@ -111,6 +111,8 @@ const playerInput: PlayerMovement = {
   camD: false,
   camI: false,
   camO: false,
+  camRL: false,
+  camRR: false,
 };
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
@@ -163,14 +165,8 @@ const init = async () => {
   }
   const startPoint = new Barycenter(startObjects);
 
-  cam = new Camera(
-    new DOMPoint(0, zoom/2, zoom/2),
-    new DOMPoint(
-      startPoint.position.x,
-      startPoint.position.y,
-      startPoint.position.z
-    )
-  );
+  //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
+  cam = new Camera();
   cam.view();
   requestAnimationFrame(loop);
 };
@@ -267,9 +263,9 @@ document.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {
-    let dy = (4 * (y - lastY)) / canvas.height;
-    let dx = (4 * (x - lastX)) / canvas.width;
-    cam.rotateAroundEye(dx, dy);
+    let dy = (y - lastY) / canvas.height;
+    let dx = (x - lastX) / canvas.width;
+    cam.rotate(dx * 100, dy * 100, 0);
     // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
     //(dx, dy);
     lastX = x;

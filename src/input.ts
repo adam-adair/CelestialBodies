@@ -1,6 +1,20 @@
-import { cam, togglePause } from ".";
+import { cam } from ".";
 import { Mesh } from "./mesh";
 import { get } from "./utils";
+
+interface altKey<T> {
+  [K: string]: T;
+}
+const altKeys: altKey<string> = {
+  "3": "u",
+  "9": "o",
+  "8": "i",
+  "2": "k",
+  "4": "j",
+  "6": "l",
+  "1": "m",
+  "7": ".",
+};
 
 export interface PlayerMovement {
   up: boolean;
@@ -21,6 +35,8 @@ export interface PlayerMovement {
   camD: boolean;
   camI: boolean;
   camO: boolean;
+  camRL: boolean;
+  camRR: boolean;
 }
 
 export const handleInput = (
@@ -28,7 +44,9 @@ export const handleInput = (
   pressed: boolean,
   inp: PlayerMovement
 ) => {
-  switch (ev.key) {
+  console.log(ev.key);
+  const key = altKeys[ev.key] ? altKeys[ev.key] : ev.key;
+  switch (key) {
     case "w":
       inp.up = pressed;
       //ev.preventDefault();
@@ -101,6 +119,14 @@ export const handleInput = (
       inp.camO = pressed;
       //ev.preventDefault();
       break;
+    case "m":
+      inp.camRL = pressed;
+      //ev.preventDefault();
+      break;
+    case ".":
+      inp.camRR = pressed;
+      //ev.preventDefault();
+      break;
   }
 };
 
@@ -109,7 +135,6 @@ export const movePlayer = (
   inp: PlayerMovement,
   movement: number
 ) => {
-
   const posX = <HTMLFormElement>get("posX");
   const posY = <HTMLFormElement>get("posY");
   const posZ = <HTMLFormElement>get("posZ");
@@ -153,4 +178,6 @@ export const moveCamera = (inp: PlayerMovement) => {
   if (inp.camD) cam.move(0, -0.1, 0);
   if (inp.camI) cam.move(0, 0, -0.1);
   if (inp.camO) cam.move(0, 0, 0.1);
+  if (inp.camRL) cam.rotate(0, 0, 1);
+  if (inp.camRR) cam.rotate(0, 0, -1);
 };
