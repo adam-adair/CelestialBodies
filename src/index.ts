@@ -110,6 +110,8 @@ const playerInput: PlayerMovement = {
   camD: false,
   camI: false,
   camO: false,
+  camRL: false,
+  camRR: false,
 };
 document.onkeydown = (ev) => handleInput(ev, true, playerInput);
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
@@ -154,7 +156,7 @@ const init = async () => {
   // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
   grid = new Grid(10, 10, true);
-  cam = new Camera(new DOMPoint(0, zoom / 2, zoom / 2), new DOMPoint(0, 0, 0));
+  cam = new Camera();
   cam.view();
   requestAnimationFrame(loop);
 };
@@ -253,9 +255,9 @@ canvas.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {
-    let dy = (4 * (y - lastY)) / canvas.height;
-    let dx = (4 * (x - lastX)) / canvas.width;
-    cam.rotateAroundEye(dx, dy);
+    let dy = (y - lastY) / canvas.height;
+    let dx = (x - lastX) / canvas.width;
+    cam.rotate(dx * 100, dy * 100, 0);
     // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
     //(dx, dy);
     lastX = x;
