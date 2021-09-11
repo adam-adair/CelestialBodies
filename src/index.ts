@@ -19,13 +19,14 @@ import { Barycenter } from "./barycenter";
 
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
-import { addBody } from "./addBody";
+import { addBody, destroyTemp } from "./addBody";
 
 const { gl, program, canvas } = initialize;
 const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
+const cancelButton = get("cancelButton") as HTMLButtonElement;
 const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -57,15 +58,15 @@ const loadMusic = (song: any) => {
       // Plus hearing the same loop forever is annoying.
       let playing = false;
       const playButton = document.createElement("button");
-      playButton.innerHTML = "Play Song";
-      document.body.appendChild(playButton);
+      playButton.innerHTML = "Play Music";
+      get("instructions").appendChild(playButton);
       playButton.onclick = () => {
         if (!playing) {
-          playButton.innerHTML = "Pause Song";
+          playButton.innerHTML = "Pause Music";
           audio.play();
           playing = true;
         } else {
-          playButton.innerHTML = "Play Song";
+          playButton.innerHTML = "Play Music";
           audio.pause();
           playing = false;
         }
@@ -146,6 +147,7 @@ const init = async () => {
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(universeSize, 2048, 2000);
   bodyButton.onclick = toggleForm; //() => addBody(bodyForm, textures);
+  cancelButton.onclick = cancelBody;
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
@@ -241,13 +243,13 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
-  canvas.width = document.body.clientWidth / 2;
-  canvas.height =
-    document.body.clientHeight -
-    parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
+  canvas.width = get("canvasContainer").scrollWidth; //document.body.clientWidth / 2;
+  canvas.height = get("canvasContainer").scrollHeight; //
+  // document.body.clientHeight -
+  // parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
 
   // disabling for testing so I don't have to wait
-  // loadMusic(spaceJam);
+  loadMusic(spaceJam);
   init();
 };
 
@@ -284,7 +286,8 @@ export const toggleForm = () => {
   if (bodyForm.style.display === "none") {
     paused = true;
     bodyButton.innerHTML = "Finalize Body";
-    bodyForm.style.display = "block";
+    cancelButton.style.display = "inline-block";
+    bodyForm.style.display = "inline-block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
     //stops game obj movement when typing input fields
@@ -303,6 +306,7 @@ export const toggleForm = () => {
   } else {
     paused = false;
     bodyButton.innerHTML = "Add Body";
+    cancelButton.style.display = "none";
     bodyForm.style.display = "none";
     if (player) {
       player.name = nameField.value;
@@ -319,4 +323,10 @@ export const setPlayer = (body: Body) => {
 
 export const getPlayer = () => {
   return player;
+};
+
+export const cancelBody = () => {
+  player = null;
+  destroyTemp();
+  toggleForm();
 };

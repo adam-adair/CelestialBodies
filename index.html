@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Celestial Bawdies</title>
+    <title>Celestial Bodies</title>
     <style>
       * {
         -webkit-touch-callout: none;
@@ -17,6 +17,11 @@
         padding: 0;
         overflow: hidden;
         height: 100%;
+        color: white;
+        background-color: rgb(17, 17, 17);
+      }
+      body > h2 {
+        text-align: center;
       }
       #bodyForm > *,
       #sizeDiv > * {
@@ -28,6 +33,7 @@
       }
       .flexContainer > * {
         flex: 1;
+        text-align: center;
       }
       #container > div {
         margin: 1rem;
@@ -37,6 +43,7 @@
       }
       #panels {
         height: 90vh;
+        flex: 2;
       }
       .scrollable {
         overflow-y: auto;
@@ -57,38 +64,55 @@
       .card h5 {
         margin: 0;
       }
+      #gameContainer {
+        display: flex;
+        height: 90vh;
+      }
+      .wide {
+        flex: 4;
+      }
+      input[type="number"] {
+        max-width: 50px;
+      }
     </style>
   </head>
   <body>
-    <div id="container" class="flexContainer">
-      <div>
-        <canvas id="canvas"></canvas>
+    <h2>Celestial Bodies</h2>
+    <div id="gameContainer" class="flexContainer">
+      <div id="instructions">
+        <b> Camera Controls </b><br />
+        Look with mouse<br />
+        `: pause<br />
+        u or 3: backwards<br />
+        o or 9: forward<br />
+        i or 8: up<br />
+        k or 2: down<br />
+        j or 4: strafe left<br />
+        l or 6: strafe right<br />
+        m or 1: roll left<br />
+        . or 7: roll right<br />
+        <br />
+        <br />
+        <b> New Body Controls</b><br />
+        a, d: Move Along X-Axis<br />
+        w, s: Move Along Y-Axis<br />
+        q, e: Move Along Z-Axis<br />
+        <br />
         <p id="musicStatus">Music Loading: 0%</p>
       </div>
+      <div id="canvasContainer" class="wide">
+        <canvas id="canvas"></canvas>
+        <button id="setup1">Setup 1</button>
+        <button id="setup1">Setup 2</button>
+        <button id="setup1">Setup 3</button>
+      </div>
       <div id="panels" class="scrollable">
-        <div id="instructions">
-          <b> Camera Controls </b><br />
-          Look with mouse<br />
-          `: pause<br />
-          u or 3: backwards<br />
-          o or 9: forward<br />
-          i or 8: up<br />
-          k or 2: down<br />
-          j or 4: strafe left<br />
-          l or 6: strafe right<br />
-          m or 1: roll left<br />
-          . or 7: roll right<br />
-          <br />
-        </div>
         <div id="addBody">
-          <button id="bodyButton">Add Body</button>
+          <div>
+            <button id="bodyButton">Add Body</button>
+            <button id="cancelButton" style="display: none">Cancel</button>
+          </div>
           <form id="bodyForm" style="display: none">
-            <br />
-            <b> New Body Controls</b><br />
-            a, d: Move Along X-Axis<br />
-            w, s: Move Along Y-Axis<br />
-            q, e: Move Along Z-Axis<br />
-            <br />
             <div>
               <input
                 type="radio"
@@ -100,33 +124,38 @@
               <input type="radio" id="bodyStar" name="bodyType" value="star" />
               <label for="bodyStar">Star</label>
             </div>
-            <label for="bodyName">Celestial Body Name:</label>
-            <input type="text" id="bodyName" name="bodyName" />
+            <div>
+              <label for="bodyName">Celestial Body Name:</label>
+              <input type="text" id="bodyName" name="bodyName" />
+            </div>
             <div id="sizeDiv">
-              <label for="bodySize" id="bodySizeLabel">Size:</label>
+              <div>
+                <label for="bodySize" id="bodySizeLabel">Size:</label>
+                <input
+                  type="number"
+                  id="bodySize"
+                  name="bodySize"
+                  min=".01"
+                  max="50"
+                  step=".01"
+                  value="1"
+                />
+              </div>
+            </div>
+            <div>
+              <label for="bodyMass">Mass:</label>
               <input
                 type="number"
-                id="bodySize"
-                name="bodySize"
+                id="bodyMass"
+                name="bodyMass"
                 min=".01"
                 max="50"
                 step=".01"
                 value="1"
               />
             </div>
-            <label for="bodyMass">Mass:</label>
-            <input
-              type="number"
-              id="bodyMass"
-              name="bodyMass"
-              min=".01"
-              max="50"
-              step=".01"
-              value="1"
-            />
             <div>
-              Position:<br />
-              X:<input
+              Position: X:<input
                 type="number"
                 id="posX"
                 name="posX"
@@ -149,8 +178,7 @@
               />
             </div>
             <div>
-              Initial Velocity:<br />
-              X:<input
+              Initial Velocity: X:<input
                 type="number"
                 id="velX"
                 name="velX"
@@ -179,7 +207,7 @@
               />
             </div>
             <div id="surfaceDiv">
-              <span id="bodySurfaceLabel"> Surface:<br /> </span>
+              Surface:
               <input type="radio" id="grass" name="bodySurface" value="grass" />
               <label for="grass">Grass</label>
               <input type="radio" id="water" name="bodySurface" value="water" />
@@ -187,8 +215,9 @@
               <input type="radio" id="sand" name="bodySurface" value="sand" />
               <label for="sand">Sand</label>
               <input type="radio" id="solid" name="bodySurface" value="color" />
-              <label for="solid">Solid Color</label>
-              <br />
+              <label for="solid">Solid</label>
+            </div>
+            <div id="colorDiv">
               <label for="color">Base Color</label>
               <input
                 type="color"
