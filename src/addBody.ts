@@ -125,7 +125,7 @@ const changeBody = (
 };
 
 //delete current temp body if exists
-const destroyTemp = () => {
+export const destroyTemp = () => {
   for (let key in gameObjects.objects) {
     const obj = gameObjects.objects[key];
     if (obj.name === "_tempBody") obj.destroy(gameObjects);
