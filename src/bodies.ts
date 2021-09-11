@@ -11,7 +11,7 @@ import gameObjects, { GameObjects } from "./GameObjects";
 import { Barycenter } from "./barycenter";
 import { createListItem, updateListItem } from "./listItems";
 
-const { gravitationalConstant } = constants;
+const { gravitationalConstant, maxPlanetSize } = constants;
 let nextID = 1;
 
 export class Body extends Mesh {
@@ -149,7 +149,8 @@ export class Body extends Mesh {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
-    const newSize = this.size + otherObject.size;
+    let newSize = this.size + otherObject.size;
+    newSize = Math.min(newSize, maxPlanetSize);
     this.rescale(newSize / this.size);
     this.size = newSize;
     this.alterTrajectory(otherObject);

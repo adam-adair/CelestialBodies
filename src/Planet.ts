@@ -9,9 +9,10 @@ import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
 const planetList = document.getElementById("planetList");
 
-const { minMass, impactThreshold } = constants;
+const { minPlanetMass, maxPlanetMass, minPlanetSize, maxPlanetSize, impactThreshold } = constants;
 
 export class Planet extends Sphere {
+  hitBoxTimer: number;
   constructor(
     name: string,
     size: number,
@@ -25,6 +26,15 @@ export class Planet extends Sphere {
     //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
     super(name, size, precision, mass, velocity, acceleration, texture, color);
     this.addToList();
+    this.hitBoxTimer=30;
+  }
+
+  update(){
+    if(this.hitBoxTimer>-1){
+      this.hitBoxTimer--;
+      if(this.hitBoxTimer=0) this.addToAttractors().addToMovers();
+    }
+    Sphere.prototype.update.call(this);
   }
 
   checkCollision(gameObjects: GameObjects, otherObject: Body) {
@@ -42,10 +52,11 @@ export class Planet extends Sphere {
       const smaller = this.mass < otherObject.size ? this : otherObject;
       const newVelocity = bigger.alterTrajectory(smaller);
       const diff = newVelocity.add(bigger.velocity).magnitude();
-      if (diff < impactThreshold) {
-        bigger.absorb(gameObjects, smaller);
-      } else {
+      console.log("impact", diff)
+      if (diff > impactThreshold || bigger.mass+smaller.mass > maxPlanetMass) {
         bigger.split(gameObjects, smaller);
+      } else {
+        bigger.absorb(gameObjects, smaller);
       }
     }
     // else if (otherObject instanceof Asteroid){
@@ -58,19 +69,19 @@ export class Planet extends Sphere {
     const initialMass = this.mass + otherObject.mass;
     const initialSize = this.size + otherObject.size;
 
-    let maxMass = Math.max(initialMass * 0.333333333, minMass); // limiting the size of debris pieces to 1/3 mass of the combined mass because in a scenario where two equal sized planets hit each other, it seems weird if we ended up with debris the size of one of the original planets. but this is largely arbitrary
+    let maxMass = Math.max(initialMass * 0.333333333, minPlanetMass); // limiting the size of debris pieces to 1/3 mass of the combined mass because in a scenario where two equal sized planets hit each other, it seems weird if we ended up with debris the size of one of the original planets. but this is largely arbitrary
     const initialVelocity = this.alterTrajectory(otherObject); //find the trajectory of the planets before they split up, this is important to find the momentum of the new objects and to keep them from going in crazy directions.
     const unitVelocity = initialVelocity.normalize(); // normalize the velocity to 0-1 scale to make it easier to offset
     const startPosition = this.position.add(otherObject.position).scale(1 / 2); // debris will be randomly scattered around the midpoint between the planets when they collided
     const randomOffset = () => Math.random() * 2 - 1;
     let remainingMass = initialMass;
-    while (remainingMass >= minMass) {
+    while (remainingMass >= minPlanetMass) {
       maxMass = Math.min(maxMass, remainingMass);
       const newMass = Math.min(
         remainingMass,
-        Math.random() * (maxMass - minMass) + minMass
+        Math.random() * (maxMass - minPlanetMass) + minPlanetMass
       ); // this piece of debris will either be randomly sized within limits, or the remaining amount, whichever is smaller.
-      const newSize = (newMass / initialMass) * initialSize; // size of the new object has same proportion as its mass
+      let newSize = (newMass / initialMass) * initialSize; // size of the new object has same proportion as its mass
       const newSpeed = initialVelocity.scale(initialMass / newMass).magnitude(); //objects should speed up as their mass decreases, ignoring friction from the collision
       const randomDirection = new Vertex(
         unitVelocity.x - randomOffset(),
@@ -88,8 +99,6 @@ export class Planet extends Sphere {
         this.texture,
         randomColor()
       )
-        .addToAttractors()
-        .addToMovers()
         .translate(
           /* start the new object where the 2 planets collided but
           offset enough in the direction of its velocity that it won't

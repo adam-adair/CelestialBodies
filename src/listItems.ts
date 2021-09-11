@@ -47,7 +47,7 @@ export function createListItem(objectToList: any): HTMLElement {
   zoomButton.innerHTML= "Fly To"
   zoomButton.onclick = () =>{
     const camPosition =cam.getPosition();
-    cam.move(camPosition.x - objectToList.position.x, camPosition.y- objectToList.position.y, camPosition.z - objectToList.position.z + objectToList.size*constants.zoom/2);
+    cam.move(camPosition.x - objectToList.position.x + objectToList.size, camPosition.y- objectToList.position.y- objectToList.size, objectToList.position.z + camPosition.z +objectToList.size*constants.zoom);
     cam.lookAt(objectToList.position);
   }
 
