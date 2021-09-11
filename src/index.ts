@@ -22,7 +22,7 @@ import { StarField } from "./Starfield";
 import { addBody } from "./addBody";
 
 const { gl, program, canvas } = initialize;
-const { movement, zoom } = constants;
+const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
@@ -117,9 +117,9 @@ const playerInput: PlayerMovement = {
 
 let paused = false;
 document.onkeydown = (ev) => {
-  if(ev.key==="`") paused=!paused;
+  if (ev.key === "`") paused = !paused;
   else handleInput(ev, true, playerInput);
-}
+};
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
 let player: Body;
@@ -127,7 +127,6 @@ let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
-
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -145,7 +144,7 @@ const init = async () => {
   textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
-  starField = new StarField(100, 512, 2000);
+  starField = new StarField(universeSize, 2048, 2000);
   bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.

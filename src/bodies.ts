@@ -78,8 +78,9 @@ export class Body extends Mesh {
     this.translate(this.velocity.x, this.velocity.y, this.velocity.z);
     this.acceleration = this.acceleration.scale(0);
     this.createOrUpdateListItem();
+    if (this.position.magnitude() - this.size > constants.universeSize)
+      this.destroy(gameObjects);
   }
-
 
   createOrUpdateListItem(): HTMLElement {
     let element = updateListItem(this) || createListItem(this);
