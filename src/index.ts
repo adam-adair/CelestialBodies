@@ -279,8 +279,6 @@ export const togglePause = () => {
   if (paused) {
     bodyButton.innerHTML = "Finalize Body";
     bodyForm.style.display = "block";
-    get("sizeDiv").style.visibility = "visible";
-    get("surfaceDiv").style.visibility = "visible";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
     //stops game obj movement when typing name
@@ -296,8 +294,6 @@ export const togglePause = () => {
   } else {
     bodyButton.innerHTML = "Add Body";
     bodyForm.style.display = "none";
-    get("sizeDiv").style.visibility = "hidden";
-    get("surfaceDiv").style.visibility = "hidden";
     if (player) {
       player.name = nameField.value;
       player.addToAttractors().addToMovers();
