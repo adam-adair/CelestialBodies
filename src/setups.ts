@@ -297,7 +297,7 @@ export const starColor = (
   const classB = new Star(
     "Class B",
     16,
-    15 *massColorFactor,
+    15.8 *massColorFactor,
     null,
     null,
     textures[2]
@@ -307,7 +307,7 @@ export const starColor = (
   const blueStar = new Star(
     "Blue",
     16,
-    16.1 *massColorFactor,
+    16 *massColorFactor,
     null,
     null,
     textures[2]

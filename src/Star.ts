@@ -16,7 +16,7 @@ const pickColor = (mass: number) => {
   else if (mass <= 1.04 *massColorFactor) return Colors.Yellow;
   else if (mass <= 1.4 *massColorFactor) return Colors.White;
   else if (mass <= 2.1 *massColorFactor) return Colors.ClassA;
-  else if (mass <= 15 *massColorFactor) return Colors.ClassB;
+  else if (mass <= 15.8 *massColorFactor) return Colors.ClassB;
   return Colors.Blue;
 };
 
