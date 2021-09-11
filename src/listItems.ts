@@ -10,12 +10,10 @@ export function createListItem(objectToList: any): HTMLElement {
 
   listItem.appendChild(card);
 
-
   const statList = document.createElement("ul");
   const vectorList = document.createElement("ul");
   card.appendChild(statList);
   card.appendChild(vectorList);
-
 
   const name = document.createElement("h5");
   name.id= listItem.id+"-name";
@@ -34,8 +32,6 @@ export function createListItem(objectToList: any): HTMLElement {
   statList.appendChild(mass);
   statList.appendChild(size);
 
-
-
   const position = document.createElement("h5");
   position.id= listItem.id+"-position";
   position.innerHTML = `Position: [${objectToList.position.x.toFixed(2)},${objectToList.position.y.toFixed(2)},${objectToList.position.z.toFixed(2)}]`;
@@ -46,7 +42,6 @@ export function createListItem(objectToList: any): HTMLElement {
 
   vectorList.appendChild(position);
   vectorList.appendChild(velocity);
-
 
   const zoomButton = document.createElement("button");
   zoomButton.innerHTML= "Fly To"
@@ -71,8 +66,8 @@ const position = document.getElementById(`${objectToList.id}-position`)
 
 mass.innerHTML= `Mass: ${objectToList.mass.toFixed(2)}`
 size.innerHTML= `Size: ${objectToList.size.toFixed(2)}`
-velocity.innerHTML = `Velocity: [${objectToList.velocity.x.toFixed(2)},${objectToList.velocity.y.toFixed(2)},${objectToList.velocity.z.toFixed(2)}]`
-position.innerHTML = `Position: [${objectToList.position.x.toFixed(2)},${objectToList.position.y.toFixed(2)},${objectToList.position.z.toFixed(2)}]`
+velocity.innerHTML = `Velocity: [${objectToList.velocity.x.toFixed(2)}, ${objectToList.velocity.y.toFixed(2)}, ${objectToList.velocity.z.toFixed(2)}]`
+position.innerHTML = `Position: [${objectToList.position.x.toFixed(2)}, ${objectToList.position.y.toFixed(2)}, ${objectToList.position.z.toFixed(2)}]`
 
 return listItem;
 }

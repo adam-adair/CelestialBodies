@@ -27,9 +27,11 @@
       #bodyList {
         height: 50%;
       }
+      #panels{
+        height: 90vh;
+      }
       .scrollable {
-        overflow-y: scroll;
-        height: 25%;
+        overflow-y: auto;
       }
       ul{
         list-style-type: none;
@@ -68,10 +70,10 @@
           . or 7: roll right<br />
         </p>
       </div>
-      <div id="panels">
+      <div id="panels" class="scrollable">
         <div id="addBody">
           <button id="bodyButton">Add Body</button>
-          <form id="bodyForm" style="visibility: hidden">
+          <form id="bodyForm" style="display: none">
             <p>Move new body: qewasd</p>
             <div>
               <input
