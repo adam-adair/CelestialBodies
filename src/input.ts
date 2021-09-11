@@ -42,7 +42,7 @@ export interface PlayerMovement {
 export const handleInput = (
   ev: KeyboardEvent,
   pressed: boolean,
-  inp: PlayerMovement
+  inp: PlayerMovement,
 ) => {
   const key = altKeys[ev.key] ? altKeys[ev.key] : ev.key;
   switch (key) {

@@ -114,7 +114,12 @@ const playerInput: PlayerMovement = {
   camRL: false,
   camRR: false,
 };
-document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+
+let paused = false;
+document.onkeydown = (ev) => {
+  if(ev.key==="`") paused=!paused;
+  else handleInput(ev, true, playerInput);
+}
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
 let player: Body;
@@ -122,7 +127,7 @@ let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
-let paused = false;
+
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -146,7 +151,7 @@ const init = async () => {
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  populate.stableOrbit(10, textures); // doesn't quite work yet.
+  // populate.stableOrbit(10, textures); // doesn't quite work yet.
   populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
