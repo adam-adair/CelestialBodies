@@ -9,6 +9,7 @@ import {
 } from "./mesh";
 import gameObjects, { GameObjects } from "./GameObjects";
 import { Barycenter } from "./barycenter";
+import { createListItem, updateListItem } from "./listItems";
 
 const { gravitationalConstant } = constants;
 let nextID = 1;
@@ -81,15 +82,8 @@ export class Body extends Mesh {
 
 
   createOrUpdateListItem(): HTMLElement {
-    const element = document.getElementById(this.id.toString()) || document.createElement("li");
-    element.id = element.id ? element.id : this.id.toString();
-     element.innerHTML = `
-      Name: ${this.name}
-      Mass:
-      ${this.mass.toFixed(2)}
-      Size: ${this.size.toFixed(2)}
-      Position: [${this.position.x.toFixed(2)},${this.position.y.toFixed(2)},${this.position.z.toFixed(2)}]
-      Velocity: [${this.velocity.x.toFixed(2)},${this.velocity.y.toFixed(2)},${this.velocity.z.toFixed(2)}]`;
+    let element = updateListItem(this) || createListItem(this);
+
     return element;
   }
 

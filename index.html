@@ -14,15 +14,15 @@
       #sizeDiv > * {
         display: block;
       }
-      #container {
+      .flexContainer {
         display: flex;
+        justify-content: space-between;
+      }
+      .flexContainer> *{
+        flex:1
       }
       #container > div {
         margin: 1rem;
-      }
-      #panels {
-        display: flex;
-        flex-direction: column;
       }
       #bodyList {
         height: 50%;
@@ -31,10 +31,27 @@
         overflow-y: scroll;
         height: 25%;
       }
+      ul{
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+      .card {
+        /* margin-bottom: .5rem; */
+        height: fit-content;
+        padding: .5rem;
+      }
+      .card:hover{
+        box-shadow: 1px 1px 1px black;
+        background-color: goldenrod;
+      }
+      .card h5{
+        margin: 0;
+      }
     </style>
   </head>
   <body>
-    <div id="container">
+    <div id="container" class="flexContainer">
       <div>
         <canvas id="canvas"></canvas>
         <p id="musicStatus">Music Loading: 0%</p>
@@ -167,9 +184,9 @@
           </form>
         </div>
         <div id="bodyList">
-          <p>Stars</p>
+          <h3>Stars</h3>
           <ul id="starList" class="scrollable"></ul>
-          <p>Planets</p>
+          <h3>Planets</h3>
           <ul id="planetList" class="scrollable"></ul>
         </div>
       </div>
