@@ -145,7 +145,7 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(universeSize, 2048, 2000);
-  bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
+  bodyButton.onclick = toggleForm; //() => addBody(bodyForm, textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
@@ -277,10 +277,10 @@ document.onmousemove = (e) => {
   }
 };
 
-export const togglePause = () => {
-  paused = !paused;
+export const toggleForm = () => {
   const nameField = <HTMLFormElement>get("bodyName");
-  if (paused) {
+  if (bodyForm.style.display === "none") {
+    paused = true;
     bodyButton.innerHTML = "Finalize Body";
     bodyForm.style.display = "block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
@@ -296,6 +296,7 @@ export const togglePause = () => {
     };
     addBody(bodyForm, textures);
   } else {
+    paused = false;
     bodyButton.innerHTML = "Add Body";
     bodyForm.style.display = "none";
     if (player) {
