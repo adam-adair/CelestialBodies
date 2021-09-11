@@ -58,15 +58,15 @@ const loadMusic = (song: any) => {
       // Plus hearing the same loop forever is annoying.
       let playing = false;
       const playButton = document.createElement("button");
-      playButton.innerHTML = "Play Song";
-      document.body.appendChild(playButton);
+      playButton.innerHTML = "Play Music";
+      get("instructions").appendChild(playButton);
       playButton.onclick = () => {
         if (!playing) {
-          playButton.innerHTML = "Pause Song";
+          playButton.innerHTML = "Pause Music";
           audio.play();
           playing = true;
         } else {
-          playButton.innerHTML = "Play Song";
+          playButton.innerHTML = "Play Music";
           audio.pause();
           playing = false;
         }
@@ -242,13 +242,13 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
-  canvas.width = document.body.clientWidth / 2;
-  canvas.height =
-    document.body.clientHeight -
-    parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
+  canvas.width = get("canvasContainer").scrollWidth; //document.body.clientWidth / 2;
+  canvas.height = get("canvasContainer").scrollHeight; //
+  // document.body.clientHeight -
+  // parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
 
   // disabling for testing so I don't have to wait
-  // loadMusic(spaceJam);
+  loadMusic(spaceJam);
   init();
 };
 
@@ -285,8 +285,8 @@ export const toggleForm = () => {
   if (bodyForm.style.display === "none") {
     paused = true;
     bodyButton.innerHTML = "Finalize Body";
-    cancelButton.style.display = "block";
-    bodyForm.style.display = "block";
+    cancelButton.style.display = "inline-block";
+    bodyForm.style.display = "inline-block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
     //stops game obj movement when typing input fields

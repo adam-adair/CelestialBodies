@@ -136,4 +136,5 @@ const hideIrrelevant = (isStar = false) => {
   const vis = isStar ? "hidden" : "visible";
   get("sizeDiv").style.visibility = vis;
   get("surfaceDiv").style.visibility = vis;
+  get("colorDiv").style.visibility = vis;
 };
