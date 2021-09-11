@@ -42,7 +42,7 @@ export interface PlayerMovement {
 export const handleInput = (
   ev: KeyboardEvent,
   pressed: boolean,
-  inp: PlayerMovement,
+  inp: PlayerMovement
 ) => {
   const key = altKeys[ev.key] ? altKeys[ev.key] : ev.key;
   switch (key) {
@@ -140,27 +140,27 @@ export const movePlayer = (
 
   if (inp.up) {
     player.translate(0, movement, 0);
-    posY.value = player.position.y;
+    posY.value = player.position.y.toFixed(2);
   }
   if (inp.down) {
     player.translate(0, -movement, 0);
-    posY.value = player.position.y;
+    posY.value = player.position.y.toFixed(2);
   }
   if (inp.left) {
     player.translate(-movement, 0, 0);
-    posX.value = player.position.x;
+    posX.value = player.position.x.toFixed(2);
   }
   if (inp.right) {
     player.translate(movement, 0, 0);
-    posX.value = player.position.x;
+    posX.value = player.position.x.toFixed(2);
   }
   if (inp.in) {
     player.translate(0, 0, -movement);
-    posZ.value = player.position.z;
+    posZ.value = player.position.z.toFixed(2);
   }
   if (inp.out) {
     player.translate(0, 0, movement);
-    posZ.value = player.position.z;
+    posZ.value = player.position.z.toFixed(2);
   }
   if (inp.spinL) player.rotate(movement * 10, 0, 0);
   if (inp.spinR) player.rotate(movement * -10, 0, 0);

@@ -151,8 +151,8 @@ const init = async () => {
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
   // populate.stableOrbit(10, textures); // doesn't quite work yet.
-  populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
-  // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
+  // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
+  populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
   // populate.twoPlanets(textures);
@@ -279,21 +279,25 @@ document.onmousemove = (e) => {
 
 export const toggleForm = () => {
   const nameField = <HTMLFormElement>get("bodyName");
+  const inputFields = document.getElementsByTagName("input");
   if (bodyForm.style.display === "none") {
     paused = true;
     bodyButton.innerHTML = "Finalize Body";
     bodyForm.style.display = "block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
-    //stops game obj movement when typing name
-    nameField.onfocus = () => {
-      document.onkeydown = null;
-      document.onkeyup = null;
-    };
-    nameField.onblur = () => {
-      document.onkeydown = (ev) => handleInput(ev, true, playerInput);
-      document.onkeyup = (ev) => handleInput(ev, false, playerInput);
-    };
+    //stops game obj movement when typing input fields
+    for (let i = 0; i < inputFields.length; i++) {
+      const field = inputFields[i];
+      field.onfocus = () => {
+        document.onkeydown = null;
+        document.onkeyup = null;
+      };
+      field.onblur = () => {
+        document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+        document.onkeyup = (ev) => handleInput(ev, false, playerInput);
+      };
+    }
     addBody(bodyForm, textures);
   } else {
     paused = false;
