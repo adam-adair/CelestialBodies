@@ -82,7 +82,7 @@ export class Star extends Sphere {
       this.faces.forEach((face) => {
         face.color = newColor;
       });
-      this.initialize(this.texture);
+      this.initialize(this.texture, true);
     }
   }
 

@@ -181,7 +181,7 @@ export const binaryStars = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ): Sphere[] => {
   const startSpeed = 0.02;
-  const mass = 1;
+  const mass = 10;
   const sun1 = new Star(
     "sun1",
     16,

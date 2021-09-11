@@ -114,7 +114,12 @@ const playerInput: PlayerMovement = {
   camRL: false,
   camRR: false,
 };
-document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+
+let paused = false;
+document.onkeydown = (ev) => {
+  if(ev.key==="`") paused=!paused;
+  else handleInput(ev, true, playerInput);
+}
 document.onkeyup = (ev) => handleInput(ev, false, playerInput);
 
 let player: Body;
@@ -122,7 +127,7 @@ let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
-let paused = false;
+
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
@@ -141,13 +146,13 @@ const init = async () => {
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(100, 512, 2000);
-  bodyButton.onclick = togglePause; //() => addBody(bodyForm, textures);
+  bodyButton.onclick = toggleForm; //() => addBody(bodyForm, textures);
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
+  // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  populate.stableOrbit(10, textures); // doesn't quite work yet.
-  // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
+  // populate.stableOrbit(10, textures); // doesn't quite work yet.
+  populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
@@ -273,14 +278,12 @@ document.onmousemove = (e) => {
   }
 };
 
-export const togglePause = () => {
-  paused = !paused;
+export const toggleForm = () => {
   const nameField = <HTMLFormElement>get("bodyName");
-  if (paused) {
+  if (bodyForm.style.display === "none") {
+    paused=true;
     bodyButton.innerHTML = "Finalize Body";
-    bodyForm.style.visibility = "visible";
-    get("sizeDiv").style.visibility = "visible";
-    get("surfaceDiv").style.visibility = "visible";
+    bodyForm.style.display = "block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
     //stops game obj movement when typing name
@@ -294,10 +297,9 @@ export const togglePause = () => {
     };
     addBody(bodyForm, textures);
   } else {
+    paused=false;
     bodyButton.innerHTML = "Add Body";
-    bodyForm.style.visibility = "hidden";
-    get("sizeDiv").style.visibility = "hidden";
-    get("surfaceDiv").style.visibility = "hidden";
+    bodyForm.style.display = "none";
     if (player) {
       player.name = nameField.value;
       player.addToAttractors().addToMovers();

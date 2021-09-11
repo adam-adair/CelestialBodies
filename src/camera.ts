@@ -18,7 +18,6 @@ export class Camera {
       1,
       100
     );
-
   }
   perspective = (fov: number, ratio: number, near: number, far: number) => {
     const tan = 1 / Math.tan((fov * Math.PI) / 180);
@@ -39,5 +38,38 @@ export class Camera {
   }
   move(x = 0, y = 0, z = 0) {
     this.viewMatrix.translateSelf(x, y, z);
+  }
+  getPosition() {
+    const worldMatrix = this.viewMatrix.inverse();
+    console.log(worldMatrix);
+    return new Vertex(worldMatrix.m41, worldMatrix.m42, worldMatrix.m43);
+  }
+  lookAt(target: Vertex) {
+    const camPosition = this.getPosition();
+    const up = new Vertex(0, 1, 0);
+
+    const zAxis = camPosition.subtract(target).normalize();
+    const xAxis = up.cross(zAxis).normalize();
+    const yAxis = zAxis.cross(xAxis).normalize();
+
+    this.viewMatrix = new DOMMatrix([
+      xAxis.x,
+      xAxis.y,
+      xAxis.z,
+      0,
+      yAxis.x,
+      yAxis.y,
+      yAxis.z,
+      0,
+      zAxis.x,
+      zAxis.y,
+      zAxis.z,
+      0,
+      camPosition.x,
+      camPosition.y,
+      camPosition.z,
+      1,
+    ]);
+    this.view();
   }
 }
