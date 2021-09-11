@@ -15,4 +15,5 @@ export const constants = {
   speedAdjust: 1 / 50, // factor for adjusting initial velocity in body creation
   massAdjust: 1, // factor for adjusting initial velocity in body creation
   sizeAdjust: 1, // factor for adjusting initial velocity in body creation
+  universeSize: 200,
 };

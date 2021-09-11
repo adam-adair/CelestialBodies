@@ -35,9 +35,9 @@ export const randomSystem = (
       .addToAttractors()
       .addToMovers();
     body.translate(
-      Math.random() * 18 +18,
-      Math.random() * 18 +18,
-      Math.random() * 18 +18
+      Math.random() * 18 + 18,
+      Math.random() * 18 + 18,
+      Math.random() * 18 + 18
     );
   }
 };
@@ -181,7 +181,7 @@ export const binaryStars = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ): Sphere[] => {
   const startSpeed = 0.02;
-  const mass = 10;
+  const mass = 1;
   const sun1 = new Star(
     "sun1",
     16,

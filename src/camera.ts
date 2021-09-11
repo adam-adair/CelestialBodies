@@ -11,12 +11,12 @@ export class Camera {
   constructor() {
     this.cameraGL = gl.getUniformLocation(program, "camera");
     this.viewMatrix = new DOMMatrix();
-    this.viewMatrix.translateSelf(0, 3, 13);
+    this.move(0, 3, 13);
     this.projMatrix = this.perspective(
       zoom,
       canvas.width / canvas.height,
       1,
-      100
+      1000
     );
   }
   perspective = (fov: number, ratio: number, near: number, far: number) => {
@@ -38,10 +38,13 @@ export class Camera {
   }
   move(x = 0, y = 0, z = 0) {
     this.viewMatrix.translateSelf(x, y, z);
+    const distFromOrigin = this.getPosition().magnitude();
+    if (distFromOrigin >= constants.universeSize * 0.9) {
+      this.viewMatrix.translateSelf(-x, -y, -z);
+    }
   }
   getPosition() {
     const worldMatrix = this.viewMatrix.inverse();
-    console.log(worldMatrix);
     return new Vertex(worldMatrix.m41, worldMatrix.m42, worldMatrix.m43);
   }
   lookAt(target: Vertex) {
