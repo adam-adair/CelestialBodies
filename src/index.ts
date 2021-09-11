@@ -19,13 +19,14 @@ import { Barycenter } from "./barycenter";
 
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
-import { addBody } from "./addBody";
+import { addBody, destroyTemp } from "./addBody";
 
 const { gl, program, canvas } = initialize;
 const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
 let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
+const cancelButton = get("cancelButton") as HTMLButtonElement;
 const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -146,6 +147,7 @@ const init = async () => {
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(universeSize, 2048, 2000);
   bodyButton.onclick = toggleForm; //() => addBody(bodyForm, textures);
+  cancelButton.onclick = cancelBody;
 
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
@@ -283,6 +285,7 @@ export const toggleForm = () => {
   if (bodyForm.style.display === "none") {
     paused = true;
     bodyButton.innerHTML = "Finalize Body";
+    cancelButton.style.display = "block";
     bodyForm.style.display = "block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
@@ -302,6 +305,7 @@ export const toggleForm = () => {
   } else {
     paused = false;
     bodyButton.innerHTML = "Add Body";
+    cancelButton.style.display = "none";
     bodyForm.style.display = "none";
     if (player) {
       player.name = nameField.value;
@@ -318,4 +322,10 @@ export const setPlayer = (body: Body) => {
 
 export const getPlayer = () => {
   return player;
+};
+
+export const cancelBody = () => {
+  player = null;
+  destroyTemp();
+  toggleForm();
 };
