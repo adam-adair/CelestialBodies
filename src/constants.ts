@@ -37,4 +37,6 @@ export const constants = {
   sizeAdjust: 1, // factor for adjusting initial velocity in body creation
   universeSize: 200,
   starMasstoRadius,
+  maxSpawnTime: 60 * 10, //10 seconds
+  minSpawnTime: 60 * 1, // 5 seconds
 };

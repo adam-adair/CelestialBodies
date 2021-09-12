@@ -7,6 +7,7 @@ import { Sphere } from "./Sphere";
 import { Star } from "./Star";
 import gameObjects from "./GameObjects";
 import { Planet } from "./Planet";
+import { WhiteHole } from "./WhiteHole";
 
 const {
   maxPlanetMass,
@@ -431,6 +432,11 @@ export const testTranslation = (
   new Sphere("clouds", 1, 16, 0, null, null, textures[4]).translate(-4, 0, 0);
 };
 
+export const whiteHole = ( textures: (HTMLImageElement | ProceduralTextureData)[]) => {
+
+  new WhiteHole("white hole",16, textures);
+}
+
 export default {
   randomSystem,
   repeatableSystem,
@@ -444,4 +450,5 @@ export default {
   testCollisionLoseMomentum,
   randomPlanetSystem,
   testTranslation,
+  whiteHole
 };

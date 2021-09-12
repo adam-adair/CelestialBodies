@@ -145,35 +145,37 @@
             <label for="bodyPlanet">Planet</label>
             <input type="radio" id="bodyStar" name="bodyType" value="star" />
             <label for="bodyStar">Star</label>
+            <input type="radio" id="bodyWhiteHole" name="bodyType" value="whiteHole" />
+            <label for="bodyWhiteHole">White Hole</label>
           </div>
           <div id="bodyOptions">
-            <div>
+            <div id="nameDiv" class="hideable planet star whiteHole">
               <label for="bodyName">Celestial Body Name:</label>
               <input type="text" id="bodyName" name="bodyName" />
             </div>
-            <div id="sizeDiv">
+            <div id="sizeDiv" class="hideable planet">
               <div>
                 <label for="bodySize" id="bodySizeLabel">Size:</label>
                 <br>
                 <input type="range" id="bodySize" name="bodySize" />
               </div>
             </div>
-            <div>
+            <div id="massDiv" class="hideable planet star">
               <label for="bodyMass" id="bodyMassLabel">Mass:</label>
               <br>
               <input type="range" id="bodyMass" name="bodyMass" />
             </div>
-            <div>
+            <div id="positionDiv" class="hideable planet star whiteHole">
               Position: X:<input type="number" id="posX" name="posX" step=".1" value="0" />
               Y:<input type="number" id="posY" name="posY" step=".1" value="0" />
               Z:<input type="number" id="posZ" name="posZ" step=".1" value="0" />
             </div>
-            <div>
+            <div id="velocityDiv" class="hideable planet star">
               Initial Velocity: X:<input type="number" id="velX" name="velX" min="-50" max="50" step=".01" value="0" />
               Y:<input type="number" id="velY" name="velY" min="-50" max="50" step=".01" value="0" />
               Z:<input type="number" id="velZ" name="velZ" min="-50" max="50" step=".01" value="0" />
             </div>
-            <div id="surfaceDiv">
+            <div id="surfaceDiv" class="hideable planet">
               Surface:
               <input type="radio" id="grass" name="bodySurface" value="grass" />
               <label for="grass">Grass</label>
@@ -184,7 +186,7 @@
               <input type="radio" id="solid" name="bodySurface" value="color" />
               <label for="solid">Solid</label>
             </div>
-            <div id="colorDiv">
+            <div id="colorDiv" class="hideable planet">
               <label for="color">Base Color</label>
               <input type="color" id="colorRGB" name="bodyBase" value="#ffffff" />
             </div>
@@ -196,6 +198,8 @@
         <ul id="starList" class="scrollable"></ul>
         <h3>Planets</h3>
         <ul id="planetList" class="scrollable"></ul>
+        <h3>White Holes</h3>
+        <ul id="whiteHoleList" class="scrollable"></ul>
       </div>
     </div>
   </div>

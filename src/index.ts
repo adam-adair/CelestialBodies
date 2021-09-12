@@ -20,6 +20,7 @@ import { Barycenter } from "./barycenter";
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
 import { addBody, destroyTemp } from "./addBody";
+import { WhiteHole } from "./WhiteHole";
 
 const { gl, program, canvas } = initialize;
 const { movement, universeSize } = constants;
@@ -152,7 +153,7 @@ const init = async () => {
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  populate.stableOrbit(20, textures); // doesn't quite work yet.
+  // populate.stableOrbit(20, textures); // doesn't quite work yet.
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
@@ -162,6 +163,7 @@ const init = async () => {
   // populate.testCollisionLoseMomentum(textures);
   // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
+  populate.whiteHole(textures);
   grid = new Grid(10, 10, true);
 
   //dynamically point to the center of gravity of the starting objects, instead of 0 0 0
@@ -201,11 +203,11 @@ const loop = (now: number) => {
     for (let i in movers) {
       const body = movers[i] as Planet | Star | Asteroid;
 
-      for (let j in objects) {
+      for (let j in attractors) {
         //dont check against self
 
-        if (movers[i] !== objects[j]) {
-          const otherBody = objects[j] as Planet | Star | Asteroid;
+        if (movers[i] !== attractors[j]) {
+          const otherBody = attractors[j] as Planet | Star | Asteroid;
           body.checkCollision(gameObjects, otherBody);
         }
       }
@@ -313,7 +315,8 @@ export const toggleForm = () => {
     bodyForm.style.display = "none";
     if (player) {
       player.name = nameField.value;
-      player.addToAttractors().addToMovers();
+      if (player.constructor.name !== "WhiteHole")  //instanceof doesn't work here and I don't know why
+        player.addToAttractors().addToMovers();
       setPlayer(null);
     }
     bodyForm.removeEventListener("change", null);
