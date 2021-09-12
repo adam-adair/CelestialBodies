@@ -23,6 +23,7 @@ const pickColor = (mass: number) => {
 export class Star extends Sphere {
   luminosity: number;
   temperature: number;
+  hitBoxTimer: number;
   constructor(
     name: string,
     precision: number,
@@ -53,8 +54,20 @@ export class Star extends Sphere {
     //in case we want to have lighting come from stars and dynamically adjust color and brightness
     this.temperature = temperature; //in Kelvins (thousands)
     this.luminosity = luminosity; // 4*Math.PI*((size/2)**2)*(temperature**4 )  // divided by some
+    this.hitBoxTimer = 30;
     this.addToList();
   }
+
+  update() {
+    if (this.hitBoxTimer > -1) {
+      --this.hitBoxTimer;
+      if (this.hitBoxTimer === 0) {
+        this.addToAttractors().addToMovers();
+      }
+    }
+    Sphere.prototype.update.call(this);
+  }
+
   handleCollision(gameObjects: GameObjects, otherObject: Body) {
     // stars will absorb the other object, no matter what it is. If we make black holes in the future then we may have to change that.
     this.absorb(gameObjects, otherObject);

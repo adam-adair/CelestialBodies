@@ -14,7 +14,7 @@ export class Camera {
   constructor() {
     this.cameraGL = gl.getUniformLocation(program, "camera");
     this.viewMatrix = new DOMMatrix();
-    this.move(0, 3, 0);
+    this.move(0, 3, 25);
     this.projMatrix = this.perspective(
       zoom,
       canvas.width / canvas.height,

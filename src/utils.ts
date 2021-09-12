@@ -25,7 +25,7 @@ export const generateRandomStarts= () =>{
   return [startX,startY,startZ];
 }
 
-export const randomInRange = (max:number, min:number = 0) => Math.floor(Math.random() * (max - min) + min)
+export const randomInRange = (max:number, min:number = 0) => Math.random() * (max - min) + min
 
 export default {
   kilogramsToMass,

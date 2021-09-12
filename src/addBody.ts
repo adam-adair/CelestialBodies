@@ -6,6 +6,7 @@ import gameObjects from "./GameObjects";
 import { get } from "./utils";
 import { Color } from "./colors";
 import { constants } from "./constants";
+import { WhiteHole } from "./WhiteHole";
 const {
   speedAdjust,
   massAdjust,
@@ -32,7 +33,6 @@ const changeBody = (
   const change = (<HTMLElement>ev.target).id;
   const size =
     parseFloat((<HTMLFormElement>get("bodySize")).value) * sizeAdjust || 0;
-  console.log("change body size", size);
   const mass =
     parseFloat((<HTMLFormElement>get("bodyMass")).value) * massAdjust || 0;
   const velX =
@@ -49,6 +49,7 @@ const changeBody = (
   let bodyType;
   if ((<HTMLFormElement>get("bodyStar")).checked) bodyType = "star";
   if ((<HTMLFormElement>get("bodyPlanet")).checked) bodyType = "planet";
+  if ((<HTMLFormElement>get("bodyWhiteHole")).checked) bodyType = "whiteHole";
 
   let texIx = 0;
   if ((<HTMLFormElement>get("grass")).checked) texIx = 3;
@@ -104,7 +105,7 @@ const changeBody = (
   let body;
   if (change === "bodyPlanet" || scaleChange === "planet") {
     destroyTemp();
-    hideIrrelevant();
+    resetOptions(bodyType);
     body = new Planet(
       "_tempBody",
       size,
@@ -126,7 +127,7 @@ const changeBody = (
   }
   if (change === "bodyStar" || scaleChange === "star") {
     destroyTemp();
-    hideIrrelevant(true);
+    resetOptions(bodyType);
     body = new Star(
       "_tempBody",
       12,
@@ -135,6 +136,13 @@ const changeBody = (
       null,
       textures[2]
     );
+    body.translate(scalePos[0], scalePos[1], scalePos[2]);
+    setPlayer(body);
+  }
+  if (change === "bodyWhiteHole") {
+    destroyTemp();
+    resetOptions(bodyType);
+    body  = new WhiteHole("_tempBody", 16, textures);
     body.translate(scalePos[0], scalePos[1], scalePos[2]);
     setPlayer(body);
   }
@@ -148,12 +156,19 @@ export const destroyTemp = () => {
   }
 };
 
-const hideIrrelevant = (isStar = false) => {
-  const vis = isStar ? "hidden" : "visible";
-  get("sizeDiv").style.visibility = vis;
-  get("surfaceDiv").style.visibility = vis;
-  get("colorDiv").style.visibility = vis;
-  changeInputRanges(isStar);
+const resetOptions = (body: string) => {
+  const hideableDivs = document.getElementsByClassName("hideable");
+  for (let x = 0; x < hideableDivs.length; x++) {
+    const el = <HTMLDivElement>hideableDivs.item(x);
+    el.style.visibility = "hidden";
+  }
+
+  const visibleDivs = document.getElementsByClassName(body);
+  for (let x = 0; x < visibleDivs.length; x++) {
+    const el = <HTMLDivElement>visibleDivs.item(x);
+    el.style.visibility = "visible";
+  }
+  if (body !== "whiteHole") changeInputRanges(body === "star" ? true : false);
 };
 
 const changeInputRanges = (isStar: boolean) => {

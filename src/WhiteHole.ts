@@ -39,14 +39,14 @@ export class WhiteHole extends Sphere {
       name,
       1,
       precision,
-      0,
+      -1,
       new Vertex(0, 0, 0),
       new Vertex(0, 0, 0),
-      null,
+      textures[0],
       new Color(3, 3, 3),
       true
     );
-    // this.addToList();
+    this.addToList();
     this.timeToSpawn = randomInRange(maxSpawnTime, minSpawnTime);
     this.newStarNumber = 1;
     this.newPlanetNumber = 1;
@@ -56,7 +56,6 @@ export class WhiteHole extends Sphere {
   update() {
     if (this.timeToSpawn > 0) {
       this.timeToSpawn--;
-      console.log("time to spawn", this.timeToSpawn)
     } else {
       this.spawn();
       this.timeToSpawn = randomInRange(maxSpawnTime, minSpawnTime);
@@ -67,7 +66,7 @@ export class WhiteHole extends Sphere {
     const newBodyType = Math.random() > 0.75 ? Star : Planet; // Planets 3x as likely to spawn
     if (newBodyType === Planet) {
       const newPlanet = new Planet(
-        `New Star ${this.newPlanetNumber++}`,
+        `New Planet ${this.newPlanetNumber++}`,
         randomInRange(maxPlanetSize, minPlanetSize),
         16,
         randomInRange(maxPlanetMass, minPlanetMass),
@@ -77,9 +76,9 @@ export class WhiteHole extends Sphere {
         Colors.randomColor()
       );
       newPlanet.translate(
-        this.position.x + newPlanet.velocity.x * newPlanet.size,
-        this.position.y + newPlanet.velocity.y * newPlanet.size,
-        this.position.z + newPlanet.velocity.z * newPlanet.size
+        this.position.x + newPlanet.velocity.x *5,
+        this.position.y + newPlanet.velocity.y *5,
+        this.position.z + newPlanet.velocity.z *5
       );
     } else {
       const newStar = new Star(
@@ -91,9 +90,9 @@ export class WhiteHole extends Sphere {
         this.textures[2],
       );
       newStar.translate(
-        this.position.x + newStar.velocity.x * newStar.size,
-        this.position.y + newStar.velocity.y * newStar.size,
-        this.position.z + newStar.velocity.z * newStar.size
+        this.position.x + newStar.velocity.x*5,
+        this.position.y + newStar.velocity.y*5,
+        this.position.z + newStar.velocity.z*5,
       );
 
     }
@@ -143,8 +142,8 @@ export class WhiteHole extends Sphere {
   }
 
   randomVelocity() {
-    const maxVelocity = 1;
-    const minVelocity = 0.1;
+    const maxVelocity = .1;
+    const minVelocity = 0.025;
 
     const randomOffset = () => Math.random() * 2 - 1;
     return new Vertex(randomOffset(), randomOffset(), randomOffset())
@@ -152,8 +151,8 @@ export class WhiteHole extends Sphere {
       .scale(randomInRange(maxVelocity - minVelocity));
   }
 
-  // addToList() {
-  //   const item = this.createOrUpdateListItem();
-  //   whiteHoleList.appendChild(item);
-  // }
+  addToList() {
+    const item = this.createOrUpdateListItem();
+    whiteHoleList.appendChild(item);
+  }
 }

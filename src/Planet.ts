@@ -37,8 +37,10 @@ export class Planet extends Sphere {
 
   update() {
     if (this.hitBoxTimer > -1) {
-      this.hitBoxTimer--;
-      if ((this.hitBoxTimer = 0)) this.addToAttractors().addToMovers();
+      --this.hitBoxTimer;
+      if (this.hitBoxTimer === 0) {
+        this.addToAttractors().addToMovers();
+      }
     }
     Sphere.prototype.update.call(this);
   }
