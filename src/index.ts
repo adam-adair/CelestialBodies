@@ -343,12 +343,16 @@ export const cancelBody = () => {
 
 const checkCoilSubscribtion = () => {
   const d = document as any;
-  if (d.monetization && d.monetization.state === "started") toggleWhiteHole();
-  else
-    d.monetization.addEventListener("monetizationstart", function () {
-      console.log("HELLO COIL SUBSCRIBER");
+  if (d.monetization) {
+    if (d.monetization.state === "started") {
       toggleWhiteHole();
-    });
+    } else {
+      d.monetization.addEventListener("monetizationstart", function () {
+        console.log("HELLO COIL SUBSCRIBER");
+        toggleWhiteHole();
+      });
+    }
+  }
 };
 
 const toggleWhiteHole = () => {
@@ -366,5 +370,5 @@ const toggleWhiteHole = () => {
   whiteHolelabel.setAttribute("for", whiteHoleRadio.id);
   whiteHolelabel.innerHTML = "White Hole";
 
-  radioDiv.appendChild(whiteHolelabel)
+  radioDiv.appendChild(whiteHolelabel);
 };
