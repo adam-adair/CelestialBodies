@@ -50,7 +50,8 @@ const changeBody = (
   let bodyType;
   if ((<HTMLFormElement>get("bodyStar")).checked) bodyType = "star";
   if ((<HTMLFormElement>get("bodyPlanet")).checked) bodyType = "planet";
-  if ((<HTMLFormElement>get("bodyWhiteHole")).checked) bodyType = "whiteHole";
+  const whiteHoleDiv = <HTMLFormElement>get("bodyWhiteHole");
+  if (whiteHoleDiv && whiteHoleDiv.checked) bodyType = "whiteHole";
 
   let texIx = 0;
   if ((<HTMLFormElement>get("grass")).checked) texIx = 3;
