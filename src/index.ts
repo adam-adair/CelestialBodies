@@ -58,15 +58,15 @@ const loadMusic = (song: any) => {
       // Plus hearing the same loop forever is annoying.
       let playing = false;
       const playButton = document.createElement("button");
-      playButton.innerHTML = "Play Song";
-      document.body.appendChild(playButton);
+      playButton.innerHTML = "Play Music";
+      get("instructions").appendChild(playButton);
       playButton.onclick = () => {
         if (!playing) {
-          playButton.innerHTML = "Pause Song";
+          playButton.innerHTML = "Pause Music";
           audio.play();
           playing = true;
         } else {
-          playButton.innerHTML = "Play Song";
+          playButton.innerHTML = "Play Music";
           audio.pause();
           playing = false;
         }
@@ -152,9 +152,9 @@ const init = async () => {
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(10, textures); // doesn't quite work yet.
+  populate.stableOrbit(20, textures); // doesn't quite work yet.
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
-  populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
+  // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
   // populate.starColor(textures); // just a display of star colors. they don't move.
   // populate.twoPlanets(textures);
@@ -169,6 +169,7 @@ const init = async () => {
   for (let object in gameObjects.movers) {
     startObjects.push(gameObjects.movers[object]);
   }
+
   const startPoint = new Barycenter(startObjects);
 
   //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
@@ -242,13 +243,13 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
-  canvas.width = document.body.clientWidth / 2;
-  canvas.height =
-    document.body.clientHeight -
-    parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
+  canvas.width = get("canvasContainer").scrollWidth; //document.body.clientWidth / 2;
+  canvas.height = get("canvasContainer").scrollHeight; //
+  // document.body.clientHeight -
+  // parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
 
   // disabling for testing so I don't have to wait
-  // loadMusic(spaceJam);
+  loadMusic(spaceJam);
   init();
 };
 
@@ -280,13 +281,14 @@ document.onmousemove = (e) => {
 };
 
 export const toggleForm = () => {
+  get("bodyOptions").style.visibility = "hidden";
   const nameField = <HTMLFormElement>get("bodyName");
   const inputFields = document.getElementsByTagName("input");
   if (bodyForm.style.display === "none") {
     paused = true;
     bodyButton.innerHTML = "Finalize Body";
-    cancelButton.style.display = "block";
-    bodyForm.style.display = "block";
+    cancelButton.style.display = "inline-block";
+    bodyForm.style.display = "inline-block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
     //stops game obj movement when typing input fields
@@ -303,6 +305,7 @@ export const toggleForm = () => {
     }
     addBody(bodyForm, textures);
   } else {
+    get("sizeDiv").style.visibility = "hidden";
     paused = false;
     bodyButton.innerHTML = "Add Body";
     cancelButton.style.display = "none";

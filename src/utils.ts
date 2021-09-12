@@ -10,22 +10,27 @@ export const metersToAU = (meters: number): number => meters / 149597870700; //c
 
 export const auToMeters = (au: number): number => au * 149597870700; // reverse au back to meters, might be useful for display purposes
 
-export const starMasstoRadius = (mass: number): number => {
-  const radius = mass ** 0.8 / 2; //dividing by 2 just to scale
-  return radius;
-};
-
 export const calculateTemperature = (mass: number, radius: number) =>
-  Math.pow(mass ** 3.5 / (4 * Math.PI * radius ** 2), 1 / 4);
+  Math.pow(mass ** 3.5 / (4 * Math.PI * radius ** 2), 1 / 4);   //technically it should be ^.5 but 1/4 makes a better range
 
 export const get = (id: string) => document.getElementById(id);
+
+export const generateRandomStarts= () =>{
+  let remaining = constants.universeSize-constants.maxStarSize*2
+  const startX=Math.random() * remaining*2 - remaining;
+  remaining -= Math.abs(startX);
+  const startY = Math.random() * remaining*2 - remaining;
+  remaining -= startY;
+  const startZ = Math.random() * remaining*2 - remaining;
+  return [startX,startY,startZ];
+}
 
 export default {
   kilogramsToMass,
   massToKilograms,
   metersToAU,
   auToMeters,
-  starMasstoRadius,
   calculateTemperature,
   get,
+  generateRandomStarts
 };

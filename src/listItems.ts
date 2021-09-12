@@ -22,11 +22,11 @@ export function createListItem(objectToList: any): HTMLElement {
 
   const mass = document.createElement("h5");
   mass.id = listItem.id + "-mass";
-  mass.innerHTML = `Mass: ${objectToList.mass}`;
+  mass.innerHTML = `Mass: ${objectToList.mass.toFixed(2)}`;
 
   const size = document.createElement("h5");
   size.id = listItem.id + "-size";
-  size.innerHTML = `Size: ${objectToList.size}`;
+  size.innerHTML = `Size: ${objectToList.size.toFixed(2)}`;
 
   statList.appendChild(name);
   statList.appendChild(mass);
@@ -56,11 +56,11 @@ export function createListItem(objectToList: any): HTMLElement {
   zoomButton.onclick = () => {
     const camPosition = cam.getPosition();
     cam.move(
-      camPosition.x - objectToList.position.x,
-      camPosition.y - objectToList.position.y,
-      camPosition.z -
-        objectToList.position.z +
-        (objectToList.size * constants.zoom) / 2
+      camPosition.x - objectToList.position.x + objectToList.size,
+      camPosition.y - objectToList.position.y - objectToList.size,
+      objectToList.position.z +
+        camPosition.z +
+        objectToList.size * constants.zoom
     );
     cam.lookAt(objectToList.position);
   };

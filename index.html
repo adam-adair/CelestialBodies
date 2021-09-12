@@ -1,186 +1,171 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Celestial Bawdies</title>
-    <style>
-      * {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-      html,
-      body {
-        margin: 10;
-        padding: 0;
-        overflow: hidden;
-        height: 100%;
-      }
-      #bodyForm > *,
-      #sizeDiv > * {
-        display: block;
-      }
-      .flexContainer {
-        display: flex;
-        justify-content: space-between;
-      }
-      .flexContainer > * {
-        flex: 1;
-      }
-      #container > div {
-        margin: 1rem;
-      }
-      #bodyList {
-        height: 50%;
-      }
-      #panels {
-        height: 90vh;
-      }
-      .scrollable {
-        overflow-y: auto;
-      }
-      ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-      }
-      .card {
-        height: fit-content;
-        padding: 0.5rem;
-      }
-      .card:hover {
-        box-shadow: 1px 1px 1px black;
-        background-color: goldenrod;
-      }
-      .card h5 {
-        margin: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container" class="flexContainer">
-      <div>
-        <canvas id="canvas"></canvas>
-        <p id="musicStatus">Music Loading: 0%</p>
-      </div>
-      <div id="panels" class="scrollable">
-        <div id="instructions">
-          <b> Camera Controls </b><br />
-          Look with mouse<br />
-          `: pause<br />
-          u or 3: backwards<br />
-          o or 9: forward<br />
-          i or 8: up<br />
-          k or 2: down<br />
-          j or 4: strafe left<br />
-          l or 6: strafe right<br />
-          m or 1: roll left<br />
-          . or 7: roll right<br />
-          <br />
-        </div>
-        <div id="addBody">
+
+<head>
+  <title>Celestial Bodies</title>
+  <style>
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    html,
+    body {
+      margin: 10;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      color: white;
+      background-color: rgb(17, 17, 17);
+    }
+
+    body>h2 {
+      text-align: center;
+    }
+
+    #bodyForm>*,
+    #sizeDiv>* {
+      display: block;
+    }
+
+    .flexContainer {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .flexContainer>* {
+      flex: 1;
+      text-align: center;
+    }
+
+    #container>div {
+      margin: 1rem;
+    }
+
+    #bodyList {
+      height: 50%;
+    }
+
+    #panels {
+      height: 90vh;
+      flex: 2;
+    }
+
+    .scrollable {
+      overflow-y: auto;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .card {
+      height: fit-content;
+      padding: 0.5rem;
+    }
+
+    .card:hover {
+      box-shadow: 1px 1px 1px black;
+      background-color: goldenrod;
+    }
+
+    .card h5 {
+      margin: 0;
+    }
+
+    #gameContainer {
+      display: flex;
+      height: 90vh;
+    }
+
+    .wide {
+      flex: 4;
+    }
+
+    input[type="number"] {
+      max-width: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Celestial Bodies</h2>
+  <div id="gameContainer" class="flexContainer">
+    <div id="instructions">
+      <b> Camera Controls </b><br />
+      Look with mouse<br />
+      `: pause<br />
+      u or 3: backwards<br />
+      o or 9: forward<br />
+      i or 8: up<br />
+      k or 2: down<br />
+      j or 4: strafe left<br />
+      l or 6: strafe right<br />
+      m or 1: roll left<br />
+      . or 7: roll right<br />
+      <br />
+      <br />
+      <b> New Body Controls</b><br />
+      a, d: Move Along X-Axis<br />
+      w, s: Move Along Y-Axis<br />
+      q, e: Move Along Z-Axis<br />
+      <br />
+      <p id="musicStatus">Music Loading: 0%</p>
+    </div>
+    <div id="canvasContainer" class="wide">
+      <canvas id="canvas"></canvas>
+      <button id="setup1">Setup 1</button>
+      <button id="setup1">Setup 2</button>
+      <button id="setup1">Setup 3</button>
+    </div>
+    <div id="panels" class="scrollable">
+      <div id="addBody">
+        <div>
           <button id="bodyButton">Add Body</button>
           <button id="cancelButton" style="display: none">Cancel</button>
-          <form id="bodyForm" style="display: none">
-            <br />
-            <b> New Body Controls</b><br />
-            a, d: Move Along X-Axis<br />
-            w, s: Move Along Y-Axis<br />
-            q, e: Move Along Z-Axis<br />
-            <br />
+        </div>
+        <form id="bodyForm" style="display: none">
+          <div>
+            <input type="radio" id="bodyPlanet" name="bodyType" value="planet" />
+            <label for="bodyPlanet">Planet</label>
+            <input type="radio" id="bodyStar" name="bodyType" value="star" />
+            <label for="bodyStar">Star</label>
+          </div>
+          <div id="bodyOptions">
             <div>
-              <input
-                type="radio"
-                id="bodyPlanet"
-                name="bodyType"
-                value="planet"
-              />
-              <label for="bodyPlanet">Planet</label>
-              <input type="radio" id="bodyStar" name="bodyType" value="star" />
-              <label for="bodyStar">Star</label>
+              <label for="bodyName">Celestial Body Name:</label>
+              <input type="text" id="bodyName" name="bodyName" />
             </div>
-            <label for="bodyName">Celestial Body Name:</label>
-            <input type="text" id="bodyName" name="bodyName" />
             <div id="sizeDiv">
-              <label for="bodySize" id="bodySizeLabel">Size:</label>
-              <input
-                type="number"
-                id="bodySize"
-                name="bodySize"
-                min=".01"
-                max="50"
-                step=".01"
-                value="1"
-              />
-            </div>
-            <label for="bodyMass">Mass:</label>
-            <input
-              type="number"
-              id="bodyMass"
-              name="bodyMass"
-              min=".01"
-              max="50"
-              step=".01"
-              value="1"
-            />
-            <div>
-              Position:<br />
-              X:<input
-                type="number"
-                id="posX"
-                name="posX"
-                step=".1"
-                value="0"
-              />
-              Y:<input
-                type="number"
-                id="posY"
-                name="posY"
-                step=".1"
-                value="0"
-              />
-              Z:<input
-                type="number"
-                id="posZ"
-                name="posZ"
-                step=".1"
-                value="0"
-              />
+              <div>
+                <label for="bodySize" id="bodySizeLabel">Size:</label>
+                <br>
+                <input type="range" id="bodySize" name="bodySize" />
+              </div>
             </div>
             <div>
-              Initial Velocity:<br />
-              X:<input
-                type="number"
-                id="velX"
-                name="velX"
-                min="-50"
-                max="50"
-                step=".01"
-                value="0"
-              />
-              Y:<input
-                type="number"
-                id="velY"
-                name="velY"
-                min="-50"
-                max="50"
-                step=".01"
-                value="0"
-              />
-              Z:<input
-                type="number"
-                id="velZ"
-                name="velZ"
-                min="-50"
-                max="50"
-                step=".01"
-                value="0"
-              />
+              <label for="bodyMass" id="bodyMassLabel">Mass:</label>
+              <br>
+              <input type="range" id="bodyMass" name="bodyMass" />
+            </div>
+            <div>
+              Position: X:<input type="number" id="posX" name="posX" step=".1" value="0" />
+              Y:<input type="number" id="posY" name="posY" step=".1" value="0" />
+              Z:<input type="number" id="posZ" name="posZ" step=".1" value="0" />
+            </div>
+            <div>
+              Initial Velocity: X:<input type="number" id="velX" name="velX" min="-50" max="50" step=".01" value="0" />
+              Y:<input type="number" id="velY" name="velY" min="-50" max="50" step=".01" value="0" />
+              Z:<input type="number" id="velZ" name="velZ" min="-50" max="50" step=".01" value="0" />
             </div>
             <div id="surfaceDiv">
-              <span id="bodySurfaceLabel"> Surface:<br /> </span>
+              Surface:
               <input type="radio" id="grass" name="bodySurface" value="grass" />
               <label for="grass">Grass</label>
               <input type="radio" id="water" name="bodySurface" value="water" />
@@ -188,26 +173,24 @@
               <input type="radio" id="sand" name="bodySurface" value="sand" />
               <label for="sand">Sand</label>
               <input type="radio" id="solid" name="bodySurface" value="color" />
-              <label for="solid">Solid Color</label>
-              <br />
-              <label for="color">Base Color</label>
-              <input
-                type="color"
-                id="colorRGB"
-                name="bodyBase"
-                value="#ffffff"
-              />
+              <label for="solid">Solid</label>
             </div>
-          </form>
-        </div>
-        <div id="bodyList">
-          <h3>Stars</h3>
-          <ul id="starList" class="scrollable"></ul>
-          <h3>Planets</h3>
-          <ul id="planetList" class="scrollable"></ul>
-        </div>
+            <div id="colorDiv">
+              <label for="color">Base Color</label>
+              <input type="color" id="colorRGB" name="bodyBase" value="#ffffff" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div id="bodyList">
+        <h3>Stars</h3>
+        <ul id="starList" class="scrollable"></ul>
+        <h3>Planets</h3>
+        <ul id="planetList" class="scrollable"></ul>
       </div>
     </div>
-    <script src="./dist/bundle.js"></script>
-  </body>
+  </div>
+  <script src="./dist/bundle.js"></script>
+</body>
+
 </html>

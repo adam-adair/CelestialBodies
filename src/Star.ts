@@ -4,17 +4,19 @@ import { ProceduralTextureData, Vertex } from "./mesh";
 import { Sphere } from "./Sphere";
 import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
-import { starMasstoRadius, calculateTemperature } from "./utils";
+import { calculateTemperature } from "./utils";
+import { constants } from "./constants";
+const { starMasstoRadius, massColorFactor } = constants;
 
 const starList = document.getElementById("starList");
 
-const pickColor = (temperature: number) => {
-  if (temperature <= 3) return Colors.Red;
-  else if (temperature <= 4) return Colors.Orange;
-  else if (temperature <= 6) return Colors.Yellow;
-  else if (temperature <= 7) return Colors.White;
-  else if (temperature <= 10) return Colors.ClassA;
-  else if (temperature <= 20) return Colors.ClassB;
+const pickColor = (mass: number) => {
+  if (mass <= 0.45 * massColorFactor) return Colors.Red;
+  else if (mass <= 0.8 * massColorFactor) return Colors.Orange;
+  else if (mass <= 1.04 * massColorFactor) return Colors.Yellow;
+  else if (mass <= 1.4 * massColorFactor) return Colors.White;
+  else if (mass <= 2.1 * massColorFactor) return Colors.ClassA;
+  else if (mass <= 15.8 * massColorFactor) return Colors.ClassB;
   return Colors.Blue;
 };
 
@@ -34,7 +36,7 @@ export class Star extends Sphere {
     const luminosity = mass ** 3.5;
     const radius = starMasstoRadius(mass); //**(v-1)/(v+3); // mass and radius are in solar units
     const temperature = calculateTemperature(mass, radius);
-    const color = pickColor(temperature);
+    const color = pickColor(mass);
 
     super(
       name,
@@ -77,7 +79,7 @@ export class Star extends Sphere {
   }
 
   reColor() {
-    const newColor = pickColor(this.temperature);
+    const newColor = pickColor(this.mass);
     if (this.faces[0].color !== newColor) {
       this.faces.forEach((face) => {
         face.color = newColor;
@@ -86,8 +88,8 @@ export class Star extends Sphere {
     }
   }
 
-  addToList(){
+  addToList() {
     const item = this.createOrUpdateListItem();
     starList.appendChild(item);
-    }
+  }
 }
