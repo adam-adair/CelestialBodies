@@ -3,6 +3,7 @@
 
 <head>
   <title>Celestial Bodies</title>
+  <meta name="monetization" content="$ilp.uphold.com/UZLPzDafnHhf">
   <style>
     * {
       -webkit-touch-callout: none;
@@ -140,13 +141,12 @@
           <button id="cancelButton" style="display: none">Cancel</button>
         </div>
         <form id="bodyForm" style="display: none">
-          <div>
+          <div id="radioButtons">
             <input type="radio" id="bodyPlanet" name="bodyType" value="planet" />
             <label for="bodyPlanet">Planet</label>
             <input type="radio" id="bodyStar" name="bodyType" value="star" />
             <label for="bodyStar">Star</label>
-            <input type="radio" id="bodyWhiteHole" name="bodyType" value="whiteHole" />
-            <label for="bodyWhiteHole">White Hole</label>
+
           </div>
           <div id="bodyOptions">
             <div id="nameDiv" class="hideable planet star whiteHole">

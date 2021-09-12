@@ -22,6 +22,7 @@ export const addBody = (
   bodyForm: HTMLFormElement,
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ) => {
+
   bodyForm.addEventListener("change", (ev) => changeBody(ev, textures));
 };
 
