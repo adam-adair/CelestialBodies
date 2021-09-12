@@ -1,6 +1,7 @@
 import { cam } from ".";
-import { Mesh } from "./mesh";
+import { Mesh, Vertex } from "./mesh";
 import { get } from "./utils";
+import { constants } from "./constants";
 
 interface altKey<T> {
   [K: string]: T;
@@ -171,12 +172,45 @@ export const movePlayer = (
 };
 
 export const moveCamera = (inp: PlayerMovement) => {
-  if (inp.camL) cam.move(-0.1, 0, 0);
-  if (inp.camR) cam.move(0.1, 0, 0);
-  if (inp.camU) cam.move(0, 0.1, 0);
-  if (inp.camD) cam.move(0, -0.1, 0);
-  if (inp.camI) cam.move(0, 0, -0.1);
-  if (inp.camO) cam.move(0, 0, 0.1);
-  if (inp.camRL) cam.rotate(0, 0, 1);
-  if (inp.camRR) cam.rotate(0, 0, -1);
+  if (inp.camL) {
+    cam.follow();
+    cam.move(-0.1, 0, 0);
+  }
+  if (inp.camR) {
+    cam.follow();
+    cam.move(0.1, 0, 0);
+  }
+  if (inp.camU) {
+    cam.follow();
+    cam.move(0, 0.1, 0);
+  }
+  if (inp.camD) {
+    cam.follow();
+    cam.move(0, -0.1, 0);
+  }
+  if (inp.camI) {
+    cam.follow();
+    cam.move(0, 0, -0.1);
+  }
+  if (inp.camO) {
+    cam.follow();
+    cam.move(0, 0, 0.1);
+  }
+  if (inp.camRL) {
+    cam.follow();
+    cam.rotate(0, 0, 1);
+  }
+  if (inp.camRR) {
+    cam.follow();
+    cam.rotate(0, 0, -1);
+  }
+  if (cam.followTarget) {
+    const { x, y, z } = cam.followTarget.velocity;
+    cam.move(-x, y, -z);
+  }
+  if (cam.watchTarget) {
+    const { x, y, z } = cam.watchTarget.position;
+
+    //  cam.lookAt(new Vertex(x,y,z));
+  }
 };

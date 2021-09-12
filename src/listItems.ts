@@ -51,9 +51,13 @@ export function createListItem(objectToList: any): HTMLElement {
   vectorList.appendChild(position);
   vectorList.appendChild(velocity);
 
-  const zoomButton = document.createElement("button");
-  zoomButton.innerHTML = "Fly To";
-  zoomButton.onclick = () => {
+  const buttonDiv = document.createElement("div");
+  buttonDiv.className = "flexContainer column";
+  card.appendChild(buttonDiv);
+
+  const followButton = document.createElement("button");
+  followButton.innerHTML = "Fly To";
+  followButton.onclick = () => {
     const camPosition = cam.getPosition();
     cam.move(
       camPosition.x - objectToList.position.x + objectToList.size,
@@ -63,9 +67,19 @@ export function createListItem(objectToList: any): HTMLElement {
         objectToList.size * constants.zoom
     );
     cam.lookAt(objectToList.position);
+    cam.follow(objectToList);
   };
 
-  card.appendChild(zoomButton);
+  buttonDiv.appendChild(followButton);
+
+  const watchButton = document.createElement("button");
+  watchButton.innerHTML = "Look At";
+  watchButton.onclick = () => {
+    cam.lookAt(objectToList.position);
+    // cam.watch(objectToList);
+  };
+
+  buttonDiv.appendChild(watchButton);
 
   return listItem;
 }
