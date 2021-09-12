@@ -22,11 +22,11 @@ export function createListItem(objectToList: any): HTMLElement {
 
   const mass = document.createElement("h5");
   mass.id = listItem.id + "-mass";
-  mass.innerHTML = `Mass: ${objectToList.mass}`;
+  mass.innerHTML = `Mass: ${objectToList.mass.toFixed(2)}`;
 
   const size = document.createElement("h5");
   size.id = listItem.id + "-size";
-  size.innerHTML = `Size: ${objectToList.size}`;
+  size.innerHTML = `Size: ${objectToList.size.toFixed(2)}`;
 
   statList.appendChild(name);
   statList.appendChild(mass);
@@ -52,10 +52,16 @@ export function createListItem(objectToList: any): HTMLElement {
   vectorList.appendChild(velocity);
 
   const zoomButton = document.createElement("button");
-  zoomButton.innerHTML= "Fly To"
-  zoomButton.onclick = () =>{
-    const camPosition =cam.getPosition();
-    cam.move(camPosition.x - objectToList.position.x + objectToList.size, camPosition.y- objectToList.position.y- objectToList.size, objectToList.position.z + camPosition.z +objectToList.size*constants.zoom);
+  zoomButton.innerHTML = "Fly To";
+  zoomButton.onclick = () => {
+    const camPosition = cam.getPosition();
+    cam.move(
+      camPosition.x - objectToList.position.x + objectToList.size,
+      camPosition.y - objectToList.position.y - objectToList.size,
+      objectToList.position.z +
+        camPosition.z +
+        objectToList.size * constants.zoom
+    );
     cam.lookAt(objectToList.position);
   };
 

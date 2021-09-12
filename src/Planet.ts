@@ -9,7 +9,13 @@ import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
 const planetList = document.getElementById("planetList");
 
-const { minPlanetMass, maxPlanetMass, minPlanetSize, maxPlanetSize, impactThreshold } = constants;
+const {
+  minPlanetMass,
+  maxPlanetMass,
+  minPlanetSize,
+  maxPlanetSize,
+  impactThreshold,
+} = constants;
 
 export class Planet extends Sphere {
   hitBoxTimer: number;
@@ -26,13 +32,13 @@ export class Planet extends Sphere {
     //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
     super(name, size, precision, mass, velocity, acceleration, texture, color);
     this.addToList();
-    this.hitBoxTimer=30;
+    this.hitBoxTimer = 30;
   }
 
-  update(){
-    if(this.hitBoxTimer>-1){
+  update() {
+    if (this.hitBoxTimer > -1) {
       this.hitBoxTimer--;
-      if(this.hitBoxTimer=0) this.addToAttractors().addToMovers();
+      if ((this.hitBoxTimer = 0)) this.addToAttractors().addToMovers();
     }
     Sphere.prototype.update.call(this);
   }
@@ -52,8 +58,10 @@ export class Planet extends Sphere {
       const smaller = this.mass < otherObject.size ? this : otherObject;
       const newVelocity = bigger.alterTrajectory(smaller);
       const diff = newVelocity.add(bigger.velocity).magnitude();
-      console.log("impact", diff)
-      if (diff > impactThreshold || bigger.mass+smaller.mass > maxPlanetMass) {
+      if (
+        diff > impactThreshold ||
+        bigger.mass + smaller.mass > maxPlanetMass
+      ) {
         bigger.split(gameObjects, smaller);
       } else {
         bigger.absorb(gameObjects, smaller);
@@ -98,23 +106,22 @@ export class Planet extends Sphere {
         new Vertex(0, 0, 0),
         this.texture,
         randomColor()
-      )
-        .translate(
-          /* start the new object where the 2 planets collided but
+      ).translate(
+        /* start the new object where the 2 planets collided but
           offset enough in the direction of its velocity that it won't
           immediately collide with all the other new objects */
-          startPosition.x + newVelocity.x * newSize * 4,
-          startPosition.y + newVelocity.y * newSize * 4,
-          startPosition.z + newVelocity.z * newSize * 4
-        );
+        startPosition.x + newVelocity.x * newSize * 4,
+        startPosition.y + newVelocity.y * newSize * 4,
+        startPosition.z + newVelocity.z * newSize * 4
+      );
       remainingMass -= newMass;
     }
     this.destroy(gameObjects);
     otherObject.destroy(gameObjects);
   }
 
-  addToList(){
+  addToList() {
     const item = this.createOrUpdateListItem();
     planetList.appendChild(item);
-    }
+  }
 }

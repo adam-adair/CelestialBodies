@@ -6,17 +6,17 @@ import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
 import { calculateTemperature } from "./utils";
 import { constants } from "./constants";
-const {starMasstoRadius, massColorFactor} = constants;
+const { starMasstoRadius, massColorFactor } = constants;
 
 const starList = document.getElementById("starList");
 
 const pickColor = (mass: number) => {
-  if (mass <= .45* massColorFactor) return Colors.Red;
-  else if (mass <=.8 *massColorFactor) return Colors.Orange;
-  else if (mass <= 1.04 *massColorFactor) return Colors.Yellow;
-  else if (mass <= 1.4 *massColorFactor) return Colors.White;
-  else if (mass <= 2.1 *massColorFactor) return Colors.ClassA;
-  else if (mass <= 15.8 *massColorFactor) return Colors.ClassB;
+  if (mass <= 0.45 * massColorFactor) return Colors.Red;
+  else if (mass <= 0.8 * massColorFactor) return Colors.Orange;
+  else if (mass <= 1.04 * massColorFactor) return Colors.Yellow;
+  else if (mass <= 1.4 * massColorFactor) return Colors.White;
+  else if (mass <= 2.1 * massColorFactor) return Colors.ClassA;
+  else if (mass <= 15.8 * massColorFactor) return Colors.ClassB;
   return Colors.Blue;
 };
 
@@ -37,9 +37,6 @@ export class Star extends Sphere {
     const radius = starMasstoRadius(mass); //**(v-1)/(v+3); // mass and radius are in solar units
     const temperature = calculateTemperature(mass, radius);
     const color = pickColor(mass);
-    console.log(name, mass);
-    console.log(name, temperature);
-    console.log(name, color);
 
     super(
       name,
