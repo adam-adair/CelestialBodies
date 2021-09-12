@@ -19,7 +19,7 @@ const {
   minStarSize,
   universeSize,
   starMasstoRadius,
-  massColorFactor
+  massColorFactor,
 } = constants;
 
 //randomly generate solar system
@@ -171,7 +171,7 @@ export const stableOrbit = (
     .addToMovers();
   for (let x = 0; x < numPlanets; x++) {
     const planet = new Planet(
-      "earth",
+      `Planet ${x + 1}`,
       minPlanetSize,
       16,
       minPlanetMass,
@@ -183,8 +183,12 @@ export const stableOrbit = (
       .addToAttractors()
       .addToMovers(); //metersToAU(12742000) to get the real diameter of the earth but it's way too small to see relative to the sun
 
-    planet.translate(-sun.size,0,0);
-    planet.translate((-((universeSize - sun.size)/numPlanets)*planet.size) * (x + 1), 0, 0);
+    planet.translate(-sun.size, 0, 0);
+    planet.translate(
+      -((universeSize - sun.size) / numPlanets) * planet.size * (x + 1),
+      0,
+      0
+    );
     planet.setStableOrbit(sun);
   }
 };
@@ -193,7 +197,7 @@ export const stableOrbit = (
 export const binaryStars = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ): Sphere[] => {
-  const startSpeed = .03;
+  const startSpeed = 0.03;
   const mass = minStarMass;
   const sun1 = new Star(
     "sun1",
@@ -216,8 +220,8 @@ export const binaryStars = (
     .addToAttractors()
     .addToMovers();
 
-  sun1.translate(sun1.size*5, 0, 0);
-  sun2.translate(-sun2.size*5, 0, 0);
+  sun1.translate(sun1.size * 5, 0, 0);
+  sun2.translate(-sun2.size * 5, 0, 0);
   return [sun1, sun2];
 };
 
@@ -253,22 +257,22 @@ export const starColor = (
     null,
     textures[3]
   ).addToAttractors();
-  redStar.translate(maxStarSize*3, maxStarSize*3, 0);
+  redStar.translate(maxStarSize * 3, maxStarSize * 3, 0);
 
   const orangeStar = new Star(
     "Orange",
     16,
-    .8 * massColorFactor,
+    0.8 * massColorFactor,
     null,
     null,
     textures[2]
   ).addToAttractors();
-  orangeStar.translate(maxStarSize*2, maxStarSize*2, 0);
+  orangeStar.translate(maxStarSize * 2, maxStarSize * 2, 0);
 
   const yellowStar = new Star(
     "Yellow",
     16,
-    1.04 *massColorFactor,
+    1.04 * massColorFactor,
     null,
     null,
     textures[2]
@@ -278,7 +282,7 @@ export const starColor = (
   const whiteStar = new Star(
     "White",
     16,
-    1.4 *massColorFactor,
+    1.4 * massColorFactor,
     null,
     null,
     textures[2]
@@ -287,7 +291,7 @@ export const starColor = (
   const blueWhiteStar = new Star(
     "Blue White",
     16,
-    2.1 *massColorFactor,
+    2.1 * massColorFactor,
     null,
     null,
     textures[2]
@@ -297,30 +301,30 @@ export const starColor = (
   const classB = new Star(
     "Class B",
     16,
-    15.8 *massColorFactor,
+    15.8 * massColorFactor,
     null,
     null,
     textures[2]
   ).addToAttractors();
-  classB.translate(-maxStarSize*2, -maxStarSize*2, 0);
+  classB.translate(-maxStarSize * 2, -maxStarSize * 2, 0);
 
   const blueStar = new Star(
     "Blue",
     16,
-    16 *massColorFactor,
+    16 * massColorFactor,
     null,
     null,
     textures[2]
   ).addToAttractors();
-  blueStar.translate(-maxStarSize*4, -maxStarSize*4, 0);
+  blueStar.translate(-maxStarSize * 4, -maxStarSize * 4, 0);
 };
 
 export const twoPlanets = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ) => {
   for (let x = 0; x < 2; x++) {
-    const mass = (minPlanetMass+maxPlanetMass)/2;
-    const size = (minPlanetSize+maxPlanetSize)/2;
+    const mass = (minPlanetMass + maxPlanetMass) / 2;
+    const size = (minPlanetSize + maxPlanetSize) / 2;
     const color = new Color(Math.random(), Math.random(), Math.random());
     const velocity = new Vertex(0, 0, 0);
     const acceleration = new Vertex(0, 0, 0);
@@ -339,8 +343,8 @@ export const twoPlanets = (
     )
       .addToAttractors()
       .addToMovers();
-    const positionX = x % 2 === 0 ? x * 5*size : -x * 5 *size;
-    const positionY = x % 2 === 0 ? x * 5*size : -x * 5*size;
+    const positionX = x % 2 === 0 ? x * 5 * size : -x * 5 * size;
+    const positionY = x % 2 === 0 ? x * 5 * size : -x * 5 * size;
     body.translate(positionX, positionY, 0);
   }
 };
@@ -348,8 +352,8 @@ export const twoPlanets = (
 export const testCollisionAddMomentum = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ) => {
-  const mass = (minPlanetMass+maxPlanetMass)/4;
-    const size = (minPlanetSize+maxPlanetSize)/2;
+  const mass = (minPlanetMass + maxPlanetMass) / 4;
+  const size = (minPlanetSize + maxPlanetSize) / 2;
   const color = new Color(Math.random(), Math.random(), Math.random());
   const acceleration = new Vertex(0, 0, 0);
   const texture = textures[2];
@@ -365,7 +369,7 @@ export const testCollisionAddMomentum = (
     texture,
     Red
   ).addToMovers();
-  planet1.translate(-5* size, -5* size, 0);
+  planet1.translate(-5 * size, -5 * size, 0);
 
   const planet2 = new Planet(
     `Planet 1`,
@@ -377,14 +381,14 @@ export const testCollisionAddMomentum = (
     texture,
     Green
   ).addToMovers();
-  planet2.translate(-2*size, -2*size, 0);
+  planet2.translate(-2 * size, -2 * size, 0);
 };
 
 export const testCollisionLoseMomentum = (
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ) => {
-  const mass = (minPlanetMass+maxPlanetMass)/4;
-    const size = (minPlanetSize+maxPlanetSize)/2;
+  const mass = (minPlanetMass + maxPlanetMass) / 4;
+  const size = (minPlanetSize + maxPlanetSize) / 2;
   const acceleration = new Vertex(0, 0, 0);
   const texture = textures[2];
   const precision = 8;
@@ -399,7 +403,7 @@ export const testCollisionLoseMomentum = (
     texture,
     Red
   ).addToMovers();
-  planet1.translate(-5*size, 0, 0);
+  planet1.translate(-5 * size, 0, 0);
 
   const planet2 = new Planet(
     `Planet 1`,

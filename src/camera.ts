@@ -1,6 +1,7 @@
 import { Vertex } from "./mesh";
 import { constants } from "./constants";
 import initialize from "./initialize";
+import { Body } from "./bodies";
 const { canvas, gl, program } = initialize;
 const { zoom } = constants;
 
@@ -8,16 +9,20 @@ export class Camera {
   viewMatrix: DOMMatrix;
   projMatrix: DOMMatrix;
   cameraGL: WebGLUniformLocation;
+  followTarget: Body | null;
+  watchTarget: Body | null;
   constructor() {
     this.cameraGL = gl.getUniformLocation(program, "camera");
     this.viewMatrix = new DOMMatrix();
-    this.move(0, 3, 13);
+    this.move(0, 3, 50);
     this.projMatrix = this.perspective(
       zoom,
       canvas.width / canvas.height,
       1,
       1000
     );
+    this.followTarget = null;
+    this.watchTarget = null;
   }
   perspective = (fov: number, ratio: number, near: number, far: number) => {
     const tan = 1 / Math.tan((fov * Math.PI) / 180);
@@ -49,24 +54,24 @@ export class Camera {
   }
   lookAt(target: Vertex) {
     const camPosition = this.getPosition();
-    const up = new Vertex(0, 1, 0);
+    const tmp = new Vertex(0, 1, 0);
 
-    const zAxis = camPosition.subtract(target).normalize();
-    const xAxis = up.cross(zAxis).normalize();
-    const yAxis = zAxis.cross(xAxis).normalize();
+    const forward = camPosition.subtract(target).normalize();
+    const right = tmp.cross(forward).normalize();
+    const up = forward.cross(right).normalize();
 
     this.viewMatrix = new DOMMatrix([
-      xAxis.x,
-      xAxis.y,
-      xAxis.z,
+      right.x,
+      right.y,
+      right.z,
       0,
-      yAxis.x,
-      yAxis.y,
-      yAxis.z,
+      up.x,
+      up.y,
+      up.z,
       0,
-      zAxis.x,
-      zAxis.y,
-      zAxis.z,
+      forward.x,
+      forward.y,
+      forward.z,
       0,
       camPosition.x,
       camPosition.y,
@@ -74,5 +79,13 @@ export class Camera {
       1,
     ]);
     this.view();
+  }
+
+  follow(target?: Body) {
+    this.followTarget = target;
+  }
+
+  watch(target?: Body) {
+    this.watchTarget = target;
   }
 }

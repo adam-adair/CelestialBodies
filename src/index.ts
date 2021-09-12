@@ -270,6 +270,7 @@ document.onmousemove = (e) => {
   let x = e.clientX;
   let y = e.clientY;
   if (dragging) {
+    cam.watch();
     let dy = (y - lastY) / canvas.height;
     let dx = (x - lastX) / canvas.width;
     cam.rotate(dx * 100, dy * 100, 0);
