@@ -6,7 +6,12 @@ import { ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
 import { get } from "./utils";
 import { Sphere } from "./Sphere";
-import { sandTexture, grassTexture, cloudTexture, blankTexture } from "./texture";
+import {
+  sandTexture,
+  grassTexture,
+  cloudTexture,
+  blankTexture,
+} from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
 import { Grid } from "./grid";
@@ -23,6 +28,10 @@ const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
 const cancelButton = get("cancelButton") as HTMLButtonElement;
+get("stableOrbit").onclick = () => genExample(1);
+get("binaryStars").onclick = () => genExample(2);
+get("randomSystem").onclick = () => genExample(3);
+get("emptyUniverse").onclick = () => genExample(0);
 const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -107,8 +116,6 @@ let textures: (HTMLImageElement | ProceduralTextureData)[];
 let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
-
-
 
 const init = async () => {
   // textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
@@ -311,4 +318,24 @@ const toggleWhiteHole = () => {
 
   radioDiv.appendChild(whiteHolelabel);
   get("whHeader").style.visibility = "visible";
+};
+
+const genExample = (ex: number) => {
+  for (let object in gameObjects.objects) {
+    gameObjects.objects[object].destroy(gameObjects);
+  }
+  player = null;
+  cam = new Camera();
+  switch (ex) {
+    case 1:
+      populate.stableOrbit(10, textures);
+      break;
+    case 2:
+      populate.binaryStars(textures);
+      break;
+    case 3:
+      populate.randomPlanetSystem(50, textures);
+      populate.randomSystem(2, textures);
+      break;
+  }
 };
