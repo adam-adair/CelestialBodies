@@ -241,7 +241,10 @@ export const toggleForm = () => {
         document.onkeyup = null;
       };
       field.onblur = () => {
-        document.onkeydown = (ev) => handleInput(ev, true, playerInput);
+        document.onkeydown = (ev) => {
+          if (ev.key === "`") paused = !paused;
+          handleInput(ev, true, playerInput);
+        }
         document.onkeyup = (ev) => handleInput(ev, false, playerInput);
       };
     }
