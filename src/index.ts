@@ -233,18 +233,6 @@ export const toggleForm = () => {
     bodyForm.style.display = "inline-block";
     (<HTMLFormElement>get("bodyStar")).checked = false;
     (<HTMLFormElement>get("bodyPlanet")).checked = false;
-    //stops game obj movement when typing input fields
-    for (let i = 0; i < inputFields.length; i++) {
-      const field = inputFields[i];
-      field.onfocus = () => {
-        document.onkeydown = null;
-        document.onkeyup = null;
-      };
-      field.onblur = () => {
-        document.onkeydown = (ev) => handleInput(ev, true, playerInput);
-        document.onkeyup = (ev) => handleInput(ev, false, playerInput);
-      };
-    }
     addBody(bodyForm, textures);
   } else {
     get("sizeDiv").style.visibility = "hidden";
