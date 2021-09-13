@@ -1,9 +1,9 @@
 const path = require("path");
-const TerserPlugin = require('terser-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-   ///// using the terser plugin
-   optimization: {
+  ///// using the terser plugin
+  optimization: {
     minimize: true,
     minimizer: [
       new TerserPlugin({
@@ -11,25 +11,25 @@ module.exports = {
           ecma: 2016,
           parse: {},
           compress: {
-            ecma:2016,
-            toplevel:true,
-            arguments:true,
-            booleans_as_integers:true,
-            drop_console:true,
-            hoist_funs:true,
-            keep_fargs:false,
-            passes:3,
-            pure_getters:true,
-            unsafe:true,
-            unsafe_Function:true,
-            unsafe_arrows:true,
-            unsafe_comps:true,
-            unsafe_math:true,
-            unsafe_methods:true,
-            unsafe_proto:true,
-            unsafe_regexp:true,
-            unsafe_symbols:true,
-            unsafe_undefined:true
+            ecma: 2016,
+            toplevel: true,
+            arguments: true,
+            booleans_as_integers: true,
+            drop_console: true,
+            hoist_funs: true,
+            keep_fargs: false,
+            passes: 3,
+            pure_getters: true,
+            unsafe: true,
+            unsafe_Function: true,
+            unsafe_arrows: true,
+            unsafe_comps: true,
+            unsafe_math: true,
+            unsafe_methods: true,
+            unsafe_proto: true,
+            unsafe_regexp: true,
+            unsafe_symbols: true,
+            unsafe_undefined: true,
           },
           mangle: true, // Note `mangle.properties` is `false` by default.
           module: false,
@@ -63,6 +63,6 @@ module.exports = {
   },
   output: {
     filename: "bundle.js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname),
   },
 };
