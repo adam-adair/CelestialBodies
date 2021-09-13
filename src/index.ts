@@ -29,6 +29,9 @@ const { movers, attractors, objects } = gameObjects;
 let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
 const cancelButton = get("cancelButton") as HTMLButtonElement;
+get("stableOrbit").onclick = () => genExample(1);
+get("binaryStars").onclick = () => genExample(2);
+get("randomSystem").onclick = () => genExample(3);
 const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -170,7 +173,7 @@ const init = async () => {
   // populate.twoPlanets(textures);
   // populate.testCollisionAddMomentum(textures);
   // populate.testCollisionLoseMomentum(textures);
-  // populate.randomPlanetSystem(30, textures);
+  // populate.randomPlanetSystem(10, textures);
   // populate.testTranslation(textures);
   // populate.whiteHole(textures);
   grid = new Grid(10, 10, true);
@@ -383,4 +386,24 @@ const toggleWhiteHole = () => {
 
   radioDiv.appendChild(whiteHolelabel);
   get("whHeader").style.visibility = "visible";
+};
+
+const genExample = (ex: number) => {
+  for (let object in gameObjects.objects) {
+    gameObjects.objects[object].destroy(gameObjects);
+  }
+  player = null;
+  cam = new Camera();
+  switch (ex) {
+    case 1:
+      populate.stableOrbit(10, textures);
+      break;
+    case 2:
+      populate.binaryStars(textures);
+      break;
+    case 3:
+      populate.randomPlanetSystem(8, textures);
+      populate.randomSystem(1, textures);
+      break;
+  }
 };

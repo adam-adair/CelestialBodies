@@ -204,15 +204,15 @@ export const moveCamera = (inp: PlayerMovement, paused = false) => {
     cam.follow();
     cam.rotate(0, 0, -1);
   }
-  if(!paused){
-  if (cam.followTarget) {
-    const { x, y, z } = cam.followTarget.velocity;
-    cam.move(-x, y, -z);
-  }
-  if (cam.watchTarget) {
-    const { x, y, z } = cam.watchTarget.position;
+  if (!paused) {
+    if (cam.followTarget) {
+      const { x, y, z } = cam.followTarget.velocity;
+      cam.move(-x, y, -z);
+    }
+    if (cam.watchTarget) {
+      const { x, y, z } = cam.watchTarget.position;
 
-    //  cam.lookAt(new Vertex(x,y,z));
+      //  cam.lookAt(new Vertex(x,y,z));
+    }
   }
-}
 };
