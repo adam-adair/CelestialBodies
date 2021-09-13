@@ -80,11 +80,9 @@ export class Camera {
     ]);
     this.view();
   }
-
   follow(target?: Body) {
     this.followTarget = target;
   }
-
   watch(target?: Body) {
     this.watchTarget = target;
   }

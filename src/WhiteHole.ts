@@ -2,14 +2,11 @@ import Colors, { Color } from "./colors";
 import { ProceduralTextureData, Vertex } from "./mesh";
 
 import { Sphere } from "./Sphere";
-import { Body } from "./bodies";
-import { GameObjects } from "./GameObjects";
 import { Planet } from "./Planet";
 import { Star } from "./Star";
-import { randomInRange } from "./utils";
+import { randomInRange, seperateSpawnPoints } from "./utils";
 import { constants } from "./constants";
 const {
-  starMasstoRadius,
   massColorFactor,
   maxSpawnTime,
   minSpawnTime,
@@ -19,8 +16,6 @@ const {
   maxPlanetSize,
   maxStarMass,
   minStarMass,
-  maxStarSize,
-  minStarSize,
 } = constants;
 
 const whiteHoleList = document.getElementById("whiteHoleList");
@@ -75,11 +70,8 @@ export class WhiteHole extends Sphere {
         this.textures[randomInRange(this.textures.length)],
         Colors.randomColor()
       );
-      newPlanet.translate(
-        this.position.x + newPlanet.velocity.x *5,
-        this.position.y + newPlanet.velocity.y *5,
-        this.position.z + newPlanet.velocity.z *5
-      );
+      const [x, y, z] = seperateSpawnPoints(this.position, newPlanet.velocity);
+      newPlanet.translate(x, y, z);
     } else {
       const newStar = new Star(
         `New Star ${this.newPlanetNumber++}`,
@@ -87,14 +79,10 @@ export class WhiteHole extends Sphere {
         this.randomWeightedMass(),
         this.randomVelocity(),
         null,
-        this.textures[2],
+        this.textures[2]
       );
-      newStar.translate(
-        this.position.x + newStar.velocity.x*5,
-        this.position.y + newStar.velocity.y*5,
-        this.position.z + newStar.velocity.z*5,
-      );
-
+      const [x, y, z] = seperateSpawnPoints(this.position, newStar.velocity);
+      newStar.translate(x, y, z);
     }
   }
 
@@ -110,13 +98,13 @@ export class WhiteHole extends Sphere {
     const whiteEnd = 1.4 * massColorFactor;
     const yellowEnd = 1.04 * massColorFactor;
     const orangeEnd = 0.8 * massColorFactor;
-    const redEnd = 0.45 * massColorFactor
+    const redEnd = 0.45 * massColorFactor;
 
     class Spectral {
       chance: number;
       maxMass: number;
-      minMass:number;
-      constructor(chance: number, maxMass: number, minMass:number) {
+      minMass: number;
+      constructor(chance: number, maxMass: number, minMass: number) {
         this.chance = chance;
         this.maxMass = maxMass;
         this.minMass = minMass;
@@ -124,25 +112,28 @@ export class WhiteHole extends Sphere {
     }
 
     //chances must add up to 1!!!!
-    const classes =[
-      new Spectral(.0000003, maxStarMass, bEnd),
-      new Spectral(.0013, bEnd, aEnd),
-      new Spectral(.006, aEnd, whiteEnd),
-      new Spectral(.03, whiteEnd, yellowEnd),
-      new Spectral( .076, yellowEnd, orangeEnd),
-      new Spectral(.121, orangeEnd, redEnd),
-      new Spectral(.7641, redEnd, minStarMass)
-    ]
+    const classes = [
+      new Spectral(0.0000003, maxStarMass, bEnd),
+      new Spectral(0.0013, bEnd, aEnd),
+      new Spectral(0.006, aEnd, whiteEnd),
+      new Spectral(0.03, whiteEnd, yellowEnd),
+      new Spectral(0.076, yellowEnd, orangeEnd),
+      new Spectral(0.121, orangeEnd, redEnd),
+      new Spectral(0.7641, redEnd, minStarMass),
+    ];
 
-    let i, sum=0, r=Math.random();
-      for (i in classes) {
-        sum += classes[i].chance;
-        if (r <= sum) return randomInRange(classes[i].maxMass, classes[i].minMass);
-      }
+    let i,
+      sum = 0,
+      r = Math.random();
+    for (i in classes) {
+      sum += classes[i].chance;
+      if (r <= sum)
+        return randomInRange(classes[i].maxMass, classes[i].minMass);
+    }
   }
 
   randomVelocity() {
-    const maxVelocity = .1;
+    const maxVelocity = 0.1;
     const minVelocity = 0.025;
 
     const randomOffset = () => Math.random() * 2 - 1;

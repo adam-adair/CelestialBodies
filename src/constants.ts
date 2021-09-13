@@ -17,10 +17,7 @@ export const constants = {
   lightDirection: { x: 0, y: 4, z: 10 },
   ambientLightAmount: 1,
   movement: 0.5,
-  simulationSpeed: 23, // days simulated per real second, doesn't work yet.
-  // massScale: 14982844642.9, //1 mass = this many kilograms
-  massScale: 6.7213335e33 / gravitationalFactor, //1 mass = this many kilograms,
-  gravitationalConstant: gravitationalFactor, //cubic AUs per massScale number of kg per day squared (aka per ~60 frames per ~60 frames )
+  gravitationalConstant: gravitationalFactor,
   minStarMass,
   maxStarMass,
   sunSizeFactor,

@@ -1,7 +1,6 @@
 import { cam } from ".";
-import { Mesh, Vertex } from "./mesh";
+import { Mesh } from "./mesh";
 import { get } from "./utils";
-import { constants } from "./constants";
 
 interface altKey<T> {
   [K: string]: T;
@@ -49,83 +48,63 @@ export const handleInput = (
   switch (key) {
     case "w":
       inp.up = pressed;
-      //ev.preventDefault();
       break;
     case "a":
       inp.left = pressed;
-      //ev.preventDefault();
       break;
     case "s":
       inp.down = pressed;
-      //ev.preventDefault();
       break;
     case "d":
       inp.right = pressed;
-      //ev.preventDefault();
       break;
     case "q":
       inp.in = pressed;
-      //ev.preventDefault();
       break;
     case "e":
       inp.out = pressed;
-      //ev.preventDefault();
       break;
     case "r":
       inp.spinR = pressed;
-      //ev.preventDefault();
       break;
     case "f":
       inp.spinL = pressed;
-      //ev.preventDefault();
       break;
     case "t":
       inp.spinU = pressed;
-      //ev.preventDefault();
       break;
     case "g":
       inp.spinD = pressed;
-      //ev.preventDefault();
       break;
     case "y":
       inp.spinI = pressed;
-      //ev.preventDefault();
       break;
     case "h":
       inp.spinO = pressed;
-      //ev.preventDefault();
       break;
     case "l":
       inp.camR = pressed;
-      //ev.preventDefault();
       break;
     case "j":
       inp.camL = pressed;
-      //ev.preventDefault();
       break;
     case "i":
       inp.camU = pressed;
-      //ev.preventDefault();
       break;
     case "k":
       inp.camD = pressed;
-      //ev.preventDefault();
       break;
     case "o":
       inp.camI = pressed;
-      //ev.preventDefault();
       break;
     case "u":
       inp.camO = pressed;
-      //ev.preventDefault();
       break;
     case "m":
       inp.camRL = pressed;
-      //ev.preventDefault();
       break;
     case ".":
       inp.camRR = pressed;
-      //ev.preventDefault();
       break;
   }
 };
@@ -207,10 +186,5 @@ export const moveCamera = (inp: PlayerMovement) => {
   if (cam.followTarget) {
     const { x, y, z } = cam.followTarget.velocity;
     cam.move(-x, y, -z);
-  }
-  if (cam.watchTarget) {
-    const { x, y, z } = cam.watchTarget.position;
-
-    //  cam.lookAt(new Vertex(x,y,z));
   }
 };

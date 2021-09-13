@@ -81,7 +81,7 @@ export class Vertex {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
   public normalize() {
-    // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
+    // rescales the length of the vector to 1
     const m = this.magnitude();
     if (m > 0) {
       return this.scale(1 / m);
@@ -149,33 +149,7 @@ export class Mesh {
     this.buffer = this.gl.createBuffer();
   }
 
-  static async fromSerialized(
-    gl: WebGLRenderingContext,
-    program: WebGLProgram,
-    url: string
-  ): Promise<Mesh> {
-    const res = await fetch(url);
-    const obj = await res.json();
-    const vertices: Vertex[] = [];
-    const faces: Face[] = [];
-    // for serialized mesh
-    const { v, f, c } = obj;
-    const colors: Color[] = [];
-    for (let i = 0; i < v.length; i += 3) {
-      vertices.push(new Vertex(v[i], v[i + 1], v[i + 2]));
-    }
-    for (let i = 0; i < c.length; i += 3) {
-      colors.push(new Color(c[i], c[i + 1], c[i + 2]));
-    }
-    for (let i = 0; i < f.length; i += 4) {
-      faces.push(new Face(f[i], f[i + 1], f[i + 2], colors[f[i + 3]]));
-    }
-    return new Mesh(vertices, faces);
-  }
-
   static async fromObjMtl(
-    gl: WebGLRenderingContext,
-    program: WebGLProgram,
     url: string,
     mtlUrl: string,
     scale: number
@@ -315,33 +289,6 @@ export class Mesh {
   rescale(x: number): void {
     this.scale = this.scale.scale(x);
     this.sMatrix.scaleSelf(x, x, x);
-  }
-
-  serialize(precision: number): string {
-    const v = [];
-    const f = [];
-    const c = [];
-    const colorsArray: string[] = [];
-    for (let i = 0; i < this.vertices.length; i++) {
-      const vert = this.vertices[i];
-      v.push(
-        +vert.x.toFixed(precision),
-        +vert.y.toFixed(precision),
-        +vert.z.toFixed(precision)
-      );
-    }
-    for (let i = 0; i < this.faces.length; i++) {
-      const face = this.faces[i];
-      const faceColor =
-        "r" + face.color.r + "g" + face.color.g + "b" + face.color.b;
-      if (!colorsArray.includes(faceColor)) {
-        colorsArray.push(faceColor);
-        c.push(face.color.r, face.color.g, face.color.b);
-      }
-      const colorIndex = colorsArray.indexOf(faceColor);
-      f.push(face.vAi, face.vBi, face.vCi, colorIndex);
-    }
-    return JSON.stringify({ v, f, c });
   }
 
   initialize(

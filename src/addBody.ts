@@ -142,7 +142,7 @@ const changeBody = (
   if (change === "bodyWhiteHole") {
     destroyTemp();
     resetOptions(bodyType);
-    body  = new WhiteHole("_tempBody", 16, textures);
+    body = new WhiteHole("_tempBody", 16, textures);
     body.translate(scalePos[0], scalePos[1], scalePos[2]);
     setPlayer(body);
   }
@@ -150,10 +150,8 @@ const changeBody = (
 
 //delete current temp body if exists
 export const destroyTemp = () => {
-  for (let key in gameObjects.objects) {
-    const obj = gameObjects.objects[key];
-    if (obj.name === "_tempBody") obj.destroy(gameObjects);
-  }
+  const tempBody = getPlayer();
+  if (tempBody) tempBody.destroy(gameObjects);
 };
 
 const resetOptions = (body: string) => {
@@ -197,18 +195,13 @@ const changeInputRanges = (isStar: boolean) => {
   sizeInput.max = maxSize.toString();
   sizeInput.min = minSize.toString();
   sizeInput.step = sizeStep.toString();
-  // sizeInput.value = startSize.toString();
   sizeInput.defaultValue = startSize.toString();
   showInputValue(sizeInput);
 };
 
 const showInputValue = (range: HTMLInputElement) => {
   const rangeV = document.getElementById(`${range.id}Label`);
-  const value = parseFloat(range.value);
-  const min = parseFloat(range.min);
-  const max = parseFloat(range.max);
   const setValue = () => {
-    const newValue = Number(((value - min) * 100) / (max - min));
     rangeV.innerHTML = `${range.id.slice(4)}: ${range.value}`;
   };
   range.addEventListener("input", setValue);

@@ -1,4 +1,5 @@
 // https://clockworkchilli.com/blog/6_procedural_textures_in_javascript
+import { ProceduralTextureData } from "./mesh";
 
 interface NoiseData {
   color: number[];
@@ -245,4 +246,22 @@ export const clouds: textureData = {
       startingOctave: 2,
     },
   ],
+};
+
+export const sandTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, sand)),
+};
+
+export const grassTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, grass)),
+};
+
+export const cloudTexture: ProceduralTextureData = {
+  width: 128,
+  height: 128,
+  data: new Uint8Array(generateTexture(128, clouds)),
 };
