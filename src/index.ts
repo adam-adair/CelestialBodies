@@ -163,7 +163,7 @@ const init = async () => {
   // populate.testCollisionLoseMomentum(textures);
   // populate.randomPlanetSystem(30, textures);
   // populate.testTranslation(textures);
-  populate.whiteHole(textures);
+  // populate.whiteHole(textures);
   grid = new Grid(10, 10, true);
 
   //dynamically point to the center of gravity of the starting objects, instead of 0 0 0
@@ -247,6 +247,9 @@ const loop = (now: number) => {
 window.onload = () => {
   canvas.width = get("canvasContainer").scrollWidth; //document.body.clientWidth / 2;
   canvas.height = get("canvasContainer").scrollHeight; //
+
+  checkCoilSubscribtion();
+
   // document.body.clientHeight -
   // parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
 
@@ -315,7 +318,8 @@ export const toggleForm = () => {
     bodyForm.style.display = "none";
     if (player) {
       player.name = nameField.value;
-      if (player.constructor.name !== "WhiteHole")  //instanceof doesn't work here and I don't know why
+      if (player.constructor.name !== "WhiteHole")
+        //instanceof doesn't work here and I don't know why
         player.addToAttractors().addToMovers();
       setPlayer(null);
     }
@@ -335,4 +339,37 @@ export const cancelBody = () => {
   player = null;
   destroyTemp();
   toggleForm();
+};
+
+const checkCoilSubscribtion = () => {
+  const d = document as any;
+  if (d.monetization) {
+    if (d.monetization.state === "started") {
+      toggleWhiteHole();
+    } else {
+      d.monetization.addEventListener("monetizationstart", function () {
+        console.log("HELLO COIL SUBSCRIBER");
+        toggleWhiteHole();
+      });
+    }
+  }
+};
+
+const toggleWhiteHole = () => {
+  console.log("adding white hole");
+  const radioDiv = document.getElementById("radioButtons");
+  const whiteHoleRadio = document.createElement("input");
+  whiteHoleRadio.type = "radio";
+  whiteHoleRadio.id = "bodyWhiteHole";
+  whiteHoleRadio.name = "bodyType";
+  whiteHoleRadio.value = "whiteHole";
+
+  radioDiv.appendChild(whiteHoleRadio);
+
+  const whiteHolelabel = document.createElement("label");
+  whiteHolelabel.setAttribute("for", whiteHoleRadio.id);
+  whiteHolelabel.innerHTML = "White Hole";
+
+  radioDiv.appendChild(whiteHolelabel);
+  get("whHeader").style.visibility = "visible";
 };
