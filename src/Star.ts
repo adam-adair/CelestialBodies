@@ -1,10 +1,9 @@
-import Colors, { Color } from "./colors";
+import Colors from "./colors";
 import { ProceduralTextureData, Vertex } from "./mesh";
 
 import { Sphere } from "./Sphere";
 import { Body } from "./bodies";
 import { GameObjects } from "./GameObjects";
-import { calculateTemperature } from "./utils";
 import { constants } from "./constants";
 const { starMasstoRadius, massColorFactor } = constants;
 
@@ -21,8 +20,6 @@ const pickColor = (mass: number) => {
 };
 
 export class Star extends Sphere {
-  luminosity: number;
-  temperature: number;
   hitBoxTimer: number;
   constructor(
     name: string,
@@ -32,11 +29,7 @@ export class Star extends Sphere {
     acceleration?: Vertex,
     texture?: HTMLImageElement | ProceduralTextureData
   ) {
-    //include normals (which on a unit sphere are the verts) as 3rd param to smooth out sphere
-
-    const luminosity = mass ** 3.5;
-    const radius = starMasstoRadius(mass); //**(v-1)/(v+3); // mass and radius are in solar units
-    const temperature = calculateTemperature(mass, radius);
+    const radius = starMasstoRadius(mass);
     const color = pickColor(mass);
 
     super(
@@ -51,9 +44,6 @@ export class Star extends Sphere {
       true
     );
 
-    //in case we want to have lighting come from stars and dynamically adjust color and brightness
-    this.temperature = temperature; //in Kelvins (thousands)
-    this.luminosity = luminosity; // 4*Math.PI*((size/2)**2)*(temperature**4 )  // divided by some
     this.hitBoxTimer = 30;
     this.addToList();
   }
@@ -69,7 +59,6 @@ export class Star extends Sphere {
   }
 
   handleCollision(gameObjects: GameObjects, otherObject: Body) {
-    // stars will absorb the other object, no matter what it is. If we make black holes in the future then we may have to change that.
     this.absorb(gameObjects, otherObject);
     otherObject.destroy(gameObjects);
   }
@@ -81,13 +70,10 @@ export class Star extends Sphere {
   }
 
   absorb(gameObjects: GameObjects, otherObject: Body) {
-    // Stars have a different absorb function than other types, which is defined in the Body class. Just add to the star's mass, resize and recolor the star based on the new mass.
-    // this.velocity = this.velocity.add(otherObject.velocity.scale(this.mass/otherObject.mass));
     this.mass += otherObject.mass;
     const newSize = starMasstoRadius(this.mass);
     this.rescale(newSize / this.size);
     this.size = newSize;
-    this.temperature = calculateTemperature(this.mass, this.size);
     this.reColor();
   }
 

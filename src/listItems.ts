@@ -1,5 +1,6 @@
 import { cam } from ".";
 import { constants } from "./constants";
+import { get } from "./utils";
 
 export function createListItem(objectToList: any): HTMLElement {
   const listItem = document.createElement("li");
@@ -65,11 +66,8 @@ export function createListItem(objectToList: any): HTMLElement {
   watchButton.innerHTML = "Look At";
   watchButton.onclick = () => {
     cam.lookAt(objectToList.position);
-    // cam.watch(objectToList);
   };
-
   buttonDiv.appendChild(watchButton);
-
   return listItem;
 }
 
@@ -85,13 +83,13 @@ export const flyTo = (objectToList: any) => {
 };
 
 export function updateListItem(objectToList: any): HTMLElement | null {
-  const listItem = document.getElementById(objectToList.id.toString());
+  const listItem = get(objectToList.id.toString());
   if (!listItem) return;
-  const name = document.getElementById(`${objectToList.id}-name`);
-  const mass = document.getElementById(`${objectToList.id}-mass`);
-  const size = document.getElementById(`${objectToList.id}-size`);
-  const velocity = document.getElementById(`${objectToList.id}-velocity`);
-  const position = document.getElementById(`${objectToList.id}-position`);
+  const name = get(`${objectToList.id}-name`);
+  const mass = get(`${objectToList.id}-mass`);
+  const size = get(`${objectToList.id}-size`);
+  const velocity = get(`${objectToList.id}-velocity`);
+  const position = get(`${objectToList.id}-position`);
 
   name.innerHTML = `Name: ${objectToList.name}`;
   mass.innerHTML = `Mass: ${objectToList.mass.toFixed(2)}`;

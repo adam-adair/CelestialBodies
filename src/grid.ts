@@ -1,4 +1,4 @@
-import { Face, Matrix, Vertex } from "./mesh";
+import { Matrix, Vertex } from "./mesh";
 import initialize from "./initialize";
 const { gl, program } = initialize;
 
