@@ -31,7 +31,7 @@ export const randomSystem = (
       Math.random() / 100
     );
     const acceleration = new Vertex(0, 0, 0);
-    const texture = textures[Math.floor(Math.random() * textures.length)];
+    const texture = textures[2];
     const precision = Math.floor(Math.random() * 8) + 8;
 
     const body = new Star(
@@ -170,9 +170,11 @@ export const binaryStarsPlanet = (
   planet.setStableOrbit([sun1, sun2]);
 };
 
-export const whiteHole = ( textures: (HTMLImageElement | ProceduralTextureData)[]) => {
-  new WhiteHole("white hole",16, textures);
-}
+export const whiteHole = (
+  textures: (HTMLImageElement | ProceduralTextureData)[]
+) => {
+  new WhiteHole("white hole", 16, textures);
+};
 
 export default {
   randomSystem,
@@ -180,5 +182,5 @@ export default {
   binaryStars,
   binaryStarsPlanet,
   randomPlanetSystem,
-  whiteHole
+  whiteHole,
 };
