@@ -21,7 +21,6 @@ import { flyTo } from "./listItems";
 const { gl, canvas } = initialize;
 const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
-let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
 const cancelButton = get("cancelButton") as HTMLButtonElement;
 const bodyForm = get("bodyForm") as HTMLFormElement;
