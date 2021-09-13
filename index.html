@@ -100,14 +100,48 @@
       input[type="number"] {
         max-width: 50px;
       }
+      #presets > button {
+        align-self: center;
+        margin: 4px;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      .yellow {
+        color: goldenrod;
+      }
+      .bottom {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+      }
+      #titleOverlay {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+      #titleOverlay > p {
+        font-size: 8em;
+        color: white;
+        text-shadow: 4px 4px goldenrod;
+      }
     </style>
   </head>
 
   <body>
+    <div id="titleOverlay" class="column">
+      <p>CELESTIAL BODIES</p>
+      <h4 id="musicStatus">Music Loading: 0%</h4>
+    </div>
     <h2>Celestial Bodies</h2>
     <div id="gameContainer" class="flexContainer">
       <div id="instructions">
-        <b> Camera Controls </b><br />
+        <span class="yellow bold"> Camera Controls </span><br />
         Look with mouse<br />
         `: pause<br />
         u or 3: backwards<br />
@@ -120,18 +154,20 @@
         . or 7: roll right<br />
         <br />
         <br />
-        <b> New Body Controls</b><br />
+        <span class="yellow bold"> New Body Controls</span><br />
         a, d: Move Along X-Axis<br />
         w, s: Move Along Y-Axis<br />
         q, e: Move Along Z-Axis<br />
         <br />
-        <p id="musicStatus">Music Loading: 0%</p>
+        <span class="yellow bold"> Example Scenarios</span><br />
+        <div id="presets" class="flexContainer column">
+          <button id="setup1">Setup 1</button>
+          <button id="setup1">Setup 2</button>
+          <button id="setup1">Setup 3</button>
+        </div>
       </div>
       <div id="canvasContainer" class="wide">
         <canvas id="canvas"></canvas>
-        <button id="setup1">Setup 1</button>
-        <button id="setup1">Setup 2</button>
-        <button id="setup1">Setup 3</button>
       </div>
       <div id="panels" class="scrollable">
         <div id="addBody">
