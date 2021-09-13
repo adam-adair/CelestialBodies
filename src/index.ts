@@ -21,6 +21,7 @@ import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
 import { addBody, destroyTemp } from "./addBody";
 import { WhiteHole } from "./WhiteHole";
+import { flyTo } from "./listItems";
 
 const { gl, program, canvas } = initialize;
 const { movement, universeSize } = constants;
@@ -49,31 +50,32 @@ const loadMusic = (song: any) => {
       const audio = document.createElement("audio");
       audio.src = URL.createObjectURL(new Blob([wave], { type: "audio/wav" }));
       audio.loop = true;
-      musicStatus.remove();
-
-      // doing this for now so we can test audio
-      // chrome requires user interact with DOM before audio plays
-      // think this won't be an issue once actually playing game
-      // but during development, if you live reload, you haven't
-      // interacted with DOM so it won't autoplay music.
-      // Plus hearing the same loop forever is annoying.
-      let playing = false;
-      const playButton = document.createElement("button");
-      playButton.innerHTML = "Play Music";
-      get("instructions").appendChild(playButton);
-      playButton.onclick = () => {
-        if (!playing) {
-          playButton.innerHTML = "Pause Music";
-          audio.play();
-          playing = true;
-        } else {
-          playButton.innerHTML = "Play Music";
-          audio.pause();
-          playing = false;
-        }
-      };
+      musicStatus.innerHTML = "Click anywhere to begin";
+      get("titleOverlay").onclick = () => hideOverlay(audio);
     }
   }, 0);
+};
+
+const hideOverlay = (audio: HTMLAudioElement) => {
+  get("titleOverlay").style.visibility = "hidden";
+  let playing = true;
+  audio.play();
+  const playButton = document.createElement("button");
+  playButton.className = "bottom";
+  playButton.innerHTML = "Pause Music";
+  playButton.style.zIndex = "0";
+  get("instructions").appendChild(playButton);
+  playButton.onclick = () => {
+    if (!playing) {
+      playButton.innerHTML = "Pause Music";
+      audio.play();
+      playing = true;
+    } else {
+      playButton.innerHTML = "Play Music";
+      audio.pause();
+      playing = false;
+    }
+  };
 };
 
 const sandTexture: ProceduralTextureData = {
@@ -130,20 +132,27 @@ let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
 
-const loadImage = (url: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.src = url;
-  });
-};
+// const loadImage = (url: string): Promise<HTMLImageElement> => {
+//   return new Promise((resolve) => {
+//     const img = new Image();
+//     img.onload = () => resolve(img);
+//     img.src = url;
+//   });
+// };
 
-const loadImages = (urlArr: string[]) => {
-  return Promise.all(urlArr.map((url) => loadImage(url)));
+// const loadImages = (urlArr: string[]) => {
+//   return Promise.all(urlArr.map((url) => loadImage(url)));
+// };
+
+const blankTexture: ProceduralTextureData = {
+  width: 1,
+  height: 1,
+  data: new Uint8Array([255, 255, 255, 255]),
 };
 
 const init = async () => {
-  textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
+  // textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
+  textures = [blankTexture, blankTexture];
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(universeSize, 2048, 2000);
@@ -153,7 +162,7 @@ const init = async () => {
   // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
   // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
   // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  // populate.stableOrbit(20, textures); // doesn't quite work yet.
+  populate.stableOrbit(10, textures); // doesn't quite work yet.
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // player = await populate.texturesDisplay(gl, program, player, textures);
@@ -177,6 +186,8 @@ const init = async () => {
   //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
   cam = new Camera();
   cam.view();
+  flyTo(gameObjects.objects[3]);
+
   requestAnimationFrame(loop);
 };
 
