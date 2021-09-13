@@ -371,4 +371,5 @@ const toggleWhiteHole = () => {
   whiteHolelabel.innerHTML = "White Hole";
 
   radioDiv.appendChild(whiteHolelabel);
+  get("whHeader").style.visibility = "visible";
 };
