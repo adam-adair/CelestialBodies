@@ -9,7 +9,7 @@ import initialize from "./initialize";
 
 const { gl, program } = initialize;
 
-export class Matrix extends DOMMatrix {
+export class M extends DOMMatrix {
   transposeSelf() {
     let temp;
     temp = this.m12;
@@ -38,7 +38,7 @@ export class Matrix extends DOMMatrix {
   }
 }
 
-export class Vertex {
+export class V {
   x: number;
   y: number;
   z: number;
@@ -47,34 +47,24 @@ export class Vertex {
     this.y = y;
     this.z = z;
   }
-  public subtract(otherVertex: Vertex): Vertex {
-    return new Vertex(
-      this.x - otherVertex.x,
-      this.y - otherVertex.y,
-      this.z - otherVertex.z
+  public subtract(otherV: V): V {
+    return new V(this.x - otherV.x, this.y - otherV.y, this.z - otherV.z);
+  }
+  public add(otherV: V): V {
+    return new V(this.x + otherV.x, this.y + otherV.y, this.z + otherV.z);
+  }
+  public scale(factor: number): V {
+    return new V(this.x * factor, this.y * factor, this.z * factor);
+  }
+  public cross(otherV: V): V {
+    return new V(
+      this.y * otherV.z - this.z * otherV.y,
+      this.z * otherV.x - this.x * otherV.z,
+      this.x * otherV.y - this.y * otherV.x
     );
   }
-  public add(otherVertex: Vertex): Vertex {
-    return new Vertex(
-      this.x + otherVertex.x,
-      this.y + otherVertex.y,
-      this.z + otherVertex.z
-    );
-  }
-  public scale(factor: number): Vertex {
-    return new Vertex(this.x * factor, this.y * factor, this.z * factor);
-  }
-  public cross(otherVertex: Vertex): Vertex {
-    return new Vertex(
-      this.y * otherVertex.z - this.z * otherVertex.y,
-      this.z * otherVertex.x - this.x * otherVertex.z,
-      this.x * otherVertex.y - this.y * otherVertex.x
-    );
-  }
-  public dot(otherVertex: Vertex): number {
-    return (
-      this.x * otherVertex.x + this.y * otherVertex.y + this.z * otherVertex.z
-    );
+  public dot(otherV: V): number {
+    return this.x * otherV.x + this.y * otherV.y + this.z * otherV.z;
   }
   public magnitude(): number {
     //the length of the vector
@@ -110,24 +100,24 @@ export interface ProceduralTextureData {
 export class Mesh {
   gl: WebGLRenderingContext;
   program: WebGLProgram;
-  vertices: Vertex[];
-  normals: Vertex[];
-  position: Vertex;
-  rotation: Vertex;
-  scale: Vertex;
+  vertices: V[];
+  normals: V[];
+  position: V;
+  rotation: V;
+  scale: V;
   faces: Face[];
-  pMatrix: Matrix;
-  rMatrix: Matrix;
-  sMatrix: Matrix;
+  pM: M;
+  rM: M;
+  sM: M;
   buffer: WebGLBuffer;
   vbo: Float32Array;
   textureCoords: textureCoord[];
   gl_texture: WebGLTexture;
   texture: HTMLImageElement | ProceduralTextureData;
   constructor(
-    vertices: Vertex[],
+    vertices: V[],
     faces: Face[],
-    normals?: Vertex[],
+    normals?: V[],
     textureCoords?: textureCoord[],
     texture?: HTMLImageElement | ProceduralTextureData,
     isStar = false
@@ -137,12 +127,12 @@ export class Mesh {
     this.vertices = vertices;
     this.faces = faces;
     if (normals) this.normals = normals;
-    this.pMatrix = new Matrix();
-    this.rMatrix = new Matrix();
-    this.sMatrix = new Matrix();
-    this.position = new Vertex(0, 0, 0);
-    this.rotation = new Vertex(0, 0, 0);
-    this.scale = new Vertex(1, 1, 1);
+    this.pM = new M();
+    this.rM = new M();
+    this.sM = new M();
+    this.position = new V(0, 0, 0);
+    this.rotation = new V(0, 0, 0);
+    this.scale = new V(1, 1, 1);
     this.texture = texture;
     this.textureCoords = textureCoords;
     this.initialize(texture, isStar);
@@ -211,19 +201,17 @@ export class Mesh {
     gl.vertexAttribPointer(sunFlag, 1, gl.FLOAT, false, FSIZE * 12, FSIZE * 11);
     gl.enableVertexAttribArray(sunFlag);
 
-    // Set the model matrix
+    // Set the model M
     const model = gl.getUniformLocation(program, "model");
-    const nMatrix = gl.getUniformLocation(program, "nMatrix");
+    const nM = gl.getUniformLocation(program, "nM");
 
-    const modelMatrix = this.pMatrix.multiply(
-      this.rMatrix.multiply(this.sMatrix)
-    );
-    const normalMatrix = new Matrix(modelMatrix.toString());
-    normalMatrix.invertSelf();
-    normalMatrix.transposeSelf();
+    const modelM = this.pM.multiply(this.rM.multiply(this.sM));
+    const normalM = new M(modelM.toString());
+    normalM.invertSelf();
+    normalM.transposeSelf();
 
-    gl.uniformMatrix4fv(model, false, modelMatrix.toFloat32Array());
-    gl.uniformMatrix4fv(nMatrix, false, normalMatrix.toFloat32Array());
+    gl.uniformMatrix4fv(model, false, modelM.toFloat32Array());
+    gl.uniformMatrix4fv(nM, false, normalM.toFloat32Array());
 
     gl.drawArrays(gl.TRIANGLES, 0, this.faces.length * 3);
   };
@@ -232,23 +220,23 @@ export class Mesh {
     return this.directionalVector(otherObject).magnitude();
   }
 
-  directionalVector(otherObject: Mesh): Vertex {
+  directionalVector(otherObject: Mesh): V {
     return this.position.subtract(otherObject.position);
   }
 
   rotate(x: number, y: number, z: number): void {
-    this.rotation = this.rotation.subtract(new Vertex(-x, -y, -z));
-    this.rMatrix.rotateSelf(x, y, z);
+    this.rotation = this.rotation.subtract(new V(-x, -y, -z));
+    this.rM.rotateSelf(x, y, z);
   }
 
   translate(x: number, y: number, z: number): void {
-    this.position = this.position.subtract(new Vertex(-x, -y, -z));
-    this.pMatrix.translateSelf(x, y, z);
+    this.position = this.position.subtract(new V(-x, -y, -z));
+    this.pM.translateSelf(x, y, z);
   }
 
   rescale(x: number): void {
     this.scale = this.scale.scale(x);
-    this.sMatrix.scaleSelf(x, x, x);
+    this.sM.scaleSelf(x, x, x);
   }
 
   initialize(

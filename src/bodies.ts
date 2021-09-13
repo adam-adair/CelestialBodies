@@ -1,12 +1,6 @@
 import { Color } from "./colors";
 import { constants } from "./constants";
-import {
-  Face,
-  Mesh,
-  ProceduralTextureData,
-  textureCoord,
-  Vertex,
-} from "./mesh";
+import { Face, Mesh, ProceduralTextureData, textureCoord, V } from "./mesh";
 import gameObjects, { GameObjects } from "./GameObjects";
 import { Barycenter } from "./barycenter";
 import { createListItem, updateListItem } from "./listItems";
@@ -19,32 +13,32 @@ export class Body extends Mesh {
   name: string;
   size: number;
   mass: number;
-  velocity: Vertex;
-  acceleration: Vertex;
+  velocity: V;
+  acceleration: V;
   constructor(
     name: string,
     d: number,
     mass?: number,
     color?: Color,
-    velocity?: Vertex,
-    acceleration?: Vertex,
-    vertices?: Vertex[],
+    velocity?: V,
+    acceleration?: V,
+    vertices?: V[],
     faces?: Face[],
-    normals?: Vertex[],
+    normals?: V[],
     textureCoords?: textureCoord[],
     texture?: HTMLImageElement | ProceduralTextureData,
     isStar = false
   ) {
     if (!vertices) {
       vertices = [];
-      vertices[0] = new Vertex(-d, -d, -d);
-      vertices[1] = new Vertex(-d, -d, d);
-      vertices[2] = new Vertex(-d, d, -d);
-      vertices[3] = new Vertex(-d, d, d);
-      vertices[4] = new Vertex(d, -d, -d);
-      vertices[5] = new Vertex(d, d, -d);
-      vertices[6] = new Vertex(d, -d, d);
-      vertices[7] = new Vertex(d, d, d);
+      vertices[0] = new V(-d, -d, -d);
+      vertices[1] = new V(-d, -d, d);
+      vertices[2] = new V(-d, d, -d);
+      vertices[3] = new V(-d, d, d);
+      vertices[4] = new V(d, -d, -d);
+      vertices[5] = new V(d, d, -d);
+      vertices[6] = new V(d, -d, d);
+      vertices[7] = new V(d, d, d);
     }
 
     if (!faces) {
@@ -67,8 +61,8 @@ export class Body extends Mesh {
     nextID++;
     this.size = d;
     this.mass = mass ? mass : 1;
-    this.velocity = velocity ? velocity : new Vertex(0, 0, 0);
-    this.acceleration = acceleration ? acceleration : new Vertex(0, 0, 0);
+    this.velocity = velocity ? velocity : new V(0, 0, 0);
+    this.acceleration = acceleration ? acceleration : new V(0, 0, 0);
     this.name = name;
     gameObjects.objects[this.id] = this;
   }
@@ -77,16 +71,16 @@ export class Body extends Mesh {
     this.velocity = this.velocity.subtract(this.acceleration);
     this.translate(this.velocity.x, this.velocity.y, this.velocity.z);
     this.acceleration = this.acceleration.scale(0);
-    this.createOrUpdateListItem();
+    this.cUL();
     if (this.position.magnitude() - this.size > constants.universeSize)
       this.destroy(gameObjects);
   }
 
-  createOrUpdateListItem(): HTMLElement {
+  cUL(): HTMLElement {
     return updateListItem(this) || createListItem(this);
   }
 
-  applyForce(force: Vertex) {
+  applyForce(force: V) {
     this.acceleration = this.acceleration.add(force.scale(1 / this.mass));
   }
 
@@ -97,7 +91,7 @@ export class Body extends Mesh {
     );
   }
 
-  calculateAttraction(objectTwo: Body): Vertex {
+  calculateAttraction(objectTwo: Body): V {
     let direction = this.directionalVector(objectTwo);
     const distance = Math.max(direction.magnitude(), 0.01);
     direction = direction.normalize();
@@ -120,7 +114,7 @@ export class Body extends Mesh {
 
     if (this.mass < center.mass) {
       const force = this.forceOfCenterMass(center);
-      this.velocity = new Vertex(0, force, 0);
+      this.velocity = new V(0, force, 0);
       this.acceleration = this.acceleration.scale(0);
     }
   }
@@ -134,12 +128,12 @@ export class Body extends Mesh {
     if (element) element.remove();
   }
 
-  addToMovers() {
+  aM() {
     gameObjects.movers[this.id] = this;
     return this;
   }
 
-  addToAttractors() {
+  aA() {
     gameObjects.attractors[this.id] = this;
     return this;
   }
@@ -154,7 +148,7 @@ export class Body extends Mesh {
     otherObject.destroy(gameObjects);
   }
 
-  alterTrajectory(otherObject: Body): Vertex {
+  alterTrajectory(otherObject: Body): V {
     const combinedMass = this.mass + otherObject.mass;
     const obj1ScaledVelocity = this.velocity.scale(this.mass / combinedMass);
     const obj2ScaledVelocity = otherObject.velocity.scale(

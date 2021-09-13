@@ -1,14 +1,14 @@
-import { Matrix, Vertex } from "./mesh";
+import { M, V } from "./mesh";
 import initialize from "./initialize";
 const { gl, program } = initialize;
 
 export class Grid {
   gl: WebGLRenderingContext;
   program: WebGLProgram;
-  vertices: Vertex[];
-  pMatrix: Matrix;
-  rMatrix: Matrix;
-  sMatrix: Matrix;
+  vertices: V[];
+  pM: M;
+  rM: M;
+  sM: M;
   buffer: WebGLBuffer;
   vbo: Float32Array;
   drawStyle: number;
@@ -17,29 +17,21 @@ export class Grid {
     this.program = program;
     this.drawStyle = points ? gl.POINTS : gl.LINES;
     const translate = (gridSize * gridWidth) / 2;
-    const vertices: Vertex[] = [];
+    const vertices: V[] = [];
     for (let i = 0; i < gridSize; i++) {
       for (let j = 0; j < gridSize; j++) {
         vertices.push(
-          new Vertex(-translate + gridWidth * i, 0, -translate + gridWidth * j)
+          new V(-translate + gridWidth * i, 0, -translate + gridWidth * j)
         );
         vertices.push(
-          new Vertex(
-            -translate + gridWidth * (i + 1),
-            0,
-            -translate + gridWidth * j
-          )
+          new V(-translate + gridWidth * (i + 1), 0, -translate + gridWidth * j)
         );
 
         vertices.push(
-          new Vertex(
-            -translate + gridWidth * (i + 1),
-            0,
-            -translate + gridWidth * j
-          )
+          new V(-translate + gridWidth * (i + 1), 0, -translate + gridWidth * j)
         );
         vertices.push(
-          new Vertex(
+          new V(
             -translate + gridWidth * (i + 1),
             0,
             -translate + gridWidth * (j + 1)
@@ -47,36 +39,28 @@ export class Grid {
         );
 
         vertices.push(
-          new Vertex(
+          new V(
             -translate + gridWidth * (i + 1),
             0,
             -translate + gridWidth * (j + 1)
           )
         );
         vertices.push(
-          new Vertex(
-            -translate + gridWidth * i,
-            0,
-            -translate + gridWidth * (j + 1)
-          )
+          new V(-translate + gridWidth * i, 0, -translate + gridWidth * (j + 1))
         );
 
         vertices.push(
-          new Vertex(
-            -translate + gridWidth * i,
-            0,
-            -translate + gridWidth * (j + 1)
-          )
+          new V(-translate + gridWidth * i, 0, -translate + gridWidth * (j + 1))
         );
         vertices.push(
-          new Vertex(-translate + gridWidth * i, 0, -translate + gridWidth * j)
+          new V(-translate + gridWidth * i, 0, -translate + gridWidth * j)
         );
       }
     }
     this.vertices = vertices;
-    this.pMatrix = new Matrix();
-    this.rMatrix = new Matrix();
-    this.sMatrix = new Matrix();
+    this.pM = new M();
+    this.rM = new M();
+    this.sM = new M();
     const arr = [];
     for (let i = 0; i < this.vertices.length; i++) {
       const vA = this.vertices[i];
@@ -106,19 +90,17 @@ export class Grid {
     gl.vertexAttribPointer(texCoord, 2, gl.FLOAT, false, FSIZE * 7, FSIZE * 5);
     gl.enableVertexAttribArray(texCoord);
 
-    // Set the model matrix
+    // Set the model M
     const model = gl.getUniformLocation(program, "model");
-    const nMatrix = gl.getUniformLocation(program, "nMatrix");
+    const nM = gl.getUniformLocation(program, "nM");
 
-    const modelMatrix = this.sMatrix.multiply(
-      this.pMatrix.multiply(this.rMatrix)
-    );
-    const normalMatrix = new Matrix(modelMatrix.toString());
-    normalMatrix.invertSelf();
-    normalMatrix.transposeSelf();
+    const modelM = this.sM.multiply(this.pM.multiply(this.rM));
+    const normalM = new M(modelM.toString());
+    normalM.invertSelf();
+    normalM.transposeSelf();
 
-    gl.uniformMatrix4fv(model, false, modelMatrix.toFloat32Array());
-    gl.uniformMatrix4fv(nMatrix, false, normalMatrix.toFloat32Array());
+    gl.uniformMatrix4fv(model, false, modelM.toFloat32Array());
+    gl.uniformMatrix4fv(nM, false, normalM.toFloat32Array());
 
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.drawArrays(this.drawStyle, 0, this.vertices.length);

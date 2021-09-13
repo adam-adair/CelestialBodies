@@ -1,5 +1,5 @@
 import Colors from "./colors";
-import { ProceduralTextureData, Vertex } from "./mesh";
+import { ProceduralTextureData, V } from "./mesh";
 
 import { Sphere } from "./Sphere";
 import { Body } from "./bodies";
@@ -25,8 +25,8 @@ export class Star extends Sphere {
     name: string,
     precision: number,
     mass?: number,
-    velocity?: Vertex,
-    acceleration?: Vertex,
+    velocity?: V,
+    acceleration?: V,
     texture?: HTMLImageElement | ProceduralTextureData
   ) {
     const radius = starMasstoRadius(mass);
@@ -52,20 +52,20 @@ export class Star extends Sphere {
     if (this.hitBoxTimer > -1) {
       --this.hitBoxTimer;
       if (this.hitBoxTimer === 0) {
-        this.addToAttractors().addToMovers();
+        this.aA().aM();
       }
     }
     Sphere.prototype.update.call(this);
   }
 
-  handleCollision(gameObjects: GameObjects, otherObject: Body) {
+  hC(gameObjects: GameObjects, otherObject: Body) {
     this.absorb(gameObjects, otherObject);
     otherObject.destroy(gameObjects);
   }
 
   checkCollision(gameObjects: GameObjects, otherObject: Body) {
     if (this.intersect(otherObject)) {
-      this.handleCollision(gameObjects, otherObject);
+      this.hC(gameObjects, otherObject);
     }
   }
 
@@ -88,7 +88,7 @@ export class Star extends Sphere {
   }
 
   addToList() {
-    const item = this.createOrUpdateListItem();
+    const item = this.cUL();
     starList.appendChild(item);
   }
 }

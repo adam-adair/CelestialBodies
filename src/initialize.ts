@@ -14,14 +14,14 @@ const program = gl.createProgram();
 const vs_source = require("./glsl/vshader.glsl") as string;
 const fs_source = require("./glsl/fshader.glsl") as string;
 
-const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertexShader, vs_source);
-gl.compileShader(vertexShader);
+const VShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(VShader, vs_source);
+gl.compileShader(VShader);
 const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragShader, fs_source);
 gl.compileShader(fragShader);
 
-gl.attachShader(program, vertexShader);
+gl.attachShader(program, VShader);
 gl.attachShader(program, fragShader);
 gl.linkProgram(program);
 gl.useProgram(program);

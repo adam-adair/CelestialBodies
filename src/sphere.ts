@@ -1,10 +1,5 @@
 import { Color } from "./colors";
-import {
-  Face,
-  ProceduralTextureData,
-  textureCoord,
-  Vertex,
-} from "./mesh";
+import { Face, ProceduralTextureData, textureCoord, V } from "./mesh";
 
 import { Body } from "./bodies";
 
@@ -15,13 +10,13 @@ export class Sphere extends Body {
     size: number,
     precision: number,
     mass?: number,
-    velocity?: Vertex,
-    acceleration?: Vertex,
+    velocity?: V,
+    acceleration?: V,
     texture?: HTMLImageElement | ProceduralTextureData,
     color?: Color,
     isStar = false
   ) {
-    const vertices: Vertex[] = [];
+    const vertices: V[] = [];
     const faces: Face[] = [];
     const textureCoords: textureCoord[] = [];
     for (let j = 0; j <= precision; j++) {
@@ -32,7 +27,7 @@ export class Sphere extends Body {
         const ai = (i * 2 * Math.PI) / precision;
         const si = Math.sin(ai);
         const ci = Math.cos(ai);
-        vertices.push(new Vertex(si * sj, cj, ci * sj));
+        vertices.push(new V(si * sj, cj, ci * sj));
         textureCoords.push({ u: i / precision, v: j / precision });
       }
     }

@@ -1,4 +1,4 @@
-import { Vertex } from "./mesh";
+import { V } from "./mesh";
 import { constants } from "./constants";
 import initialize from "./initialize";
 import { Body } from "./bodies";
@@ -6,21 +6,16 @@ const { canvas, gl, program } = initialize;
 const { zoom } = constants;
 
 export class Camera {
-  viewMatrix: DOMMatrix;
-  projMatrix: DOMMatrix;
+  viewM: DOMMatrix;
+  projM: DOMMatrix;
   cameraGL: WebGLUniformLocation;
   followTarget: Body | null;
   watchTarget: Body | null;
   constructor() {
     this.cameraGL = gl.getUniformLocation(program, "camera");
-    this.viewMatrix = new DOMMatrix();
+    this.viewM = new DOMMatrix();
     this.move(0, 3, 25);
-    this.projMatrix = this.perspective(
-      zoom,
-      canvas.width / canvas.height,
-      1,
-      1000
-    );
+    this.projM = this.perspective(zoom, canvas.width / canvas.height, 1, 1000);
     this.followTarget = null;
     this.watchTarget = null;
   }
@@ -35,32 +30,32 @@ export class Camera {
     ]);
   };
   view() {
-    const cameraMatrix = this.projMatrix.multiply(this.viewMatrix.inverse());
-    gl.uniformMatrix4fv(this.cameraGL, false, cameraMatrix.toFloat32Array());
+    const cameraM = this.projM.multiply(this.viewM.inverse());
+    gl.uniformMatrix4fv(this.cameraGL, false, cameraM.toFloat32Array());
   }
   rotate(x: number, y: number, z: number) {
-    this.viewMatrix.rotateSelf(y, x, z);
+    this.viewM.rotateSelf(y, x, z);
   }
   move(x = 0, y = 0, z = 0) {
-    this.viewMatrix.translateSelf(x, y, z);
+    this.viewM.translateSelf(x, y, z);
     const distFromOrigin = this.getPosition().magnitude();
     if (distFromOrigin >= constants.universeSize * 0.9) {
-      this.viewMatrix.translateSelf(-x, -y, -z);
+      this.viewM.translateSelf(-x, -y, -z);
     }
   }
   getPosition() {
-    const worldMatrix = this.viewMatrix.inverse();
-    return new Vertex(worldMatrix.m41, worldMatrix.m42, worldMatrix.m43);
+    const worldM = this.viewM.inverse();
+    return new V(worldM.m41, worldM.m42, worldM.m43);
   }
-  lookAt(target: Vertex) {
+  lookAt(target: V) {
     const camPosition = this.getPosition();
-    const tmp = new Vertex(0, 1, 0);
+    const tmp = new V(0, 1, 0);
 
     const forward = camPosition.subtract(target).normalize();
     const right = tmp.cross(forward).normalize();
     const up = forward.cross(right).normalize();
 
-    this.viewMatrix = new DOMMatrix([
+    this.viewM = new DOMMatrix([
       right.x,
       right.y,
       right.z,

@@ -1,4 +1,4 @@
-import { ProceduralTextureData, Vertex } from "./mesh";
+import { ProceduralTextureData, V } from "./mesh";
 import { Color, randomColor } from "./colors";
 import { constants } from "./constants";
 import { Sphere } from "./Sphere";
@@ -8,11 +8,7 @@ import { GameObjects } from "./GameObjects";
 import { randomInRange, seperateSpawnPoints } from "./utils";
 const planetList = document.getElementById("planetList");
 
-const {
-  minPlanetMass,
-  maxPlanetMass,
-  impactThreshold,
-} = constants;
+const { minPlanetMass, maxPlanetMass, impactThreshold } = constants;
 
 export class Planet extends Sphere {
   hitBoxTimer: number;
@@ -21,8 +17,8 @@ export class Planet extends Sphere {
     size: number,
     precision: number,
     mass?: number,
-    velocity?: Vertex,
-    acceleration?: Vertex,
+    velocity?: V,
+    acceleration?: V,
     texture?: HTMLImageElement | ProceduralTextureData,
     color?: Color
   ) {
@@ -35,7 +31,7 @@ export class Planet extends Sphere {
     if (this.hitBoxTimer > -1) {
       --this.hitBoxTimer;
       if (this.hitBoxTimer === 0) {
-        this.addToAttractors().addToMovers();
+        this.aA().aM();
       }
     }
     Sphere.prototype.update.call(this);
@@ -43,14 +39,13 @@ export class Planet extends Sphere {
 
   checkCollision(gameObjects: GameObjects, otherObject: Body) {
     if (this.intersect(otherObject)) {
-      this.handleCollision(gameObjects, otherObject);
+      this.hC(gameObjects, otherObject);
     }
   }
 
-  handleCollision(gameObjects: GameObjects, otherObject: Body) {
+  hC(gameObjects: GameObjects, otherObject: Body) {
     //if the other object is a star then that handling takes precedence
-    if (otherObject instanceof Star)
-      otherObject.handleCollision(gameObjects, this);
+    if (otherObject instanceof Star) otherObject.hC(gameObjects, this);
     else if (otherObject instanceof Planet) {
       const bigger = this.mass >= otherObject.size ? this : otherObject;
       const smaller = bigger !== this ? this : otherObject;
@@ -81,11 +76,11 @@ export class Planet extends Sphere {
       maxMass = Math.min(maxMass, remainingMass);
       const newMass = Math.min(
         remainingMass,
-        randomInRange(maxMass,minPlanetMass)
+        randomInRange(maxMass, minPlanetMass)
       ); // this piece of debris will either be randomly sized within limits, or the remaining amount, whichever is smaller.
       let newSize = (newMass / initialMass) * initialSize; // size of the new object has same proportion as its mass
       const newSpeed = initialVelocity.scale(initialMass / newMass).magnitude(); //objects should speed up as their mass decreases, ignoring friction from the collision
-      const randomDirection = new Vertex(
+      const randomDirection = new V(
         unitVelocity.x - randomOffset(),
         unitVelocity.y - randomOffset(),
         unitVelocity.z - randomOffset()
@@ -97,12 +92,16 @@ export class Planet extends Sphere {
         16,
         newMass,
         newVelocity,
-        new Vertex(0, 0, 0),
+        new V(0, 0, 0),
         this.texture,
         randomColor()
-      )
-      const [x,y,z]=seperateSpawnPoints(startPosition,newVelocity,newSize);
-      debris.translate(x,y,z);
+      );
+      const [x, y, z] = seperateSpawnPoints(
+        startPosition,
+        newVelocity,
+        newSize
+      );
+      debris.translate(x, y, z);
       remainingMass -= newMass;
     }
     this.destroy(gameObjects);
@@ -110,7 +109,7 @@ export class Planet extends Sphere {
   }
 
   addToList() {
-    const item = this.createOrUpdateListItem();
+    const item = this.cUL();
     planetList.appendChild(item);
   }
 }

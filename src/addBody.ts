@@ -1,5 +1,5 @@
 import { getPlayer, setPlayer } from ".";
-import { ProceduralTextureData, Vertex } from "./mesh";
+import { ProceduralTextureData, V } from "./mesh";
 import { Planet } from "./Planet";
 import { Star } from "./Star";
 import gameObjects from "./GameObjects";
@@ -22,7 +22,6 @@ export const addBody = (
   bodyForm: HTMLFormElement,
   textures: (HTMLImageElement | ProceduralTextureData)[]
 ) => {
-
   bodyForm.addEventListener("change", (ev) => changeBody(ev, textures));
 };
 
@@ -93,7 +92,7 @@ const changeBody = (
       player.destroy(gameObjects);
     }
     if (["velX", "velY", "velZ"].includes(change)) {
-      player.velocity = new Vertex(velX, velY, velZ);
+      player.velocity = new V(velX, velY, velZ);
     }
     if (["posX", "posY", "posZ"].includes(change)) {
       player.translate(
@@ -113,7 +112,7 @@ const changeBody = (
       size,
       12,
       mass,
-      new Vertex(velX, velY, velZ),
+      new V(velX, velY, velZ),
       null,
       textures[texIx]
     );
@@ -134,7 +133,7 @@ const changeBody = (
       "_tempBody",
       12,
       mass,
-      new Vertex(velX, velY, velZ),
+      new V(velX, velY, velZ),
       null,
       textures[2]
     );

@@ -1,5 +1,5 @@
 import Colors, { Color } from "./colors";
-import { ProceduralTextureData, Vertex } from "./mesh";
+import { ProceduralTextureData, V } from "./mesh";
 
 import { Sphere } from "./Sphere";
 import { Planet } from "./Planet";
@@ -35,8 +35,8 @@ export class WhiteHole extends Sphere {
       1,
       precision,
       -1,
-      new Vertex(0, 0, 0),
-      new Vertex(0, 0, 0),
+      new V(0, 0, 0),
+      new V(0, 0, 0),
       textures[0],
       new Color(3, 3, 3),
       true
@@ -137,13 +137,13 @@ export class WhiteHole extends Sphere {
     const minVelocity = 0.025;
 
     const randomOffset = () => Math.random() * 2 - 1;
-    return new Vertex(randomOffset(), randomOffset(), randomOffset())
+    return new V(randomOffset(), randomOffset(), randomOffset())
       .normalize()
       .scale(randomInRange(maxVelocity - minVelocity));
   }
 
   addToList() {
-    const item = this.createOrUpdateListItem();
+    const item = this.cUL();
     whiteHoleList.appendChild(item);
   }
 }

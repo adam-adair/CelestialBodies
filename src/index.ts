@@ -251,7 +251,7 @@ export const toggleForm = () => {
         document.onkeydown = (ev) => {
           if (ev.key === "`") paused = !paused;
           handleInput(ev, true, playerInput);
-        }
+        };
         document.onkeyup = (ev) => handleInput(ev, false, playerInput);
       };
     }
@@ -266,7 +266,7 @@ export const toggleForm = () => {
       player.name = nameField.value;
       if (player.constructor.name !== "WhiteHole")
         //instanceof doesn't work here and I don't know why
-        player.addToAttractors().addToMovers();
+        player.aA().aM();
       setPlayer(null);
     }
     bodyForm.removeEventListener("change", null);
