@@ -149,46 +149,6 @@ export class Mesh {
     this.buffer = this.gl.createBuffer();
   }
 
-  static async fromObjMtl(
-    url: string,
-    mtlUrl: string,
-    scale: number
-  ): Promise<Mesh> {
-    const res = await fetch(url);
-    const objArr = (await res.text()).split("\n");
-    const mtlRes = await fetch(mtlUrl);
-    const mtlArr = (await mtlRes.text()).split("\n");
-    const vertices: Vertex[] = [];
-    const faces: Face[] = [];
-    type MaterialsList = {
-      [key: string]: Color;
-    };
-    const Colors: MaterialsList = {};
-    for (let i = 0; i < mtlArr.length; i++) {
-      const ln = mtlArr[i].split(" ");
-      if (ln[0] === "newmtl") {
-        const cols = mtlArr[i + 3].split(" ");
-        Colors[ln[1]] = new Color(+cols[1], +cols[2], +cols[3]);
-      }
-    }
-    let currentCol = "";
-    for (let i = 0; i < objArr.length; i++) {
-      const ln = objArr[i].split(" ");
-      if (ln[0] === "usemtl") currentCol = ln[1];
-      if (ln[0] === "v")
-        vertices.push(
-          new Vertex(+ln[1] * scale, +ln[2] * scale, +ln[3] * scale)
-        );
-      if (ln[0] === "f") {
-        const A = +ln[1].split("/")[0] - 1;
-        const B = +ln[2].split("/")[0] - 1;
-        const C = +ln[3].split("/")[0] - 1;
-        faces.push(new Face(A, B, C, Colors[currentCol]));
-      }
-    }
-    return new Mesh(vertices, faces);
-  }
-
   draw = (): void => {
     const { gl, program } = this;
     if (this.texture) {
