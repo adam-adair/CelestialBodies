@@ -233,7 +233,7 @@ const loop = (now: number) => {
     body.draw();
   }
 
-  moveCamera(playerInput);
+  moveCamera(playerInput, paused);
   //draw player
   if (player) {
     movePlayer(player, playerInput, movement);

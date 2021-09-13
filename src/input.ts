@@ -171,7 +171,7 @@ export const movePlayer = (
   if (inp.spinO) player.rotate(0, 0, movement * -10);
 };
 
-export const moveCamera = (inp: PlayerMovement) => {
+export const moveCamera = (inp: PlayerMovement, paused = false) => {
   if (inp.camL) {
     cam.follow();
     cam.move(-0.1, 0, 0);
@@ -204,6 +204,7 @@ export const moveCamera = (inp: PlayerMovement) => {
     cam.follow();
     cam.rotate(0, 0, -1);
   }
+  if(!paused){
   if (cam.followTarget) {
     const { x, y, z } = cam.followTarget.velocity;
     cam.move(-x, y, -z);
@@ -213,4 +214,5 @@ export const moveCamera = (inp: PlayerMovement) => {
 
     //  cam.lookAt(new Vertex(x,y,z));
   }
+}
 };
