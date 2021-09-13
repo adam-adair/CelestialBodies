@@ -58,18 +58,7 @@ export function createListItem(objectToList: any): HTMLElement {
 
   const followButton = document.createElement("button");
   followButton.innerHTML = "Fly To";
-  followButton.onclick = () => {
-    const camPosition = cam.getPosition();
-    cam.move(
-      camPosition.x - objectToList.position.x + objectToList.size,
-      camPosition.y - objectToList.position.y - objectToList.size,
-      objectToList.position.z +
-        camPosition.z +
-        objectToList.size * constants.zoom
-    );
-    cam.lookAt(objectToList.position);
-    cam.follow(objectToList);
-  };
+  followButton.onclick = () => flyTo(objectToList);
 
   buttonDiv.appendChild(followButton);
 
@@ -81,6 +70,17 @@ export function createListItem(objectToList: any): HTMLElement {
   buttonDiv.appendChild(watchButton);
   return listItem;
 }
+
+export const flyTo = (objectToList: any) => {
+  const camPosition = cam.getPosition();
+  cam.move(
+    camPosition.x - objectToList.position.x + objectToList.size,
+    camPosition.y - objectToList.position.y - objectToList.size,
+    objectToList.position.z + camPosition.z + objectToList.size * constants.zoom
+  );
+  cam.lookAt(objectToList.position);
+  cam.follow(objectToList);
+};
 
 export function updateListItem(objectToList: any): HTMLElement | null {
   const listItem = get(objectToList.id.toString());

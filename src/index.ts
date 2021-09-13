@@ -6,18 +6,17 @@ import { ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
 import { get } from "./utils";
 import { Sphere } from "./Sphere";
-import { sandTexture, grassTexture, cloudTexture } from "./texture";
+import { sandTexture, grassTexture, cloudTexture, blankTexture } from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
 import { Grid } from "./grid";
 import { Camera } from "./camera";
 import { Star } from "./Star";
 import { Planet } from "./Planet";
-import { Barycenter } from "./barycenter";
-
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
 import { addBody, destroyTemp } from "./addBody";
+import { flyTo } from "./listItems";
 
 const { gl, canvas } = initialize;
 const { movement, universeSize } = constants;
@@ -46,25 +45,32 @@ const loadMusic = (song: any) => {
       const audio = document.createElement("audio");
       audio.src = URL.createObjectURL(new Blob([wave], { type: "audio/wav" }));
       audio.loop = true;
-      musicStatus.remove();
-
-      let playing = false;
-      const playButton = document.createElement("button");
-      playButton.innerHTML = "Play Music";
-      get("instructions").appendChild(playButton);
-      playButton.onclick = () => {
-        if (!playing) {
-          playButton.innerHTML = "Pause Music";
-          audio.play();
-          playing = true;
-        } else {
-          playButton.innerHTML = "Play Music";
-          audio.pause();
-          playing = false;
-        }
-      };
+      musicStatus.innerHTML = "Click anywhere to begin";
+      get("titleOverlay").onclick = () => hideOverlay(audio);
     }
   }, 0);
+};
+
+const hideOverlay = (audio: HTMLAudioElement) => {
+  get("titleOverlay").style.visibility = "hidden";
+  let playing = true;
+  audio.play();
+  const playButton = document.createElement("button");
+  playButton.className = "bottom";
+  playButton.innerHTML = "Pause Music";
+  playButton.style.zIndex = "0";
+  get("instructions").appendChild(playButton);
+  playButton.onclick = () => {
+    if (!playing) {
+      playButton.innerHTML = "Pause Music";
+      audio.play();
+      playing = true;
+    } else {
+      playButton.innerHTML = "Play Music";
+      audio.pause();
+      playing = false;
+    }
+  };
 };
 
 const playerInput: PlayerMovement = {
@@ -103,20 +109,11 @@ let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
 
-const loadImage = (url: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.src = url;
-  });
-};
 
-const loadImages = (urlArr: string[]) => {
-  return Promise.all(urlArr.map((url) => loadImage(url)));
-};
 
 const init = async () => {
-  textures = await loadImages(["./textures/blank.png", "./textures/blank.png"]);
+  // textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
+  textures = [blankTexture, blankTexture];
   textures.push(sandTexture, grassTexture, cloudTexture);
   //size of the sphere encompassing the world, size of the texture in pixels, frequency of the stars (higher is less freq)
   starField = new StarField(universeSize, 2048, 2000);
@@ -125,7 +122,7 @@ const init = async () => {
 
   // presets
   // populate.randomSystem(5, textures);
-  // populate.stableOrbit(20, textures);
+  populate.stableOrbit(10, textures);
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
   // populate.randomPlanetSystem(30, textures);
@@ -136,6 +133,8 @@ const init = async () => {
   //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
   cam = new Camera();
   cam.view();
+  flyTo(gameObjects.objects[3]);
+
   requestAnimationFrame(loop);
 };
 
@@ -181,7 +180,7 @@ const loop = (now: number) => {
     body.draw();
   }
 
-  moveCamera(playerInput);
+  moveCamera(playerInput, paused);
   //draw player
   if (player) {
     movePlayer(player, playerInput, movement);
@@ -193,6 +192,7 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
+  checkCoilSubscribtion();
   loadMusic(spaceJam);
   init();
 };
@@ -276,4 +276,37 @@ export const cancelBody = () => {
   destroyTemp();
   player = null;
   toggleForm();
+};
+
+const checkCoilSubscribtion = () => {
+  const d = document as any;
+  if (d.monetization) {
+    if (d.monetization.state === "started") {
+      toggleWhiteHole();
+    } else {
+      d.monetization.addEventListener("monetizationstart", function () {
+        console.log("HELLO COIL SUBSCRIBER");
+        toggleWhiteHole();
+      });
+    }
+  }
+};
+
+const toggleWhiteHole = () => {
+  console.log("adding white hole");
+  const radioDiv = document.getElementById("radioButtons");
+  const whiteHoleRadio = document.createElement("input");
+  whiteHoleRadio.type = "radio";
+  whiteHoleRadio.id = "bodyWhiteHole";
+  whiteHoleRadio.name = "bodyType";
+  whiteHoleRadio.value = "whiteHole";
+
+  radioDiv.appendChild(whiteHoleRadio);
+
+  const whiteHolelabel = document.createElement("label");
+  whiteHolelabel.setAttribute("for", whiteHoleRadio.id);
+  whiteHolelabel.innerHTML = "White Hole";
+
+  radioDiv.appendChild(whiteHolelabel);
+  get("whHeader").style.visibility = "visible";
 };

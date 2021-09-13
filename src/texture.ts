@@ -265,3 +265,9 @@ export const cloudTexture: ProceduralTextureData = {
   height: 128,
   data: new Uint8Array(generateTexture(128, clouds)),
 };
+
+export const blankTexture: ProceduralTextureData = {
+  width: 1,
+  height: 1,
+  data: new Uint8Array([255, 255, 255, 255]),
+};
