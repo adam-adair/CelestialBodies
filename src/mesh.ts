@@ -81,7 +81,7 @@ export class Vertex {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
   public normalize() {
-    // rescales the length of the vector to 1, which makes it easier to calculate the point to move to based on distance traveled in a frame.
+    // rescales the length of the vector to 1
     const m = this.magnitude();
     if (m > 0) {
       return this.scale(1 / m);
@@ -147,72 +147,6 @@ export class Mesh {
     this.textureCoords = textureCoords;
     this.initialize(texture, isStar);
     this.buffer = this.gl.createBuffer();
-  }
-
-  static async fromSerialized(
-    gl: WebGLRenderingContext,
-    program: WebGLProgram,
-    url: string
-  ): Promise<Mesh> {
-    const res = await fetch(url);
-    const obj = await res.json();
-    const vertices: Vertex[] = [];
-    const faces: Face[] = [];
-    // for serialized mesh
-    const { v, f, c } = obj;
-    const colors: Color[] = [];
-    for (let i = 0; i < v.length; i += 3) {
-      vertices.push(new Vertex(v[i], v[i + 1], v[i + 2]));
-    }
-    for (let i = 0; i < c.length; i += 3) {
-      colors.push(new Color(c[i], c[i + 1], c[i + 2]));
-    }
-    for (let i = 0; i < f.length; i += 4) {
-      faces.push(new Face(f[i], f[i + 1], f[i + 2], colors[f[i + 3]]));
-    }
-    return new Mesh(vertices, faces);
-  }
-
-  static async fromObjMtl(
-    gl: WebGLRenderingContext,
-    program: WebGLProgram,
-    url: string,
-    mtlUrl: string,
-    scale: number
-  ): Promise<Mesh> {
-    const res = await fetch(url);
-    const objArr = (await res.text()).split("\n");
-    const mtlRes = await fetch(mtlUrl);
-    const mtlArr = (await mtlRes.text()).split("\n");
-    const vertices: Vertex[] = [];
-    const faces: Face[] = [];
-    type MaterialsList = {
-      [key: string]: Color;
-    };
-    const Colors: MaterialsList = {};
-    for (let i = 0; i < mtlArr.length; i++) {
-      const ln = mtlArr[i].split(" ");
-      if (ln[0] === "newmtl") {
-        const cols = mtlArr[i + 3].split(" ");
-        Colors[ln[1]] = new Color(+cols[1], +cols[2], +cols[3]);
-      }
-    }
-    let currentCol = "";
-    for (let i = 0; i < objArr.length; i++) {
-      const ln = objArr[i].split(" ");
-      if (ln[0] === "usemtl") currentCol = ln[1];
-      if (ln[0] === "v")
-        vertices.push(
-          new Vertex(+ln[1] * scale, +ln[2] * scale, +ln[3] * scale)
-        );
-      if (ln[0] === "f") {
-        const A = +ln[1].split("/")[0] - 1;
-        const B = +ln[2].split("/")[0] - 1;
-        const C = +ln[3].split("/")[0] - 1;
-        faces.push(new Face(A, B, C, Colors[currentCol]));
-      }
-    }
-    return new Mesh(vertices, faces);
   }
 
   draw = (): void => {
@@ -315,33 +249,6 @@ export class Mesh {
   rescale(x: number): void {
     this.scale = this.scale.scale(x);
     this.sMatrix.scaleSelf(x, x, x);
-  }
-
-  serialize(precision: number): string {
-    const v = [];
-    const f = [];
-    const c = [];
-    const colorsArray: string[] = [];
-    for (let i = 0; i < this.vertices.length; i++) {
-      const vert = this.vertices[i];
-      v.push(
-        +vert.x.toFixed(precision),
-        +vert.y.toFixed(precision),
-        +vert.z.toFixed(precision)
-      );
-    }
-    for (let i = 0; i < this.faces.length; i++) {
-      const face = this.faces[i];
-      const faceColor =
-        "r" + face.color.r + "g" + face.color.g + "b" + face.color.b;
-      if (!colorsArray.includes(faceColor)) {
-        colorsArray.push(faceColor);
-        c.push(face.color.r, face.color.g, face.color.b);
-      }
-      const colorIndex = colorsArray.indexOf(faceColor);
-      f.push(face.vAi, face.vBi, face.vCi, colorIndex);
-    }
-    return JSON.stringify({ v, f, c });
   }
 
   initialize(

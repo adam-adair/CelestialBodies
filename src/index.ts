@@ -1,37 +1,37 @@
 import { CPlayer } from "./music/player-small";
 import spaceJam from "./music/spaceJam";
-import { Color, Red, Green, Blue, White } from "./colors";
 import { Body } from "./bodies";
 import { constants } from "./constants";
-import { Mesh, Vertex, ProceduralTextureData } from "./mesh";
+import { ProceduralTextureData } from "./mesh";
 import { movePlayer, handleInput, PlayerMovement, moveCamera } from "./input";
-import { get, kilogramsToMass, metersToAU } from "./utils";
+import { get } from "./utils";
 import { Sphere } from "./Sphere";
-import { generateTexture, sand, grass, clouds } from "./texture";
+import {
+  sandTexture,
+  grassTexture,
+  cloudTexture,
+  blankTexture,
+} from "./texture";
 import initialize from "./initialize";
 import populate from "./setups";
 import { Grid } from "./grid";
 import { Camera } from "./camera";
 import { Star } from "./Star";
 import { Planet } from "./Planet";
-import { Asteroid } from "./Asteroid";
-import { Barycenter } from "./barycenter";
-
 import gameObjects from "./GameObjects";
 import { StarField } from "./Starfield";
 import { addBody, destroyTemp } from "./addBody";
-import { WhiteHole } from "./WhiteHole";
 import { flyTo } from "./listItems";
 
-const { gl, program, canvas } = initialize;
+const { gl, canvas } = initialize;
 const { movement, universeSize } = constants;
 const { movers, attractors, objects } = gameObjects;
-let then = 0;
 const bodyButton = get("bodyButton") as HTMLButtonElement;
 const cancelButton = get("cancelButton") as HTMLButtonElement;
 get("stableOrbit").onclick = () => genExample(1);
 get("binaryStars").onclick = () => genExample(2);
 get("randomSystem").onclick = () => genExample(3);
+get("emptyUniverse").onclick = () => genExample(0);
 const bodyForm = get("bodyForm") as HTMLFormElement;
 //could use this func to load diff songs for diff levels or scenes
 const loadMusic = (song: any) => {
@@ -81,24 +81,6 @@ const hideOverlay = (audio: HTMLAudioElement) => {
   };
 };
 
-const sandTexture: ProceduralTextureData = {
-  width: 128,
-  height: 128,
-  data: new Uint8Array(generateTexture(128, sand)),
-};
-
-const grassTexture: ProceduralTextureData = {
-  width: 128,
-  height: 128,
-  data: new Uint8Array(generateTexture(128, grass)),
-};
-
-const cloudTexture: ProceduralTextureData = {
-  width: 128,
-  height: 128,
-  data: new Uint8Array(generateTexture(128, clouds)),
-};
-
 const playerInput: PlayerMovement = {
   spinL: false,
   spinR: false,
@@ -135,24 +117,6 @@ let grid: Grid;
 export let cam: Camera;
 let starField: Sphere;
 
-// const loadImage = (url: string): Promise<HTMLImageElement> => {
-//   return new Promise((resolve) => {
-//     const img = new Image();
-//     img.onload = () => resolve(img);
-//     img.src = url;
-//   });
-// };
-
-// const loadImages = (urlArr: string[]) => {
-//   return Promise.all(urlArr.map((url) => loadImage(url)));
-// };
-
-const blankTexture: ProceduralTextureData = {
-  width: 1,
-  height: 1,
-  data: new Uint8Array([255, 255, 255, 255]),
-};
-
 const init = async () => {
   // textures = await loadImages(["./textures/blank.png", "./textures/test2.jpg"]);
   textures = [blankTexture, blankTexture];
@@ -162,29 +126,15 @@ const init = async () => {
   bodyButton.onclick = toggleForm; //() => addBody(bodyForm, textures);
   cancelButton.onclick = cancelBody;
 
-  // moved the different testing configurations into functions to make them easier to switch between. we can get rid of these later on. just uncomment the setup you want to use.
-  // populate.randomSystem(5, textures); // after 25 objects the simulation gets real slow
-  // populate.repeatableSystem(textures); // two objects with equal mass and no starting velocity
-  populate.stableOrbit(10, textures); // doesn't quite work yet.
+  // presets
+  // populate.randomSystem(5, textures);
+  populate.stableOrbit(10, textures);
   // populate.binaryStars(textures); // to objects with equal mass and opposite motion perpindular to axis
   // populate.binaryStarsPlanet(textures); //binary stars plus an orbiting planet
-  // player = await populate.texturesDisplay(gl, program, player, textures);
-  // populate.starColor(textures); // just a display of star colors. they don't move.
-  // populate.twoPlanets(textures);
-  // populate.testCollisionAddMomentum(textures);
-  // populate.testCollisionLoseMomentum(textures);
-  // populate.randomPlanetSystem(10, textures);
-  // populate.testTranslation(textures);
+  // populate.randomPlanetSystem(30, textures);
   // populate.whiteHole(textures);
+
   grid = new Grid(10, 10, true);
-
-  //dynamically point to the center of gravity of the starting objects, instead of 0 0 0
-  const startObjects = [];
-  for (let object in gameObjects.movers) {
-    startObjects.push(gameObjects.movers[object]);
-  }
-
-  const startPoint = new Barycenter(startObjects);
 
   //right now the camera start position is hardcoded but we can change that around and maybe make it dynamic based on what's in scene
   cam = new Camera();
@@ -197,31 +147,22 @@ const init = async () => {
 //game loop
 const loop = (now: number) => {
   cam.view();
-  // calculate frames per second
-  now *= 0.001; // convert to seconds
-  const deltaTime = now - then; // compute time since last frame
-  then = now; // remember time for next frame
-  const fps = 1 / deltaTime; // compute frames per second
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   //clear screen
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  //box movement
+
   starField.draw();
 
-  // check this object against all other objects for collision
-  // maybe there's a better way to do this
-
   if (!paused) {
+    // check whether movers collide with attractors. if an object is not both it is immune to object collision
     for (let i in movers) {
-      const body = movers[i] as Planet | Star | Asteroid;
-
+      const body = movers[i] as Planet | Star;
       for (let j in attractors) {
         //dont check against self
-
         if (movers[i] !== attractors[j]) {
-          const otherBody = attractors[j] as Planet | Star | Asteroid;
+          const otherBody = attractors[j] as Planet | Star;
           body.checkCollision(gameObjects, otherBody);
         }
       }
@@ -241,8 +182,6 @@ const loop = (now: number) => {
   // draw all objects
   for (let i in objects) {
     const body = objects[i];
-    //make object spin
-    // body.rotate(0.5, 0.5, 0.5);
     if (!paused) body.update();
     body.draw();
   }
@@ -259,15 +198,7 @@ const loop = (now: number) => {
 
 // start program
 window.onload = () => {
-  canvas.width = get("canvasContainer").scrollWidth; //document.body.clientWidth / 2;
-  canvas.height = get("canvasContainer").scrollHeight; //
-
   checkCoilSubscribtion();
-
-  // document.body.clientHeight -
-  // parseInt(getComputedStyle(document.documentElement).fontSize) * 3;
-
-  // disabling for testing so I don't have to wait
   loadMusic(spaceJam);
   init();
 };
@@ -293,8 +224,6 @@ document.onmousemove = (e) => {
     let dy = (y - lastY) / canvas.height;
     let dx = (x - lastX) / canvas.width;
     cam.rotate(dx * 100, dy * 100, 0);
-    // cam.target = cam.target.subtract(new Vertex(-dx, -dy, 0));
-    //(dx, dy);
     lastX = x;
     lastY = y;
   }
@@ -350,8 +279,8 @@ export const getPlayer = () => {
 };
 
 export const cancelBody = () => {
-  player = null;
   destroyTemp();
+  player = null;
   toggleForm();
 };
 
@@ -402,8 +331,8 @@ const genExample = (ex: number) => {
       populate.binaryStars(textures);
       break;
     case 3:
-      populate.randomPlanetSystem(8, textures);
-      populate.randomSystem(1, textures);
+      populate.randomPlanetSystem(50, textures);
+      populate.randomSystem(2, textures);
       break;
   }
 };

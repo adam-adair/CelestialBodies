@@ -1,7 +1,6 @@
 import { Color } from "./colors";
 import {
   Face,
-  Mesh,
   ProceduralTextureData,
   textureCoord,
   Vertex,
@@ -60,8 +59,6 @@ export class Sphere extends Body {
       texture,
       isStar
     );
-    //in case we need size or precision later
-    this.precision = precision;
     //make sphere unit sphere and scale it to size
     this.rescale(size);
   }

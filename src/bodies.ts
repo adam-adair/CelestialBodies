@@ -1,4 +1,4 @@
-import { Color, randomColor } from "./colors";
+import { Color } from "./colors";
 import { constants } from "./constants";
 import {
   Face,
@@ -18,9 +18,9 @@ export class Body extends Mesh {
   id: number;
   name: string;
   size: number;
-  mass: number; // kg
-  velocity: Vertex; // changes in location (in AUs) in that direction in a frame.
-  acceleration: Vertex; // change in AU to velocity in a frame
+  mass: number;
+  velocity: Vertex;
+  acceleration: Vertex;
   constructor(
     name: string,
     d: number,
@@ -83,9 +83,7 @@ export class Body extends Mesh {
   }
 
   createOrUpdateListItem(): HTMLElement {
-    let element = updateListItem(this) || createListItem(this);
-
-    return element;
+    return updateListItem(this) || createListItem(this);
   }
 
   applyForce(force: Vertex) {
@@ -101,11 +99,10 @@ export class Body extends Mesh {
 
   calculateAttraction(objectTwo: Body): Vertex {
     let direction = this.directionalVector(objectTwo);
-    const distance = Math.max(direction.magnitude(), 0.01); // astronomical units AU
+    const distance = Math.max(direction.magnitude(), 0.01);
     direction = direction.normalize();
-    let gravitationalForce = this.gravitationalForce(objectTwo, distance); // cubic meters per kilogram per second per second
-    direction = direction.scale(gravitationalForce);
-    return direction;
+    let gravitationalForce = this.gravitationalForce(objectTwo, distance);
+    return direction.scale(gravitationalForce);
   }
 
   forceOfCenterMass(otherObject: Body | Barycenter): number {
@@ -116,7 +113,6 @@ export class Body extends Mesh {
   }
 
   setStableOrbit(otherObjects: Body | Body[]) {
-    // kind of cheating because this only works if the newly placed object is directly to the left or right of the center of gravity on the x axis. otherwise there's crazy geometry to figure out the perpindicular direction.
     const center =
       otherObjects instanceof Body
         ? otherObjects
@@ -155,14 +151,7 @@ export class Body extends Mesh {
     this.size = newSize;
     this.alterTrajectory(otherObject);
     this.mass += otherObject.mass;
-    // this.moveToMidPoint(otherObject);
     otherObject.destroy(gameObjects);
-  }
-
-  moveToMidPoint(otherObject: Body) {
-    const halfwayPoint = this.position.add(otherObject.position).scale(1 / 2);
-    const { x, y, z } = this.position.subtract(halfwayPoint);
-    this.translate(x, y, z);
   }
 
   alterTrajectory(otherObject: Body): Vertex {
@@ -174,9 +163,5 @@ export class Body extends Mesh {
     const newVelocity = obj1ScaledVelocity.add(obj2ScaledVelocity);
     this.velocity = newVelocity;
     return newVelocity;
-  }
-
-  calculateNewTrajectory(otherObject: Body): Vertex {
-    return new Vertex(0, 0, 0);
   }
 }
